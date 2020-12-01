@@ -1,9 +1,9 @@
-mod dec18;
+mod dec01;
 
 fn main() {
-    println!("Hello, world!");
+    println!("Hello, AoC!");
 
-    let my_map = dec18::read_map("/Users/dschreiber/Projects/advent-of-code-2020/src/dec18.txt".to_string());
+    let my_numbers = dec01::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec01.txt".to_string());
 
-    dec18::display_map(my_map);
+    // dec01::solve(my_numbers);
 }
