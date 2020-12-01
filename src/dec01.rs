@@ -38,8 +38,8 @@ pub fn solve_for_one(nums: Vec<i32>, num: i32) -> bool {
   // guess the middle and adjust until we find it's complement or fail
   let lo = 0;
   let hi = nums.len() as i32 - 1;
-  if num < nums[0] { println!("not found {}", num); return false; }
-  if num > nums[hi as usize] { println!("not found {}", num); return false; }
+  if num < nums[0] { return false; }
+  if num > nums[hi as usize] { return false; }
 
   let result = guess_hi_lo(nums, num, hi, lo);
   result == num
@@ -56,9 +56,21 @@ pub fn solve(nums: Vec<i32>) {
       break;
     }
   }
-
-  pub fn solve_part2(nums: Vec<i32>) {
-
-  }
-
 }
+
+pub fn solve_part2(nums: Vec<i32>) {
+  for n in nums.iter() {
+    for m in nums.iter() {
+      if (n+m) > 2020 {
+        break;
+      }
+      let o = 2020-(n+m);
+      if solve_for_one(nums.clone(), o) {
+        println!("SOLUTION FOUND {},{}, {} = {}", n, m, o, n*m*o);
+        return;    
+      } 
+      
+    }
+  }
+}
+

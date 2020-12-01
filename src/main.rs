@@ -9,5 +9,7 @@ fn main() {
     my_numbers.sort();
     // println!("{:?}", my_numbers);
 
-    dec01::solve(my_numbers);
+    dec01::solve(my_numbers.clone());
+    dec01::solve_part2(my_numbers.clone());
+
 }
