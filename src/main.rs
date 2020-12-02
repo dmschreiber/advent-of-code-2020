@@ -1,8 +1,7 @@
 mod dec01;
+mod dec02;
 
-fn main() {
-    println!("Hello, AoC!");
-
+fn dec01() {
     let mut my_numbers = dec01::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec01.txt".to_string());
 
     // sort
@@ -11,5 +10,18 @@ fn main() {
 
     dec01::solve(my_numbers.clone());
     dec01::solve_part2(my_numbers.clone());
+
+}
+
+fn dec02() {
+    let my_passwords = dec02::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec02.txt".to_string());
+    // println!("{:?}", my_passwords);
+    dec02::solve_part1(&my_passwords);
+    dec02::solve_part2(&my_passwords);
+}
+
+fn main() {
+    dec01();
+    dec02();
 
 }
