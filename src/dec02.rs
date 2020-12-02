@@ -61,7 +61,7 @@ pub fn solve_part2(pwds: &Vec<Password>) {
 
     if ((slice1) || (slice2)) && !((slice1) && (slice2)){
       good_count = good_count + 1;
-      println!("{} of {} char and between {} and {}", p.password_text, p.character, lo, hi);
+      // println!("{} of {} char and between {} and {}", p.password_text, p.character, lo, hi);
 
     }
   }
