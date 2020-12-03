@@ -10,10 +10,15 @@ pub struct Password {
 }
 
 fn get_password_from_line(line: String) -> Password {
-  let password_text = line.split(":").collect::<Vec<&str>>()[1].trim();
-  let rule_line = line.split(":").collect::<Vec<&str>>()[0].trim();
-  let rule = rule_line.split(" ").collect::<Vec<&str>>()[0].trim();
-  let character = rule_line.split(" ").collect::<Vec<&str>>()[1].trim();
+
+  let s1 = line.split(":").collect::<Vec<&str>>();
+  let password_text = s1[1].trim();
+  let rule_line = s1[0];
+
+  let s2 = rule_line.split(" ").collect::<Vec<&str>>();
+  let rule = s2[0];
+  let character = s2[1];
+
   let lo_hi = rule.split("-").collect::<Vec<&str>>();
 
   let lo = lo_hi[0].parse::<i32>().unwrap();

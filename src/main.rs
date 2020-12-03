@@ -17,7 +17,7 @@ fn dec01() {
 
 fn dec02() {
     let my_passwords = dec02::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec02.txt".to_string());
-    // println!("{:?}", my_passwords);
+
     dec02::solve_part1(&my_passwords);
     dec02::solve_part2(&my_passwords);
 }
@@ -27,6 +27,7 @@ fn main() {
     dec01();
     println!("Day 1 complete in {:?}", start.elapsed());
     let start = Instant::now();
+
     dec02();
     println!("Day 2 complete in {:?}", start.elapsed());
 
