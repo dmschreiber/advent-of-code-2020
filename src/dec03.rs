@@ -79,7 +79,7 @@ pub fn solve(map: &HashMap<(u32,u32),u8>, row_step: u32, col_step: u32) -> u32 {
     if *b > max_col { max_col = *b; }
   }
 
-  println!("amx {},{}", max_row, max_col);
+  println!("max {},{}", max_row, max_col);
 
   let mut col = 0;
   let mut tree_count = 0;
@@ -102,6 +102,6 @@ pub fn solve(map: &HashMap<(u32,u32),u8>, row_step: u32, col_step: u32) -> u32 {
         }
       }
   }
-  println!("tree count {}", tree_count);
+  // println!("tree count {}", tree_count);
   tree_count
 }

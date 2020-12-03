@@ -29,11 +29,11 @@ fn dec03() {
     let start = Instant::now();
     let p = 
     dec03::solve(&my_tree_map,1,1) as u128 *
-    dec03::solve(&my_tree_map,1,3)  as u128*
+    dec03::solve(&my_tree_map,1,3) as u128*
     dec03::solve(&my_tree_map,1,5) as u128*
     dec03::solve(&my_tree_map,1,7) as u128*
     dec03::solve(&my_tree_map,2,1) as u128;
-    println!("{} is the product of all (4239209520 is wrong)", p);
+    println!("{} is the product of all", p);
     println!("Day 3 complete in {:?}", start.elapsed());
 
 }
