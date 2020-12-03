@@ -1,41 +1,27 @@
 use std::collections::HashMap;
 use std::fs;
 
-pub fn display_map(map: HashMap<(u32,u32),u8>) {
-  let mut max_row = 0;
-  let mut max_col = 0;
-
-  for k in map.keys() {
-    let (a,b) = k;
-    if *a > max_row { max_row = *a; }
-    if *b > max_col { max_col = *b; }
-  }
-  for row in 0..=max_row {
-    for col in 0..=max_col {
-      let b = map.get(&(row,col));
-      if let Some(i) = b {
-        print!("{}", *i as char);
-      }
-    }
-    println!();
-  }
+pub struct TreeMap {
+  map: HashMap<(u32,u32),u8>,
+  max_row: u32,
+  max_col: u32,
 }
 
-pub fn display_tree_map(map: &HashMap<(u32,u32),u8>) {
-  let mut max_row = 0;
-  let mut max_col = 0;
+pub fn display_tree_map(trees: &TreeMap) {
+  let max_row = trees.max_row;
+  let max_col = trees.max_col;
 
-  for k in map.keys() 
-  {
-    let (a,b) = k;
-    if *a > max_row { max_row = *a; }
-    if *b > max_col { max_col = *b; }
-  }
+  // for k in map.keys() 
+  // {
+  //   let (a,b) = k;
+  //   if *a > max_row { max_row = *a; }
+  //   if *b > max_col { max_col = *b; }
+  // }
   for row in 0..=max_row 
   {
     for col in 0..=max_col 
     {
-      let b = map.get(&(row,col));
+      let b = trees.map.get(&(row,col));
       if let Some(i) = b {
         print!("{}", *i as char);
       }
@@ -44,8 +30,8 @@ pub fn display_tree_map(map: &HashMap<(u32,u32),u8>) {
   }
 }
 
-pub fn read_tree_map(filename: String) -> HashMap<(u32,u32),u8> {
-  let mut map = HashMap::new();
+pub fn read_tree_map(filename: String) -> TreeMap {
+  let mut tree = TreeMap {map: HashMap::new(), max_col: 0, max_row: 0};
 
   let mut col = 0;
   let mut row = 0;
@@ -59,25 +45,19 @@ pub fn read_tree_map(filename: String) -> HashMap<(u32,u32),u8> {
         row += 1;
         col = 0;
       } else {
-        map.entry((row,col)).or_insert(item);
+        tree.map.entry((row,col)).or_insert(item);
+        if col > tree.max_col { tree.max_col = col; }
+        if row > tree.max_row { tree.max_row = row; }
         col += 1;
       }
   }
 
-  map
+  tree
 }  
 
-pub fn solve(map: &HashMap<(u32,u32),u8>, row_step: u32, col_step: u32) -> u32 {
-  let mut max_row = 0;
-  let mut max_col = 0;
-
-  for k in map.keys() 
-  {
-    let (a,b) = k;
-
-    if *a > max_row { max_row = *a; }
-    if *b > max_col { max_col = *b; }
-  }
+pub fn solve(tree: &TreeMap, row_step: u32, col_step: u32) -> u32 {
+  let max_row = tree.max_row;
+  let max_col = tree.max_col;
 
   println!("max {},{}", max_row, max_col);
 
@@ -88,7 +68,7 @@ pub fn solve(map: &HashMap<(u32,u32),u8>, row_step: u32, col_step: u32) -> u32 {
     col = col + col_step;
     col = col % (max_col + 1);
 
-    let b = map.get(&(row,col));
+    let b = tree.map.get(&(row,col));
       if let Some(i) = b {
         if *i == 35 {
           // tree
