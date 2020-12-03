@@ -1,3 +1,5 @@
+
+use std::time::{Instant};
 mod dec01;
 mod dec02;
 
@@ -21,7 +23,11 @@ fn dec02() {
 }
 
 fn main() {
+    let start = Instant::now();
     dec01();
+    println!("Day 1 complete in {:?}", start.elapsed());
+    let start = Instant::now();
     dec02();
+    println!("Day 2 complete in {:?}", start.elapsed());
 
 }
