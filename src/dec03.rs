@@ -7,16 +7,11 @@ pub struct TreeMap {
   max_col: u32,
 }
 
+#[allow(dead_code)]
 pub fn display_tree_map(trees: &TreeMap) {
   let max_row = trees.max_row;
   let max_col = trees.max_col;
 
-  // for k in map.keys() 
-  // {
-  //   let (a,b) = k;
-  //   if *a > max_row { max_row = *a; }
-  //   if *b > max_col { max_col = *b; }
-  // }
   for row in 0..=max_row 
   {
     for col in 0..=max_col 
@@ -59,7 +54,7 @@ pub fn solve(tree: &TreeMap, row_step: u32, col_step: u32) -> u32 {
   let max_row = tree.max_row;
   let max_col = tree.max_col;
 
-  println!("max {},{}", max_row, max_col);
+  // println!("max {},{}", max_row, max_col);
 
   let mut col = 0;
   let mut tree_count = 0;
