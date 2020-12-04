@@ -29,14 +29,18 @@ lazy_static! {
 
 // byr ^\d{4}$ and >=1920 <=2002
 pub fn validate_birthyear(s: &str) -> bool {
-  let mut retval = false;
+  let  retval;
 
   // let y = Regex::new(r"^\d{4}$").unwrap();
   if YEAR_REGEX.is_match(s) {
     let year = s.parse::<i32>().unwrap();
     if year >= 1920 && year <= 2002 {
       retval = true;
+    } else {
+      retval = false;
     }
+  } else {
+    retval = false;
   }
 
   retval
@@ -44,13 +48,17 @@ pub fn validate_birthyear(s: &str) -> bool {
 
 // iyr ^same and >= 2010 <=2020
 pub fn validate_issueyear(s: &str) -> bool {
-  let mut retval = false;
+  let retval;
 
   if YEAR_REGEX.is_match(s) {
     let year = s.parse::<i32>().unwrap();
     if year >= 2010 && year <= 2020 {
       retval = true;
+    } else {
+      retval = false;
     }
+  } else {
+    retval = false;
   }
 
   retval
@@ -58,20 +66,25 @@ pub fn validate_issueyear(s: &str) -> bool {
 
 // eyr ^same and >= 2020 <=2030
 pub fn validate_expireyear(s: &str) -> bool {
-  let mut retval = false;
+  let  retval;
 
   if YEAR_REGEX.is_match(s) {
     let year = s.parse::<i32>().unwrap();
     if year >= 2020 && year <= 2030 {
       retval = true;
+    } else {
+      retval = false;
     }
+  } else {
+    retval = false;
   }
+
   retval
 }
 
 // hgt ^\d{1,3}(cm|in)$ cm 150-193 incl; in 59-76 incl
 pub fn validate_height(s: &str) -> bool {
-  let mut retval = false;
+  let retval;
 
   if HEIGHT_REGEX.is_match(s) {
     let value = &s[..s.len()-2];
@@ -82,14 +95,18 @@ pub fn validate_height(s: &str) -> bool {
       retval = (height >= 59) && (height <= 76);
     } else if units == "cm" {
       retval = (height >= 150) && (height <= 193);
+    } else {
+      retval = false;
     }
+  } else {
+    retval = false;
   }
 
   retval
 }
 // hcl ^#(0-9a-f){6}
 pub fn validate_haircolor(s: &str) -> bool {
-  let  retval;
+  let retval;
 
   if COLOR_REGEX.is_match(s) {
     retval = true;
@@ -125,7 +142,6 @@ pub fn validate_pid(s: &str) -> bool {
 }
 
 fn validate_passport(p:&String) -> bool {
-  let mut valid = true;
 
   for field in p.split_ascii_whitespace() {
     let key_value = field.split(":").collect::<Vec<&str>>();
@@ -133,19 +149,19 @@ fn validate_passport(p:&String) -> bool {
     let value = key_value[1];
     // println!("current validity is {} - Checking {} of {}", valid, key, value);
     if key == "byr" {
-      valid = validate_birthyear(value) && valid;
+      if !validate_birthyear(value) { return false; }
     } else if key == "iyr" {
-      valid = validate_issueyear(value) && valid;
+      if !validate_issueyear(value) { return false; }
     } else if key == "eyr" {
-      valid = validate_expireyear(value) && valid;
+      if !validate_expireyear(value) { return false; }
     } else if key == "hgt" {
-      valid = validate_height(value) && valid;
+      if !validate_height(value) { return false; }
     } else if key == "hcl" {
-      valid = validate_haircolor(value) && valid;
+      if !validate_haircolor(value) { return false; }
     } else if key == "ecl" {
-      valid = validate_eyecolor(value) && valid;
+      if !validate_eyecolor(value) { return false; }
     } else if key == "pid" {
-      valid = validate_pid(value) && valid;
+      if !validate_pid(value) { return false; }
     } else if key == "cid" {
       // ignore
     } else {
@@ -153,7 +169,7 @@ fn validate_passport(p:&String) -> bool {
     }
   }
 
-  valid
+  true
 }
 
 pub fn solve(passports: &Vec<String>, validate: bool) {
@@ -177,5 +193,5 @@ pub fn solve(passports: &Vec<String>, validate: bool) {
     }
 
   }
-  println!("valid passports {}", passport_count);
+  println!("valid passports with validation {} is {}", validate, passport_count);
 }
