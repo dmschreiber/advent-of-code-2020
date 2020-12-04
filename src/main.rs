@@ -1,4 +1,5 @@
 
+#[macro_use] extern crate lazy_static;
 use std::time::{Instant};
 mod dec01;
 mod dec02;
@@ -40,14 +41,33 @@ fn dec03() {
 }
 
 fn dec04() {
-    let start = Instant::now();
 
+    assert!(dec04::validate_birthyear("2002"));
+    assert!(!dec04::validate_birthyear("2003"));
+    assert!(dec04::validate_height("60in"));
+    assert!(dec04::validate_height("190cm"));
+    assert!(!dec04::validate_height("190in"));
+    assert!(!dec04::validate_height("190"));
+    assert!(dec04::validate_haircolor("#123abc"));
+    assert!(!dec04::validate_haircolor("#123abz"));
+    assert!(!dec04::validate_haircolor("123abc"));
+    assert!(dec04::validate_eyecolor("brn"));
+    assert!(!dec04::validate_eyecolor("wat"));
+    assert!(dec04::validate_pid("000000001"));
+    assert!(!dec04::validate_pid("0123456789"));
+
+
+    let start = Instant::now();
     let passports = dec04::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec04.txt".to_string());
     println!("Day 4 read file in {:?}", start.elapsed());
 
     let start = Instant::now();
-    dec04::solve(&passports);
+    dec04::solve(&passports, false);
     println!("Day 4 part 1 in {:?}", start.elapsed());
+
+    let start = Instant::now();
+    dec04::solve(&passports, true);
+    println!("Day 4 part 2 in {:?}", start.elapsed());
 
 }
 fn main() {
