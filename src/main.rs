@@ -3,6 +3,7 @@ use std::time::{Instant};
 mod dec01;
 mod dec02;
 mod dec03;
+mod dec04;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec01.txt".to_string());
@@ -38,6 +39,17 @@ fn dec03() {
 
 }
 
+fn dec04() {
+    let start = Instant::now();
+
+    let passports = dec04::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec04.txt".to_string());
+    println!("Day 4 read file in {:?}", start.elapsed());
+
+    let start = Instant::now();
+    dec04::solve(&passports);
+    println!("Day 4 part 1 in {:?}", start.elapsed());
+
+}
 fn main() {
     let start = Instant::now();
     dec01();
@@ -48,4 +60,8 @@ fn main() {
     println!("Day 2 complete in {:?}", start.elapsed());
 
     dec03();
+
+    let start = Instant::now();
+    dec04();
+    println!("Day 4 complete in {:?}", start.elapsed());
 }

@@ -1,11 +1,7 @@
 use std::collections::HashMap;
 use std::fs;
 
-pub struct TreeMap {
-  map: HashMap<(u32,u32),u8>,
-  max_row: u32,
-  max_col: u32,
-}
+
 
 #[allow(dead_code)]
 pub fn display_tree_map(trees: &TreeMap) {
@@ -23,6 +19,12 @@ pub fn display_tree_map(trees: &TreeMap) {
     }
     println!();
   }
+}
+
+pub struct TreeMap {
+  map: HashMap<(u32,u32),u8>,
+  max_row: u32,
+  max_col: u32,
 }
 
 pub fn read_tree_map(filename: String) -> TreeMap {
