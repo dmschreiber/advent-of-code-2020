@@ -66,9 +66,6 @@ pub fn validate_expireyear(s: &str) -> bool {
       retval = true;
     }
   }
-  if !retval {
-    println!("Expire year failed");
-  }
   retval
 }
 
