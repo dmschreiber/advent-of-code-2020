@@ -5,6 +5,7 @@ mod dec01;
 mod dec02;
 mod dec03;
 mod dec04;
+mod dec05;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec01.txt".to_string());
@@ -65,6 +66,16 @@ fn dec04() {
     dec04::solve(&passports, true);
 
 }
+
+fn dec05() {
+
+    dec05::validate();
+    let start = Instant::now();
+    let seats = dec05::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec05.txt".to_string());
+    println!("max seat_id is {}", dec05::solve(&seats, 0, 0));
+    println!("Day 5 complete in {:?}", start.elapsed());
+
+}
 fn main() {
     let start = Instant::now();
     dec01();
@@ -81,4 +92,6 @@ fn main() {
     let start = Instant::now();
     dec04();
     println!("Day 4 complete in {:?}", start.elapsed());
+
+    dec05();
 }
