@@ -2,18 +2,10 @@ use std::fs;
 use std::cmp;
 
 pub fn read_input(filename: String) -> Vec<String> {
-  let mut seats = Vec::<String>::new();
-
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
 
-  let splits = contents.lines();
-
-  for split in splits {
-    let s = String::from(split);
-    seats.push(s);
-  }
-
+  let seats: Vec<String> = contents.lines().map(|s| (&*s).to_string() ).collect();
   seats
 }
 
