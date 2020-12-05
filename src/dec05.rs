@@ -39,11 +39,10 @@ fn calculate_seat_id(seat: String) -> u32 {
 }
 
 pub fn calc_seat_ids(seats: &Vec<String>) -> Vec<u32> {
-  let mut seat_id = Vec::<u32>::new();
+  let mut seat_id : Vec<u32>;
 
-  for s in seats {
-    seat_id.push(calculate_seat_id(s.to_string()));
-  }
+  seat_id = seats.iter().map(|s| calculate_seat_id(s.to_string())).collect();
+
   seat_id.sort();
   seat_id
 }
