@@ -1,8 +1,10 @@
 # Advent of Code 2020
 
-## My solutions to AoC 2020 in Rust
+My solutions to AoC 2020 in Rust
 
-## Results on MacBook Pro 2.7 GHz Quad-Core Intel Core i7
+### Results on MacBook Pro 2.7 GHz Quad-Core Intel Core i7
+
+Inputs stored in files (need to refactor into an input directory and generalize the path). Timings are inclusive of read time from the file (as sometimes that includes parse time into structs).
 
 ```
 SOLUTION FOUND 883,1137 = 1003971
