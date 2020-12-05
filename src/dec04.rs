@@ -2,18 +2,11 @@ use std::fs;
 use regex::Regex;
 
 pub fn read_input(filename: String) -> Vec<String> {
-  let mut passports = Vec::<String>::new();
 
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
 
-  let splits = contents.split("\n\n");
-
-  for split in splits {
-    let s = String::from(split);
-    passports.push(s);
-  }
-  // collect::<Vec<String>>();
+  let passports: Vec<String> = contents.split("\n\n").map(|s| (&*s).to_string() ).collect();
 
   passports
 }
