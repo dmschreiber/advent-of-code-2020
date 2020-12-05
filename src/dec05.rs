@@ -57,17 +57,23 @@ pub fn calc_seat_ids(seats: &Vec<String>) -> Vec<u32> {
 }
 
 pub fn solve_missing(seat_ids: &Vec<u32>) -> u32 {
-  let my_seat_id = 0;
+  return solve_missing_at(seat_ids, 0);
+}
+
+fn solve_missing_at(seat_ids: &Vec<u32>, which: usize) -> u32 {
   
-  let mut last_seat = 0;
-  for s in seat_ids {
-    if s - last_seat == 2 {
-      return last_seat + 1;
-    } else {
-      last_seat = *s;
-    }
+  if which == 0 {return solve_missing_at(seat_ids, 1); }
+  if which >= seat_ids.len() {return 999; }
+
+  let my_seat_id : u32 = seat_ids[which];
+  let last_seat : u32 = seat_ids[which-1];
+
+  if my_seat_id - last_seat == 2 {
+    return last_seat + 1;
+  } else{
+    return solve_missing_at(seat_ids, which+1);
   }
-  my_seat_id
+
 }
 
 pub fn solve_max(seat_ids: &Vec<u32>, which: usize, max:u32) -> u32 {
@@ -75,11 +81,7 @@ pub fn solve_max(seat_ids: &Vec<u32>, which: usize, max:u32) -> u32 {
   if which >= seat_ids.len() {
     return max;
   } else {
-    let s = &seat_ids[which];
-    return solve_max(seat_ids,
-          which+1,
-          cmp::max(max,*s)
-        );
+    return solve_max(seat_ids,which+1,cmp::max(max,seat_ids[which]));
   }
 }
 
