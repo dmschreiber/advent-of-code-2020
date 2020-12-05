@@ -70,9 +70,12 @@ fn dec04() {
 fn dec05() {
 
     dec05::validate();
+
     let start = Instant::now();
     let seats = dec05::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec05.txt".to_string());
-    println!("max seat_id is {}", dec05::solve(&seats, 0, 0));
+    let seat_ids = dec05::calc_seat_ids(&seats);
+    println!("max seat_id is {}", dec05::solve_max(&seat_ids, 0, 0));
+    println!("my seat is {}", dec05::solve_missing(&seat_ids));
     println!("Day 5 complete in {:?}", start.elapsed());
 
 }

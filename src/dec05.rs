@@ -46,22 +46,41 @@ fn calculate_seat_id(seat: String) -> u32 {
   return row_lo * 8 + col_lo;
 }
 
-pub fn solve(seats: &Vec<String>, which: usize, max:u32) -> u32 {
+pub fn calc_seat_ids(seats: &Vec<String>) -> Vec<u32> {
+  let mut seat_id = Vec::<u32>::new();
 
-  if which >= seats.len() {
+  for s in seats {
+    seat_id.push(calculate_seat_id(s.to_string()));
+  }
+  seat_id.sort();
+  seat_id
+}
+
+pub fn solve_missing(seat_ids: &Vec<u32>) -> u32 {
+  let my_seat_id = 0;
+  
+  let mut last_seat = 0;
+  for s in seat_ids {
+    if s - last_seat == 2 {
+      return last_seat + 1;
+    } else {
+      last_seat = *s;
+    }
+  }
+  my_seat_id
+}
+
+pub fn solve_max(seat_ids: &Vec<u32>, which: usize, max:u32) -> u32 {
+
+  if which >= seat_ids.len() {
     return max;
   } else {
-    let s = &seats[which];
-    return solve(seats,
+    let s = &seat_ids[which];
+    return solve_max(seat_ids,
           which+1,
-          cmp::max(max,calculate_seat_id(s.to_string()))
+          cmp::max(max,*s)
         );
   }
-  // let s = seats[which];
-
-  // for s in seats {
-  //   println!("")
-  // }
 }
 
 pub fn validate() {
