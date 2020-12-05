@@ -8,7 +8,7 @@ mod dec04;
 mod dec05;
 
 fn dec01() {
-    let mut my_numbers = dec01::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec01.txt".to_string());
+    let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
 
     // sort
     my_numbers.sort();
@@ -20,14 +20,14 @@ fn dec01() {
 }
 
 fn dec02() {
-    let my_passwords = dec02::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec02.txt".to_string());
+    let my_passwords = dec02::read_input("./inputs/dec02.txt".to_string());
 
     dec02::solve_part1(&my_passwords);
     dec02::solve_part2(&my_passwords);
 }
 
 fn dec03() {
-    let my_tree_map = dec03::read_tree_map("/Users/dschreiber/Projects/advent-of-code-2020/src/dec03.txt".to_string());
+    let my_tree_map = dec03::read_tree_map("./inputs/dec03.txt".to_string());
 
     let p1 = dec03::solve(&my_tree_map,1,3) as u128;
     println!("{} trees found in part 1", p1);
@@ -59,7 +59,7 @@ fn dec04() {
     // assert!(!dec04::validate_pid("0123456789"));
 
 
-    let passports = dec04::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec04.txt".to_string());
+    let passports = dec04::read_input("./inputs/dec04.txt".to_string());
 
     dec04::solve(&passports, false);
 
@@ -72,7 +72,7 @@ fn dec05() {
     dec05::validate();
 
     let start = Instant::now();
-    let seats = dec05::read_input("/Users/dschreiber/Projects/advent-of-code-2020/src/dec05.txt".to_string());
+    let seats = dec05::read_input("./inputs/dec05.txt".to_string());
     let seat_ids = dec05::calc_seat_ids(&seats);
     println!("max seat_id is {}", dec05::solve_max(&seat_ids, 0, 0));
     println!("my seat is {}", dec05::solve_missing(&seat_ids));
