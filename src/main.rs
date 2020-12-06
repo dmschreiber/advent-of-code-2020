@@ -84,7 +84,9 @@ fn dec05() {
 fn dec06() {
     let start = Instant::now();
     let customs = dec06::read_input("./inputs/dec06.txt".to_string());
-    println!("Part 1 customs questions are {}", dec06::solve(&customs));
+    let answer =dec06::solve(&customs);
+    println!("Part 1 customs questions are {}", answer);
+    assert!(answer == 6930);
 
     let answer = dec06::solve_part_2(&customs);
     assert!(answer == 3585);

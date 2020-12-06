@@ -18,15 +18,15 @@ fn is_q_in_form(f: &String, q: char) -> u32 {
     return 0;
   }
 }
+
+
 pub fn solve(forms: &Vec<String>) -> u32 {
   let questions = "abcdefghijklmnopqrstuvwxyz".as_bytes();
-  let mut total_answer_count = 0;
 
-  for f in forms {
-    for q in questions {
-      total_answer_count = total_answer_count + is_q_in_form(&f, *q as char);
-    }
-  }
+  let total_answer_count = forms.iter().map(|f|
+    questions.iter().map(|&q| is_q_in_form(&f, q as char)).sum::<u32>()
+  ).sum::<u32>();
+
   total_answer_count
 }
 
