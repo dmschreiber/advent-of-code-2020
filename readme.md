@@ -38,7 +38,7 @@ Day 5 complete in 212.734µs
 ```
 
 ```
-customs questions are 6930
-customs questions are 3585
-Day 6 complete in 2.383709ms
+Part 1 customs questions are 6930
+Part 2 customs questions are 3585
+Day 6 complete in 974.065µs
 ```
