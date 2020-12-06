@@ -36,3 +36,9 @@ max seat_id is 878
 my seat is 504
 Day 5 complete in 212.734µs
 ```
+
+```
+customs questions are 6930
+customs questions are 3585
+Day 6 complete in 2.383709ms
+```
