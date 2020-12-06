@@ -15,6 +15,15 @@ const COL_HI: u32 = 7;
 const COL_LO: u32 = 0;
 
 fn calculate_seat_id(seat: String) -> u32 {
+
+  // let b1 = seat.replace("B","1");
+  // let b11 = b1.replace("F", "0");
+  // let b2 = b11.replace("R","1");
+  // let b21 = b2.replace("L","0");
+
+  // let seat_id = isize::from_str_radix(&b21,2).unwrap();
+  // return seat_id as u32;
+
   let instructions = seat.as_bytes();
   let mut row_hi = ROW_HI;
   let mut row_lo = ROW_LO;

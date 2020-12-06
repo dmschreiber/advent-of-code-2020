@@ -6,6 +6,7 @@ mod dec02;
 mod dec03;
 mod dec04;
 mod dec05;
+mod dec06;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
@@ -79,6 +80,15 @@ fn dec05() {
     println!("Day 5 complete in {:?}", start.elapsed());
 
 }
+
+fn dec06() {
+    let start = Instant::now();
+    let customs = dec06::read_input("./inputs/dec06.txt".to_string());
+    println!("customs questions are {}", dec06::solve(&customs));
+    println!("customs questions are {}", dec06::solve_part_2(&customs));
+    println!("Day 6 complete in {:?}", start.elapsed());
+}
+
 fn main() {
     let start = Instant::now();
     dec01();
@@ -97,4 +107,6 @@ fn main() {
     println!("Day 4 complete in {:?}", start.elapsed());
 
     dec05();
+
+    dec06();
 }
