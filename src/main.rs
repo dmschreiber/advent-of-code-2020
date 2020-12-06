@@ -82,11 +82,16 @@ fn dec05() {
 }
 
 fn dec06() {
-    let start = Instant::now();
     let customs = dec06::read_input("./inputs/dec06.txt".to_string());
-    println!("customs questions are {}", dec06::solve(&customs));
-    println!("customs questions are {}", dec06::solve_part_2(&customs));
-    println!("Day 6 complete in {:?}", start.elapsed());
+    let start = Instant::now();
+    println!("Part 1 customs questions are {}", dec06::solve(&customs));
+    println!("Day 6 part 1complete in {:?}", start.elapsed());
+    let start = Instant::now();
+    let answer = dec06::solve_part_2(&customs);
+    assert!(answer == 3585);
+    println!("Part 2 customs questions are {}", answer );
+    println!("Day 6 part 2 complete in {:?}", start.elapsed());
+    // println!("Day 6 complete in {:?}", start.elapsed());
 }
 
 fn main() {
