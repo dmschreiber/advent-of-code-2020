@@ -43,16 +43,18 @@ fn are_all_q_in_form(people: &Vec<&str>, q: char, question_count: usize) -> u32 
   }
 }
 
-pub fn solve_part_2(forms: &Vec<String>) -> u32 {
+fn tally_form(f: &String) -> u32 {
   let questions = "abcdefghijklmnopqrstuvwxyz".as_bytes();
-  let mut total_answer_count = 0;
+  let people = f.lines().collect::<Vec<&str>>();
 
-  for f in forms {
-    let people = f.lines().collect::<Vec<&str>>();
+   return questions.iter().map(|&q| are_all_q_in_form(&people, q as char, 0)).sum::<u32>();
 
-    for q in questions {
-      total_answer_count += are_all_q_in_form(&people, *q as char, 0);
-    }
-  }
+}
+
+pub fn solve_part_2(forms: &Vec<String>) -> u32 {
+  let total_answer_count;
+
+  total_answer_count = forms.iter().map(|f| tally_form(&f)).sum::<u32>();
+
   total_answer_count
 }
