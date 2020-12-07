@@ -98,8 +98,16 @@ fn dec06() {
 
 fn dec07() {
     let rules = dec07::read_input("./inputs/dec07.txt".to_string());
-    // assert!(dec07::solve(&rules)==4);
-    println!("shiny gold has {} bags", dec07::solve_part2(&rules));
+
+    let start = Instant::now();
+    let structured_rules = dec07::create_structure(&rules);
+    assert!(dec07::solve(&structured_rules)==242);
+    println!("Day 7 part 1 complete in {:?}", start.elapsed());
+    let start = Instant::now();
+
+    assert!(dec07::solve_part2(&rules)==176035);
+    println!("Day 7 part 2 complete in {:?}", start.elapsed());
+
 }
 
 fn main() {

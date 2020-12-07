@@ -42,3 +42,10 @@ Part 1 customs questions are 6930
 Part 2 customs questions are 3585
 Day 6 complete in 974.065µs
 ```
+
+```
+done  242 bags
+Day 7 part 1 complete in 941.623421ms
+shiny gold has 176035 bags
+Day 7 part 2 complete in 52.221299ms
+```
