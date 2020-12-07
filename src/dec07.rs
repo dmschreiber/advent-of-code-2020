@@ -69,52 +69,39 @@ fn get_bag_name(s: String) -> String {
   }
 }
 
-fn does_contain(rules: &Vec<BagRule>, which: String) -> bool {
+fn does_contain(rules: &Vec<BagRule>, which: String) -> u32 {
   for rule in rules {
     if rule.contained_bag == which {
 
       if rule.has_gold {
-        return true;
+        return 1;
       } else {
 
         for bag in &rule.bags_contained {
           let bag_name = get_bag_name(bag.to_string());
 
-          if does_contain(rules, bag_name) {
-            return true;
+          if does_contain(rules, bag_name) > 0 {
+            return 1;
           }
         }
 
       }
-      return false;
+      return 0;
     }
   }
-  return false;
+  return 0;
 }
 
 pub fn solve(rules: &Vec<BagRule>) -> u32 {
-  let mut bags = 0;
 
-  for rule in rules {
-    if rule.has_gold {
-      bags += 1;
-    } else {
+  let bags = rules.iter().map(|rule| does_contain(rules, rule.contained_bag.to_string())).sum::<u32>();
 
-      for bag in &rule.bags_contained {
-        let bag_name = get_bag_name(bag.to_string());
-        if does_contain(rules, bag_name) {
-          bags +=1;
-          // println!("Bag counts up to {}", bags);
-          break;
-        }
-      }
-    }
-  }
   println!("{} bags can contain shiny gold", bags);
   return bags;
 }
 
-fn how_many_bags(rules: &Vec<BagRule>, which: &String, how_many: u32, level: String) -> u32 {
+fn how_many_bags(rules: &Vec<BagRule>, which: &String, how_many: u32) -> u32 {
+  
   for rule in rules {
 
     if rule.contained_bag == *which {
@@ -124,15 +111,14 @@ fn how_many_bags(rules: &Vec<BagRule>, which: &String, how_many: u32, level: Str
         // println!("{}{} has no other bags returning {}", level, parts[0].to_string(), how_many);
         return how_many;
       } else {
-        let mut sub_bag_count = 0;
 
-        for bag in &rule.bags_contained {
-          let bag_name = get_bag_name(bag.to_string());
-          // sub_bag_count += get_bag_count(bag.to_string());
+        let sub_bag_count = rule.bags_contained.iter().map(
+          |bag| 
+          how_many_bags(rules, &get_bag_name(bag.to_string()), get_bag_count(bag.to_string()))
+            ).sum::<u32>();
 
-          sub_bag_count += how_many_bags(rules, &bag_name, get_bag_count(bag.to_string()),format!("-{}",level));
-        }
         let ret_val = how_many * sub_bag_count + how_many;
+        
         // println!("{}done {} returning {}", level, containing_bag, ret_val);
         if rule.contained_bag == GOLD {
           return ret_val - 1;
@@ -147,7 +133,7 @@ fn how_many_bags(rules: &Vec<BagRule>, which: &String, how_many: u32, level: Str
 
 pub fn solve_part2(rules: &Vec<BagRule>) -> u32 {
 
-  let answer = how_many_bags(rules, &GOLD.to_string(), 1, "".to_string());
+  let answer = how_many_bags(rules, &GOLD.to_string(), 1);
   println!("shiny gold has {} bags", answer);
   return answer;
 
