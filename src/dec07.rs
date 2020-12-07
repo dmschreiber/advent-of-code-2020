@@ -74,7 +74,7 @@ fn does_contain(rules: &Vec<BagRule>, which: String) -> bool {
     if rule.contained_bag == which {
 
       if rule.has_gold {
-        return true
+        return true;
       } else {
 
         for bag in &rule.bags_contained {
@@ -84,7 +84,9 @@ fn does_contain(rules: &Vec<BagRule>, which: String) -> bool {
             return true;
           }
         }
+
       }
+      return false;
     }
   }
   return false;
