@@ -81,27 +81,32 @@ fn get_bag_name(s: String) -> String {
 }
 
 fn does_contain(rules: &HashMap<String,BagRule>, which: String) -> u32 {
+  let start = Instant::now();
 
-  let rule;
-  if let Some(i) = rules.get(&which) {
-    rule = i;
-  } else {
+  if which == "no other" {
     return 0;
   }
-      if rule.has_gold {
+
+
+  let rule = rules.get(&which).unwrap();
+
+
+  if rule.has_gold {
+    println!("does_contain has_gold {:?}", start.elapsed());
+    return 1;
+  } else {
+
+    for bag in &rule.bags_contained {
+      // let bag_name = &bag.bag_name;
+
+      if does_contain(rules, bag.bag_name.clone()) > 0 {
+        println!("does_contain recursive {:?}", start.elapsed());
         return 1;
-      } else {
-
-        for bag in &rule.bags_contained {
-          let bag_name = &bag.bag_name;
-
-          if does_contain(rules, bag_name.to_string()) > 0 {
-            return 1;
-          }
-        }
-
       }
-      return 0;
+    }
+
+  }
+  return 0;
 }
 
 pub fn solve(rules: &HashMap<String,BagRule>) -> u32 {
