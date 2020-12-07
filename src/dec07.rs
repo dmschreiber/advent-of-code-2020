@@ -1,7 +1,5 @@
 use std::fs;
 use std::collections::HashMap;
-use std::time::{Instant};
-
 
 const GOLD : &str = "shiny gold";
 
@@ -81,7 +79,6 @@ fn get_bag_name(s: String) -> String {
 }
 
 fn does_contain(rules: &HashMap<String,BagRule>, which: &String, has_gold: &mut HashMap<String,bool>) -> u32 {
-  // let start = Instant::now();
 
   if which == "no other" {
     return 0;
@@ -90,13 +87,11 @@ fn does_contain(rules: &HashMap<String,BagRule>, which: &String, has_gold: &mut 
   let rule = rules.get(which).unwrap();
 
   if rule.has_gold {
-    // println!("does_contain has_gold {:?}", start.elapsed());
     return 1;
   }
   
   if let Some(i) = has_gold.get(which) {
     if *i {
-      // println!("does_contain {} derived has_gold {:?}", rule.contained_bag, start.elapsed());
       return 1;
     }
   }
@@ -105,7 +100,6 @@ fn does_contain(rules: &HashMap<String,BagRule>, which: &String, has_gold: &mut 
 
     if does_contain(rules, &bag.bag_name, has_gold) > 0 {
       has_gold.insert(which.to_string(), true);
-      // println!("does_contain recursive {} {:?}", rule.contained_bag, start.elapsed());
       return 1;
     }
   }
@@ -131,7 +125,6 @@ fn how_many_bags(rules: &HashMap<String,BagRule>, which: &String, how_many: u32)
   }
 
   if rule.has_no_other_bags {
-    // println!("{}{} has no other bags returning {}", level, parts[0].to_string(), how_many);
     return how_many;
   } else {
 
@@ -143,7 +136,6 @@ fn how_many_bags(rules: &HashMap<String,BagRule>, which: &String, how_many: u32)
     let ret_val = how_many * sub_bag_count + how_many;
 
 
-    // println!("{}done {} returning {}", level, containing_bag, ret_val);
     if rule.contained_bag == GOLD {
       return ret_val - 1;
     } else {
