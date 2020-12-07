@@ -1,5 +1,6 @@
 use std::fs;
 use std::collections::HashMap;
+use std::time::{Instant};
 
 
 const GOLD : &str = "shiny gold";
@@ -22,7 +23,7 @@ pub fn create_structure(rule_lines: &Vec<String>) -> HashMap<String,BagRule> {
     let parts = r.split("contain").collect::<Vec<&str>>();
 
     let containing_bag = get_bag_name(parts[0].to_string());
-    let contained_bags = parts[1].split(", ").map(|s| (&*s).to_string() ).collect();
+    let contained_bags = parts[1].split(", ").map(|s| Bag{ bag_name: get_bag_name((&*s).to_string()), bag_count: get_bag_count((&*s).to_string())} ).collect();
     
     rules.insert (containing_bag.clone(), BagRule{ contained_bag: containing_bag.to_string(), bags_contained: contained_bags, 
         has_gold: parts[1].find(GOLD) != None,
@@ -33,10 +34,14 @@ pub fn create_structure(rule_lines: &Vec<String>) -> HashMap<String,BagRule> {
   return rules;
 }
 
+pub struct Bag {
+  bag_name: String,
+  bag_count: u32,
+}
 
 pub struct BagRule {
   contained_bag: String,
-  bags_contained: Vec<String>,
+  bags_contained: Vec<Bag>,
   has_gold: bool,
   has_no_other_bags: bool,
 }
@@ -52,9 +57,13 @@ fn is_string_numeric(str: String) -> bool {
 
 fn get_bag_count(s: String) -> u32 {
   // println!("Get bag count {}", s);
+
   let pieces = s.split_ascii_whitespace().collect::<Vec<&str>>();
   if is_string_numeric(pieces[0].to_string()) {
-    return pieces[0].parse::<u32>().unwrap();
+    let a = pieces[0].parse::<u32>().unwrap();
+
+    return a;
+
   } else {
     return 0;
   }
@@ -84,9 +93,9 @@ fn does_contain(rules: &HashMap<String,BagRule>, which: String) -> u32 {
       } else {
 
         for bag in &rule.bags_contained {
-          let bag_name = get_bag_name(bag.to_string());
+          let bag_name = &bag.bag_name;
 
-          if does_contain(rules, bag_name) > 0 {
+          if does_contain(rules, bag_name.to_string()) > 0 {
             return 1;
           }
         }
@@ -104,7 +113,7 @@ pub fn solve(rules: &HashMap<String,BagRule>) -> u32 {
 }
 
 fn how_many_bags(rules: &HashMap<String,BagRule>, which: &String, how_many: u32) -> u32 {
-  
+
   let rule;
   if let Some(i) = rules.get(which) {
     rule = i;
@@ -119,11 +128,12 @@ fn how_many_bags(rules: &HashMap<String,BagRule>, which: &String, how_many: u32)
 
     let sub_bag_count = rule.bags_contained.iter().map(
       |bag| 
-      how_many_bags(rules, &get_bag_name(bag.to_string()), get_bag_count(bag.to_string()))
+      how_many_bags(rules, &bag.bag_name, bag.bag_count)
         ).sum::<u32>();
 
     let ret_val = how_many * sub_bag_count + how_many;
-    
+
+
     // println!("{}done {} returning {}", level, containing_bag, ret_val);
     if rule.contained_bag == GOLD {
       return ret_val - 1;

@@ -44,8 +44,8 @@ Day 6 complete in 974.065µs
 ```
 
 ```
-done  242 bags
-Day 7 part 1 complete in 941.623421ms
+242 bags can contain shiny gold
+Day 7 part 1 complete in 83.873021ms
 shiny gold has 176035 bags
-Day 7 part 2 complete in 52.221299ms
+Day 7 part 2 complete in 7.822µs
 ```
