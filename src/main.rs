@@ -105,7 +105,7 @@ fn dec07() {
     println!("Day 7 part 1 complete in {:?}", start.elapsed());
     let start = Instant::now();
 
-    assert!(dec07::solve_part2(&rules)==176035);
+    assert!(dec07::solve_part2(&structured_rules)==176035);
     println!("Day 7 part 2 complete in {:?}", start.elapsed());
 
 }
