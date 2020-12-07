@@ -80,23 +80,21 @@ fn get_bag_name(s: String) -> String {
   }
 }
 
-fn does_contain(rules: &HashMap<String,BagRule>, which: String, has_gold: &mut HashMap<String,bool>) -> u32 {
-  let start = Instant::now();
+fn does_contain(rules: &HashMap<String,BagRule>, which: &String, has_gold: &mut HashMap<String,bool>) -> u32 {
+  // let start = Instant::now();
 
   if which == "no other" {
     return 0;
   }
 
-
-  let rule = rules.get(&which).unwrap();
-
+  let rule = rules.get(which).unwrap();
 
   if rule.has_gold {
     // println!("does_contain has_gold {:?}", start.elapsed());
     return 1;
   }
   
-  if let Some(i) = has_gold.get(&which) {
+  if let Some(i) = has_gold.get(which) {
     if *i {
       // println!("does_contain {} derived has_gold {:?}", rule.contained_bag, start.elapsed());
       return 1;
@@ -105,8 +103,8 @@ fn does_contain(rules: &HashMap<String,BagRule>, which: String, has_gold: &mut H
 
   for bag in &rule.bags_contained {
 
-    if does_contain(rules, bag.bag_name.clone(), has_gold) > 0 {
-      has_gold.insert(which, true);
+    if does_contain(rules, &bag.bag_name, has_gold) > 0 {
+      has_gold.insert(which.to_string(), true);
       // println!("does_contain recursive {} {:?}", rule.contained_bag, start.elapsed());
       return 1;
     }
@@ -117,7 +115,7 @@ fn does_contain(rules: &HashMap<String,BagRule>, which: String, has_gold: &mut H
 
 pub fn solve(rules: &HashMap<String,BagRule>) -> u32 {
   let mut has_gold = <HashMap<String,bool>>::new();
-  let bags = rules.values().map(|rule| does_contain(rules, rule.contained_bag.to_string(),&mut has_gold)).sum::<u32>();
+  let bags = rules.values().map(|rule| does_contain(rules, &rule.contained_bag,&mut has_gold)).sum::<u32>();
 
   println!("{} bags can contain shiny gold", bags);
   return bags;
