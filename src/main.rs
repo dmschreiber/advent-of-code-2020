@@ -7,6 +7,7 @@ mod dec03;
 mod dec04;
 mod dec05;
 mod dec06;
+mod dec07;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
@@ -95,6 +96,12 @@ fn dec06() {
     println!("Day 6 complete in {:?}", start.elapsed());
 }
 
+fn dec07() {
+    let rules = dec07::read_input("./inputs/dec07.txt".to_string());
+    // assert!(dec07::solve(&rules)==4);
+    println!("shiny gold has {} bags", dec07::solve_part2(&rules));
+}
+
 fn main() {
     let start = Instant::now();
     dec01();
@@ -115,4 +122,5 @@ fn main() {
     dec05();
 
     dec06();
+    dec07();
 }
