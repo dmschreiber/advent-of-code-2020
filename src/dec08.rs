@@ -16,18 +16,19 @@ pub fn create_structure(rule_lines: &Vec<String>) -> Vec<Thing> {
 
   for r in rule_lines {
     let items : Vec<String> = r.split_ascii_whitespace().map(|s| (&*s).to_string() ).collect();
-    let operator;
-    if items[0] == "jmp" {
-      operator = Operator::Jmp;
-    } else if items[0] == "acc" {
-      operator = Operator::Acc;
-    } else {
-      operator = Operator::Nop;
-    }
-    // let operator = items[0].to_string();
-    let argument = &items[1];
 
-    let new_thing = Thing {operator: operator, argument: argument.parse::<i32>().unwrap()};
+    let my_op : &str = &items[0];
+
+    let operator = match my_op {
+      "jmp" => Operator::Jmp,
+      "acc" => Operator::Acc,
+      "nop" => Operator::Nop,
+      _ => panic!("Invalid char"),
+    };
+
+    let argument = &items[1].parse::<i32>().unwrap();
+
+    let new_thing = Thing {operator: operator, argument: *argument};
     things.push(new_thing);
   }
   // println!("{:?}", things);
