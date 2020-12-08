@@ -49,3 +49,9 @@ Day 7 part 1 complete in 15.980153ms
 shiny gold has 176035 bags
 Day 7 part 2 complete in 7.386µs
 ```
+
+```
+Final accumulator 1930, index 310, and Some(true)
+Success at 217 Final accumulator 1688, index 622, and None
+Day 8 complete in 92.402877ms
+```

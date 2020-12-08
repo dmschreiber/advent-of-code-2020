@@ -8,6 +8,7 @@ mod dec04;
 mod dec05;
 mod dec06;
 mod dec07;
+mod dec08;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
@@ -110,6 +111,17 @@ fn dec07() {
 
 }
 
+fn dec08() {
+    let lines = dec08::read_input("./inputs/dec08.txt".to_string());
+    let start = Instant::now();
+
+    let structured_lines = dec08::create_structure(&lines);
+    dec08::solve(&structured_lines);
+    dec08::solve_part2(&structured_lines);
+    println!("Day 8 complete in {:?}", start.elapsed());
+
+}
+
 fn main() {
     let start = Instant::now();
     dec01();
@@ -131,4 +143,5 @@ fn main() {
 
     dec06();
     dec07();
+    dec08();
 }
