@@ -116,8 +116,8 @@ fn dec08() {
     let start = Instant::now();
 
     let structured_lines = dec08::create_structure(&lines);
-    dec08::solve(&structured_lines);
-    dec08::solve_part2(&structured_lines);
+    assert!(dec08::solve(&structured_lines)==1930);
+    assert!(dec08::solve_part2(&structured_lines)==1688);
     println!("Day 8 complete in {:?}", start.elapsed());
 
 }

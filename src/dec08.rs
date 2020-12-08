@@ -32,34 +32,10 @@ pub struct Thing {
 }
 
 pub fn solve(things: &Vec<Thing>) -> i32 {
-  let mut retval = 0;
-  let mut index = 0 as usize;
-  let mut history = <HashMap<usize,bool>>::new();
-  
-  while history.get(&index) == None {
-    history.insert(index, true);
-    let v = things.get(index).unwrap();
-
-    if v.operator == "nop" {
-      index += 1;
-    } else if v.operator == "acc" {
-       retval += v.argument;
-       index += 1;
-    }  else if v.operator == "jmp" {
-      let tmp = (v.argument + index as i32) as usize;
-      // println!("trying to jump {} by {} get {}", index, v.argument, tmp);
-      index = tmp;
-    }  
-    // println!("history {:?}", history);
-  }
-
-
-
-  println!("Final accumulator {}, index {}, and {:?}", retval, index, history.get(&index));
-  retval
+  return solve_part2_sub(things,None);
 }
 
-pub fn solve_part2_sub(things: &Vec<Thing>, change_index: usize) -> i32 {
+pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 {
   let mut retval = 0;
   let mut index = 0 as usize;
   let mut history = <HashMap<usize,bool>>::new();
@@ -68,40 +44,51 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: usize) -> i32 {
     history.insert(index, true);
     let v = things.get(index).unwrap();
 
-    let mut op = v.operator.clone();
-
-    if (index == change_index) && (op == "nop") {
+    let op;
+    if (change_index != None) && (Some(index) == change_index) && (v.operator == "nop") {
       op = "jmp".to_string();
-    }
-
-    if (index == change_index) && (op == "jmp") {
+    } else if (change_index != None) && (Some(index) == change_index) && (v.operator == "jmp") {
       op = "nop".to_string();
+    } else {
+      op = v.operator.clone();
     }
 
     if op == "nop" {
       index += 1;
     } else if op == "acc" {
-       retval += v.argument;
+       retval = v.argument + retval;
        index += 1;
     }  else if op == "jmp" {
       let tmp = (v.argument + index as i32) as usize;
       index = tmp;
     }  
       if index >= things.len() {
-      println!("Success at {} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
-      retval = 0;
+      println!("Success at {:?} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
+      // retval = 0;
       break;
     }
   }
-  // println!("Final accumulator {}, index {}, and {:?}", retval, index, history.get(&index));
-  retval
+  if change_index == None {
+    // running program as-is
+    println!("Infinte loop at {:?} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
+    return retval
+  } else if change_index != None && index >= things.len() {
+    // changed one operator and found success
+    return retval
+  } else
+  {
+    // changed one operator and hit infinte loop
+    return 0
+  }
 }
 
-pub fn solve_part2(things: &Vec<Thing>) {
-  // solve_part2_sub(things,7);
-  for (i,t) in things.iter().enumerate() {
-    if solve_part2_sub(things,i) == 0 {
-      break;
+pub fn solve_part2(things: &Vec<Thing>) -> i32{
+  for (i,_t) in things.iter().enumerate() {
+    let retval = solve_part2_sub(things,Some(i));
+
+    if retval != 0 {
+      return retval;
     }
   }
+  return 0;
 }
