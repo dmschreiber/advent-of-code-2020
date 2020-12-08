@@ -16,7 +16,15 @@ pub fn create_structure(rule_lines: &Vec<String>) -> Vec<Thing> {
 
   for r in rule_lines {
     let items : Vec<String> = r.split_ascii_whitespace().map(|s| (&*s).to_string() ).collect();
-    let operator = items[0].to_string();
+    let operator;
+    if items[0] == "jmp" {
+      operator = Operator::Jmp;
+    } else if items[0] == "acc" {
+      operator = Operator::Acc;
+    } else {
+      operator = Operator::Nop;
+    }
+    // let operator = items[0].to_string();
     let argument = &items[1];
 
     let new_thing = Thing {operator: operator, argument: argument.parse::<i32>().unwrap()};
@@ -25,10 +33,18 @@ pub fn create_structure(rule_lines: &Vec<String>) -> Vec<Thing> {
   // println!("{:?}", things);
   return things;
 }
+
 #[derive(Debug)]
 pub struct Thing {
-  operator: String,
+  operator: Operator,
   argument: i32,
+}
+
+#[derive(Debug)]
+enum Operator {
+  Nop,
+  Acc,
+  Jmp,
 }
 
 pub fn solve(things: &Vec<Thing>) -> i32 {
@@ -45,24 +61,38 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 
     let v = things.get(index).unwrap();
 
     let op;
-    if (change_index != None) && (Some(index) == change_index) && (v.operator == "nop") {
-      op = "jmp".to_string();
-    } else if (change_index != None) && (Some(index) == change_index) && (v.operator == "jmp") {
-      op = "nop".to_string();
-    } else {
-      op = v.operator.clone();
+    match v.operator {
+      Operator::Nop => {
+        if (change_index != None) && (Some(index) == change_index) {
+          op = Operator::Jmp;
+        } else {
+          op = Operator::Nop;
+        }
+      }
+      Operator::Jmp => {
+        if (change_index != None) && (Some(index) == change_index) {
+          op = Operator::Nop;
+        } else {
+          op = Operator::Jmp;
+        }
+      }
+      Operator::Acc => { op = Operator::Acc; }
     }
 
-    if op == "nop" {
-      index += 1;
-    } else if op == "acc" {
-       retval = v.argument + retval;
-       index += 1;
-    }  else if op == "jmp" {
-      let tmp = (v.argument + index as i32) as usize;
-      index = tmp;
-    }  
-      if index >= things.len() {
+    match op {
+      Operator::Nop => {
+        index += 1;
+      } 
+      Operator::Acc => {
+         retval = v.argument + retval;
+         index += 1;
+      } 
+      Operator::Jmp => {
+        let tmp = (v.argument + index as i32) as usize;
+        index = tmp;
+      }  
+    }
+    if index >= things.len() {
       println!("Success at {:?} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
       // retval = 0;
       break;
