@@ -51,7 +51,7 @@ Day 7 part 2 complete in 7.386µs
 ```
 
 ```
-Final accumulator 1930, index 310, and Some(true)
-Success at 217 Final accumulator 1688, index 622, and None
-Day 8 complete in 6.228518ms
+Infinte loop at None Final accumulator 1930, index 310, and Some(true)
+Success at Some(217) Final accumulator 1688, index 622, and None
+Day 8 complete in 3.511578ms
 ```

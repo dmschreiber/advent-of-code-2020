@@ -52,7 +52,7 @@ pub fn solve(things: &Vec<Thing>) -> i32 {
 }
 
 pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 {
-  let mut retval = 0;
+  let mut accumulator = 0;
   let mut index = 0 as usize;
   let mut history = <HashMap<usize,bool>>::new();
   
@@ -60,6 +60,7 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 
     history.insert(index, true);
     let v = things.get(index).unwrap();
 
+    // Swap the Operation of at the specified index
     let op;
     match v.operator {
       Operator::Nop => {
@@ -79,12 +80,13 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 
       Operator::Acc => { op = Operator::Acc; }
     }
 
+    // Do the Operation
     match op {
       Operator::Nop => {
         index += 1;
       } 
       Operator::Acc => {
-         retval = v.argument + retval;
+        accumulator = v.argument + accumulator;
          index += 1;
       } 
       Operator::Jmp => {
@@ -93,18 +95,18 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 
       }  
     }
     if index >= things.len() {
-      println!("Success at {:?} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
+      println!("Success at {:?} Final accumulator {}, index {}, and {:?}", change_index, accumulator, index, history.get(&index));
       // retval = 0;
       break;
     }
   }
   if change_index == None {
     // running program as-is
-    println!("Infinte loop at {:?} Final accumulator {}, index {}, and {:?}", change_index, retval, index, history.get(&index));
-    return retval
+    println!("Infinte loop at {:?} Final accumulator {}, index {}, and {:?}", change_index, accumulator, index, history.get(&index));
+    return accumulator
   } else if change_index != None && index >= things.len() {
     // changed one operator and found success
-    return retval
+    return accumulator
   } else
   {
     // changed one operator and hit infinte loop
