@@ -9,6 +9,8 @@ mod dec05;
 mod dec06;
 mod dec07;
 mod dec08;
+mod dec09;
+mod lib;
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
@@ -77,7 +79,7 @@ fn dec05() {
     let start = Instant::now();
     let seats = dec05::read_input("./inputs/dec05.txt".to_string());
     let seat_ids = dec05::calc_seat_ids(&seats);
-    println!("max seat_id is {}", dec05::solve_max(&seat_ids, 0, 0));
+    println!("max seat_id is {}", dec05::solve_max(&seat_ids));
     println!("my seat is {}", dec05::solve_missing(&seat_ids));
     println!("Day 5 complete in {:?}", start.elapsed());
 
@@ -122,6 +124,14 @@ fn dec08() {
 
 }
 
+fn dec09() {
+    let lines = lib::read_input("./inputs/dec08.txt".to_string());
+
+    let structured_lines = dec09::create_structure(&lines);
+    dec09::solve(&structured_lines);
+
+}
+
 fn main() {
     let start = Instant::now();
     dec01();
@@ -144,4 +154,5 @@ fn main() {
     dec06();
     dec07();
     dec08();
+    dec09();
 }

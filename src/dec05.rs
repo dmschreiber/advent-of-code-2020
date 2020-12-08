@@ -76,13 +76,8 @@ fn solve_missing_at(seat_ids: &Vec<u32>, which: usize) -> u32 {
 
 }
 
-pub fn solve_max(seat_ids: &Vec<u32>, which: usize, max:u32) -> u32 {
-
-  if which >= seat_ids.len() {
-    return max;
-  } else {
-    return solve_max(seat_ids,which+1,cmp::max(max,seat_ids[which]));
-  }
+pub fn solve_max(seat_ids: &Vec<u32>) -> u32 {
+  return *seat_ids.iter().max().unwrap();
 }
 
 pub fn validate() {
