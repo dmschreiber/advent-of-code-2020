@@ -62,24 +62,23 @@ pub fn solve_part2_sub(things: &Vec<Thing>, change_index: Option<usize>) -> i32 
     let v = things.get(index).unwrap();
 
     // Swap the Operation of at the specified index
-    let op;
-    match v.operator {
+    let op = match v.operator {
       Operator::Nop => {
         if (change_index != None) && (Some(index) == change_index) {
-          op = Operator::Jmp;
+          Operator::Jmp
         } else {
-          op = Operator::Nop;
+          Operator::Nop
         }
       }
       Operator::Jmp => {
         if (change_index != None) && (Some(index) == change_index) {
-          op = Operator::Nop;
+          Operator::Nop
         } else {
-          op = Operator::Jmp;
+          Operator::Jmp
         }
       }
-      Operator::Acc => { op = Operator::Acc; }
-    }
+      Operator::Acc => { Operator::Acc }
+    };
 
     // Do the Operation
     match op {

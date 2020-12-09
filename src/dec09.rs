@@ -1,29 +1,61 @@
-use std::collections::HashMap;
 
-pub fn create_structure(lines: &Vec<String>) -> Vec<Thing> {
-  let mut things = <Vec<Thing>>::new();
+pub fn create_structure(lines: &Vec<String>) -> Vec<i64> {
 
-  for line in lines {
-    things.push( Thing{ argument: 1, operator: Operator::Nop, } );
+  let nums : Vec<i64> = lines.iter().map(|line| line.parse::<i64>().unwrap()).collect();
+
+  nums
+}
+
+fn is_in_list(nums: &[i64], num: i64) -> bool {
+  for n in nums {
+    for m in nums {
+      if n != m {
+        if num == n+m {
+          return true
+        }
+      }
+    }
+  } 
+  return false
+}
+
+pub fn solve(nums: &Vec<i64>) -> i64 {
+  let mut retval = 0;
+  for i in 25..nums.len() {
+    // let start = i-5;
+    let answer = is_in_list(&nums[i-25..i],nums[i]);
+    // println!("{} {}", answer,nums[i]);
+    if !answer {
+      println!("Didn't find numbers that sum {}",nums[i]);
+      retval = nums[i];
+      break;
+    }
   }
-  things
-}
-
-#[derive(Debug)]
-pub struct Thing {
-  operator: Operator,
-  argument: i32,
-}
-
-#[derive(Debug)]
-enum Operator {
-  Nop,
-  Acc,
-  Jmp,
-}
-
-pub fn solve(things: &Vec<Thing>) -> u32 {
-  let retval = 0;
-
   retval
+}
+
+fn find(nums:&Vec<i64>, which: usize, target: i64) -> i64 {
+  let mut retval = 0;
+  for i in 0..nums.len() {
+    let sum = nums[which..which+i].iter().sum::<i64>();
+    // println!("checking {} - {}", i, sum);
+    if sum > target {
+      return 0
+    } else if sum == target {
+      let min = nums[which..which+i].iter().min();
+      let max = nums[which..which+i].iter().max();
+      retval = min.unwrap()+max.unwrap();
+      println!("found {} with min {}, max {} and sum {}", target, min.unwrap(), max.unwrap(), min.unwrap()+max.unwrap() );
+      return retval;
+    }
+  }
+  retval
+}
+pub fn solve_part2(nums: &Vec<i64>, answer: i64) {
+  // let answer = 105950735;
+  for i in 0..nums.len() {
+    if find(nums,i,answer) > 0 {
+      break;
+    }
+  }
 }

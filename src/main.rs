@@ -1,6 +1,8 @@
 
-#[macro_use] extern crate lazy_static;
 use std::time::{Instant};
+
+#[macro_use] extern crate lazy_static;
+
 mod dec01;
 mod dec02;
 mod dec03;
@@ -125,10 +127,15 @@ fn dec08() {
 }
 
 fn dec09() {
-    let lines = lib::read_input("./inputs/dec08.txt".to_string());
+    let lines = lib::read_input("./inputs/dec09.txt".to_string());
+
+    let start = Instant::now();
 
     let structured_lines = dec09::create_structure(&lines);
-    dec09::solve(&structured_lines);
+    let answer = dec09::solve(&structured_lines);
+    dec09::solve_part2(&structured_lines, answer);
+
+    println!("Day 9 complete in {:?}", start.elapsed());
 
 }
 
