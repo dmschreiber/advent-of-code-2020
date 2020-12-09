@@ -1,4 +1,4 @@
-
+use std::fs;
 use std::time::{Instant};
 
 #[macro_use] extern crate lazy_static;
@@ -12,7 +12,17 @@ mod dec06;
 mod dec07;
 mod dec08;
 mod dec09;
-mod lib;
+
+
+pub fn read_input(filename: String) -> Vec<String> {
+
+    let contents = fs::read_to_string(filename)
+    .expect("Something went wrong reading the file");
+  
+    let lines: Vec<String> = contents.lines().map(|s| (&*s).to_string() ).collect();
+  
+    lines
+  }
 
 fn dec01() {
     let mut my_numbers = dec01::read_input("./inputs/dec01.txt".to_string());
@@ -127,7 +137,7 @@ fn dec08() {
 }
 
 fn dec09() {
-    let lines = lib::read_input("./inputs/dec09.txt".to_string());
+    let lines = read_input("./inputs/dec09.txt".to_string());
 
     let start = Instant::now();
 

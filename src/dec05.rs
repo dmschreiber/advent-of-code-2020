@@ -1,5 +1,4 @@
 use std::fs;
-use std::cmp;
 
 pub fn read_input(filename: String) -> Vec<String> {
   let contents = fs::read_to_string(filename)
