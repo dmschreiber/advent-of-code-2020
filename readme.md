@@ -55,3 +55,9 @@ Infinte loop at None Final accumulator 1930, index 310, and Some(true)
 Success at Some(217) Final accumulator 1688, index 622, and None
 Day 8 complete in 3.511578ms
 ```
+
+```
+Didn't find numbers that sum 105950735
+found 105950735 with min 4117189, max 9709726 and sum 13826915
+Day 9 complete in 1.590365ms
+```
