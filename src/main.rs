@@ -12,6 +12,7 @@ mod dec06;
 mod dec07;
 mod dec08;
 mod dec09;
+mod dec10;
 
 
 pub fn read_input(filename: String) -> Vec<String> {
@@ -172,4 +173,5 @@ fn main() {
     dec07();
     dec08();
     dec09();
+    dec10::solve();
 }
