@@ -26,6 +26,7 @@ fn check_permutations(nums: &Vec<i32>, start : i32, my_rating: i32, cached_permu
 
 pub fn solve() {
   let lines: Vec<String> = include_str!("../inputs/dec10.txt").lines().map(|s| (&*s).to_string() ).collect();
+  let start = Instant::now();
 
   let mut nums : Vec<i32> = lines.iter().map(|line| line.parse::<i32>().unwrap()).collect();
 
@@ -52,11 +53,10 @@ pub fn solve() {
       break;
     }
   }
-  // one_joltage += 1;
+
   three_joltage += 1;
   println!("one joltage={}, three joltage={}, product {}", one_joltage, three_joltage, one_joltage*three_joltage);
 
-  let start = Instant::now();
   let mut cached_permutations = <HashMap<i32,i64>>::new();
 
   let num_arrangements = check_permutations(&nums, 1, my_rating, &mut cached_permutations);
