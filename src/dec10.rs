@@ -1,5 +1,6 @@
 use std::time::{Instant};
-
+use rayon::prelude::*;
+use std::collections::HashMap;
 
 fn check_adapters(nums: &Vec<i64>, my_rating:i64, which_skip: i64) -> bool {
   let start = Instant::now();
@@ -36,33 +37,36 @@ fn copy_vec(nums: &Vec<i64>) -> Vec<i64> {
   return new_nums;
 }
 
-fn check_permutations(nums: &Vec<i64>, start : i64, my_rating: i64, lvl:&str) -> i32 {
+fn check_permutations(nums: &Vec<i32>, start : i32, my_rating: i32, cached_permutations: &mut HashMap<i32,i64>) -> i64 {
+  let s = Instant::now();
 
   let mut num_arrangements = 0;
-  let mut i = 0;
+  let mut vec = vec![start, start+1, start+2];
+  let mut iter = start..start+3;
 
-  for n in nums {
-    if nums.len() == 31 {
-        println!("vector worked removing {} of {}", i, nums.len());
+  return 
+    vec.iter().map(|n|     
+    if nums.contains(&n) {
+      if n + 3 == my_rating { 
+        1 as i64
+      } else if cached_permutations.get(n) != None {
+        *cached_permutations.get(n).unwrap()
+      } else {
+        let tmp = check_permutations(nums, n+1, my_rating, cached_permutations);
+        cached_permutations.insert(*n,tmp);
+        tmp
+      }
+    } else {
+      0
     }
-    
-    if check_adapters(&nums, my_rating,*n) {
-      // println!("vector worked removing {} of {}", i, nums.len());
-      let mut new_nums = copy_vec(nums);
-      new_nums.remove(i);
-      num_arrangements += 1;
-      num_arrangements += check_permutations(&new_nums, my_rating, &format!("-{}",lvl));
-    }
-    i = i + 1;
-  }
-  // println!("{}Finished level {}", lvl, nums.len());
-  return num_arrangements;
+    ).sum::<i64>();
+  
 }
 
 pub fn solve() {
-  let lines: Vec<String> = include_str!("../inputs/dec10-test.txt").lines().map(|s| (&*s).to_string() ).collect();
+  let lines: Vec<String> = include_str!("../inputs/dec10.txt").lines().map(|s| (&*s).to_string() ).collect();
 
-  let mut nums : Vec<i64> = lines.iter().map(|line| line.parse::<i64>().unwrap()).collect();
+  let mut nums : Vec<i32> = lines.iter().map(|line| line.parse::<i32>().unwrap()).collect();
 
   nums.sort();
 
@@ -89,8 +93,11 @@ pub fn solve() {
   }
   // one_joltage += 1;
   three_joltage += 1;
-  println!("one {}, three {}, product {}", one_joltage, three_joltage, one_joltage*three_joltage);
+  println!("one joltage={}, three joltage={}, product {}", one_joltage, three_joltage, one_joltage*three_joltage);
 
-  let num_arrangements = check_permutations(&nums, my_rating,"");
-  println!("test num arrangements is 19208 vs {}", num_arrangements);
+  let start = Instant::now();
+  let mut cached_permutations = <HashMap<i32,i64>>::new();
+
+  let num_arrangements = check_permutations(&nums, 1, my_rating, &mut cached_permutations);
+  println!("Day 10 num arrangements {} in {:?}", num_arrangements, start.elapsed());
 }

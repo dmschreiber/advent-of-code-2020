@@ -61,3 +61,8 @@ Didn't find numbers that sum 105950735
 found 105950735 with min 4117189, max 9709726 and sum 13826915
 Day 9 complete in 1.590365ms
 ```
+```
+one joltage=71, three joltage=27, product 1917
+Day 10 num arrangements 113387824750592 in 92.553µs
+Day 10 complete in 119.509µs
+```

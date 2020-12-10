@@ -173,5 +173,7 @@ fn main() {
     dec07();
     dec08();
     dec09();
+    let start = Instant::now();
     dec10::solve();
+    println!("Day 10 complete in {:?}", start.elapsed());
 }

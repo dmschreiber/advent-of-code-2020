@@ -1,0 +1,29 @@
+SOLUTION FOUND 883,1137 = 1003971
+SOLUTION FOUND 99,689, 1232 = 84035952
+Day 1 complete in 131.821µs
+Good passwords 422
+Good passwords 451
+Day 2 complete in 1.568074ms
+234 trees found in part 1
+5813773056 is the product of all
+Day 3 complete in 756.308µs
+valid passports with validation false is 242
+valid passports with validation true is 186
+Day 4 complete in 1.628695ms
+max seat_id is 878
+my seat is 504
+Day 5 complete in 226.245µs
+Part 1 customs questions are 6930
+Part 2 customs questions are 3585
+Day 6 complete in 1.023715ms
+242 bags can contain shiny gold
+Day 7 part 1 complete in 15.352462ms
+shiny gold has 176035 bags
+Day 7 part 2 complete in 11.054µs
+Infinte loop at None Final accumulator 1930, index 310, and Some(true)
+Success at Some(217) Final accumulator 1688, index 622, and None
+Day 8 complete in 3.095098ms
+Didn't find numbers that sum 105950735
+found 105950735 with min 4117189, max 9709726 and sum 13826915
+Day 9 complete in 1.597926ms
+one 71, three 27, product 1917
