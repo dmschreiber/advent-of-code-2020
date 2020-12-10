@@ -1,49 +1,10 @@
 use std::time::{Instant};
-use rayon::prelude::*;
+// use rayon::prelude::*;
 use std::collections::HashMap;
 
-fn check_adapters(nums: &Vec<i64>, my_rating:i64, which_skip: i64) -> bool {
-  let start = Instant::now();
-  let mut last = 0;
-  let mut diff = 0;
-
-  for n in nums {
-    if which_skip != *n {
-      // println!("joltage {} max {} with {}/{}", n, my_rating,one_joltage, three_joltage);
-      diff = *n - last;
-      if diff<= 3 {
-        // noop
-      } else {
-        return false;
-      }
-      last = *n;
-      
-      if *n + 3 == my_rating {
-        return true;
-      }
-    }
-  }
-  // println!("check_adapters in {:?}", start.elapsed());
-
-  return false;
-}
-
-fn copy_vec(nums: &Vec<i64>) -> Vec<i64> {
-  let mut new_nums = <Vec<i64>>::new();
-
-  for n in nums {
-    new_nums.push(*n);
-  }
-  return new_nums;
-}
-
 fn check_permutations(nums: &Vec<i32>, start : i32, my_rating: i32, cached_permutations: &mut HashMap<i32,i64>) -> i64 {
-  let s = Instant::now();
-
-  let mut num_arrangements = 0;
-  let mut vec = vec![start, start+1, start+2];
-  let mut iter = start..start+3;
-
+   let vec = vec![start, start+1, start+2];
+ 
   return 
     vec.iter().map(|n|     
     if nums.contains(&n) {
@@ -73,7 +34,7 @@ pub fn solve() {
   // solve logic
   let my_rating = nums.iter().max().unwrap() + 3;
   let mut last = 0;
-  let mut diff = 0;
+  let mut diff;
   let mut one_joltage = 0;
   let mut three_joltage = 0;
 
