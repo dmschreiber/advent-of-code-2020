@@ -96,7 +96,7 @@ pub fn solve() {
   }
 
   three_joltage += 1;
-  println!("Dat 10 part 1 one joltage={}, three joltage={}, product {} in {:?}", one_joltage, three_joltage, one_joltage*three_joltage, start.elapsed());
+  println!("Day 10 part 1 one joltage={}, three joltage={}, product {} in {:?}", one_joltage, three_joltage, one_joltage*three_joltage, start.elapsed());
 
   // part 2
 
