@@ -62,7 +62,7 @@ found 105950735 with min 4117189, max 9709726 and sum 13826915
 Day 9 complete in 1.590365ms
 ```
 ```
-Dat 10 part 1 one joltage=71, three joltage=27, product 1917 in 4.343µs
-Day 10 part 2 num arrangements 113387824750592 in 72.321µs
-Day 10 complete in 109.154µs
+Day 10 part 1 one joltage=71, three joltage=27, product 1917 in 4.455µs
+Day 10 part 2 num arrangements 113387824750592 in 50.202µs
+Day 10 complete in 77.453µs
 ```
