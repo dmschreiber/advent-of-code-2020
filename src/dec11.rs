@@ -58,94 +58,120 @@ fn count_adjacent_seats(map: &HashMap<(i32,i32),u8>, row: i32, col: i32) -> i32 
 
 }
 
-fn count_visible_seats(map: &HashMap<(i32,i32),u8>, row: i32, col: i32) -> i32 {
-  let max_col = *map.keys().map(|(a,b)| b ).max().unwrap();
-  let max_row = *map.keys().map(|(a,b)| a ).max().unwrap();
+pub struct SeatMap {
+  map: HashMap<(i32,i32),u8>,
+  max_row: i32,
+  max_col: i32,
+}
+
+fn count_visible_seats(seat_map: &SeatMap, row: i32, col: i32, short_cut: bool) -> i32 {
 
   let mut visible_count = 0;
 
-  for n in row+1..=max_row {
-    let visible = is_seat_full(map,n,col);
+  for n in row+1..=seat_map.max_row {
+    let visible = is_seat_full(&seat_map.map,n,col);
     if visible > 0 {
       visible_count += visible;
       break;
-    } else if is_empty_seat(map,n,col) {
+    } else if is_empty_seat(&seat_map.map,n,col) {
       break;
     }
+  }
+
+  if short_cut && visible_count > 0 {
+    return visible_count;
   }
 
   for n in (0..=row-1).rev() {
-    let visible = is_seat_full(map,n,col);
+    let visible = is_seat_full(&seat_map.map,n,col);
     if visible > 0 {
       visible_count += visible;
       break;
-    } else if is_empty_seat(map,n,col) {
+    } else if is_empty_seat(&seat_map.map,n,col) {
       break;
     }
   }
+  if short_cut && visible_count > 0 {
+    return visible_count;
+  }
 
-  for m in col+1..=max_col {
-    let visible = is_seat_full(map,row,m);
+  for m in col+1..=seat_map.max_col {
+    let visible = is_seat_full(&seat_map.map,row,m);
     if visible > 0 {
       visible_count += visible;
       break;
-    } else if is_empty_seat(map,row,m) {
+    } else if is_empty_seat(&seat_map.map,row,m) {
       break;
     }
+  }
+  if short_cut && visible_count > 0 {
+    return visible_count;
   }
 
   for m in (0..=col-1).rev() {
-    let visible = is_seat_full(map,row,m);
+    let visible = is_seat_full(&seat_map.map,row,m);
     if visible > 0 {
       visible_count += visible;
       break;
-    } else if is_empty_seat(map, row,m) {
+    } else if is_empty_seat(&seat_map.map, row,m) {
       break;
     }
   }
+  if short_cut && visible_count > 0 {
+    return visible_count;
+  }
 
-  let i_max = cmp::max(max_row-row-1,max_col-col-1);
+  let i_max = cmp::max(&seat_map.max_row-row-1,&seat_map.max_col-col-1);
   for i in 1..=i_max {
-      let visible = is_seat_full(map,row+i,col+i);
+      let visible = is_seat_full(&seat_map.map,row+i,col+i);
       if visible > 0 {
         visible_count += visible;
         break;
-      } else if is_empty_seat(map,row+i,col+i) {
+      } else if is_empty_seat(&seat_map.map,row+i,col+i) {
         break;
       }
+  }
+  if short_cut && visible_count > 0 {
+    return visible_count;
   }
 
   let i_max = cmp::max(row,col);
   for i in 1..=i_max {
-      let visible = is_seat_full(map,row-i,col-i);
+      let visible = is_seat_full(&seat_map.map,row-i,col-i);
       if visible > 0 {
         visible_count += visible;
         break;
-      } else if is_empty_seat(map,row-i,col-i) {
+      } else if is_empty_seat(&seat_map.map,row-i,col-i) {
         break;
       }
     
   }
+  if short_cut && visible_count > 0 {
+    return visible_count;
+  }
 
-  let i_max = cmp::max(row,max_col-col-1);
+  let i_max = cmp::max(row,&seat_map.max_col-col-1);
   for i in 1..=i_max {
-      let visible = is_seat_full(map,row-i,col+i);
+      let visible = is_seat_full(&seat_map.map,row-i,col+i);
       if visible > 0 {
         visible_count += visible;
         break;
-      } else if is_empty_seat(map,row-i,col+i) {
+      } else if is_empty_seat(&seat_map.map,row-i,col+i) {
         break;
       }
   }
+  if short_cut && visible_count > 0 {
+    return visible_count;
+  }
 
 
-  let i_max = cmp::max(max_row-row-1,col);
+  let i_max = cmp::max(&seat_map.max_row-row-1,col);
   for i in 1..=i_max {
-      let visible = is_seat_full(map,row+i,col-i);
+      let visible = is_seat_full(&seat_map.map,row+i,col-i);
       if visible > 0 {
         visible_count += visible;
         break;
-      } else if is_empty_seat(map,row+i,col-i) {
+      } else if is_empty_seat(&seat_map.map,row+i,col-i) {
         break;
       }
     
@@ -227,21 +253,21 @@ fn solve_part2(map: &mut HashMap<(i32,i32),u8>) -> i32 {
   let max_row = *map.keys().map(|(a,b)| a ).max().unwrap();
   // println!("max {} {}", max_row,max_col);
 
-
-
   let mut new_map = map.clone();
+  let seat_map = SeatMap {map: new_map, max_col: max_col , max_row: max_row };
+
 
   let mut changed = 0;
   for row in 0..=max_row {
     for col in 0..=max_col {
-      if new_map.get(&(row,col)) != None && new_map.get(&(row,col)).unwrap() == &b'L' {
-        if count_visible_seats(&new_map, row, col) == 0 {
+      if seat_map.map.get(&(row,col)) != None && seat_map.map.get(&(row,col)).unwrap() == &b'L' {
+        if count_visible_seats(&seat_map, row, col, true) == 0 {
           // println!("filling a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'#');
           changed += 1;
         }
-      } else if is_seat_full(&new_map, row, col) > 0 {
-        if count_visible_seats(&new_map, row, col) >= 5 {
+      } else if is_seat_full(&seat_map.map, row, col) > 0 {
+        if count_visible_seats(&seat_map, row, col, false) >= 5 {
           // println!("emptying a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'L');
           changed +=1;

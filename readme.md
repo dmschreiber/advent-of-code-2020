@@ -69,5 +69,5 @@ Day 10 complete in 77.453µs
 ```
 Day 11 Part 1 iteration 71 resulting in 2489 occupied seats
 Day 11 Part 2 86 iteratioin resulting in 2180 occupied seats
-Day 11 complete in 23.633981401s
+Day 11 complete in 919.430038ms
 ```
