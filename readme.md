@@ -66,3 +66,8 @@ Day 10 part 1 one joltage=71, three joltage=27, product 1917 in 4.455µs
 Day 10 part 2 num arrangements 113387824750592 in 50.202µs
 Day 10 complete in 77.453µs
 ```
+```
+Day 11 Part 1 iteration 71 resulting in 2489 occupied seats
+Day 11 Part 2 86 iteratioin resulting in 2180 occupied seats
+Day 11 complete in 23.633981401s
+```
