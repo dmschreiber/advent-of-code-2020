@@ -71,3 +71,8 @@ Day 11 Part 1 iteration 71 resulting in 2489 occupied seats
 Day 11 Part 2 86 iteratioin resulting in 2180 occupied seats
 Day 11 complete in 919.430038ms
 ```
+```
+Day 12 Part 1 manhattan is 1441
+Day 12 Part 2 manhattan is 61616
+Day 12 complete in 281.875µs
+```

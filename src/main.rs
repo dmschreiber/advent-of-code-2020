@@ -153,36 +153,39 @@ fn dec09() {
 }
 
 fn main() {
-    let start = Instant::now();
-    dec01();
-    println!("Day 1 complete in {:?}", start.elapsed());
+    // #[cfg(debug_assertions)]
+    {
+        let start = Instant::now();
+        dec01();
+        println!("Day 1 complete in {:?}", start.elapsed());
 
-    let start = Instant::now();
-    dec02();
-    println!("Day 2 complete in {:?}", start.elapsed());
+        let start = Instant::now();
+        dec02();
+        println!("Day 2 complete in {:?}", start.elapsed());
 
-    let start = Instant::now();
-    dec03();
-    println!("Day 3 complete in {:?}", start.elapsed());
+        let start = Instant::now();
+        dec03();
+        println!("Day 3 complete in {:?}", start.elapsed());
 
-    let start = Instant::now();
-    dec04();
-    println!("Day 4 complete in {:?}", start.elapsed());
+        let start = Instant::now();
+        dec04();
+        println!("Day 4 complete in {:?}", start.elapsed());
 
-    dec05();
+        dec05();
 
-    dec06();
-    dec07();
-    dec08();
-    dec09();
+        dec06();
+        dec07();
+        dec08();
+        dec09();
 
-    let start = Instant::now();
-    dec10::solve();
-    println!("Day 10 complete in {:?}", start.elapsed());
+        let start = Instant::now();
+        dec10::solve();
+        println!("Day 10 complete in {:?}", start.elapsed());
 
-    let start = Instant::now();
-    dec11::solve();
-    println!("Day 11 complete in {:?}", start.elapsed());
+        let start = Instant::now();
+        dec11::solve();
+        println!("Day 11 complete in {:?}", start.elapsed());
+    }
 
     let start = Instant::now();
     dec12::solve();
