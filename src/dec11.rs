@@ -29,8 +29,6 @@ fn is_seat_full(map: &HashMap<(i32,i32),u8>, row: i32, col: i32) -> i32 {
     return 1;
   }
   else {
-    let t = map.get(&(row,col));
-    // println!("found {:?} vs {} at {} {}", t, b'#', row, col);
     return 0;
   }
 
@@ -180,11 +178,12 @@ fn count_visible_seats(seat_map: &SeatMap, row: i32, col: i32, short_cut: bool) 
   return visible_count;
 }
 
+#[allow(dead_code)]
 fn print_map(map: &mut HashMap<(i32,i32),u8>) {
 
 
-  let max_col = *map.keys().map(|(a,b)| b ).max().unwrap();
-  let max_row = *map.keys().map(|(a,b)| a ).max().unwrap();
+  let max_col = *map.keys().map(|(_a,b)| b ).max().unwrap();
+  let max_row = *map.keys().map(|(a,_b)| a ).max().unwrap();
 
 
   for row in 0..=max_row {
@@ -197,10 +196,9 @@ fn print_map(map: &mut HashMap<(i32,i32),u8>) {
 }
 
 fn solve_part1(map: &mut HashMap<(i32,i32),u8>) -> i32 {
-  let mut retval = 0;
 
-  let max_col = *map.keys().map(|(a,b)| b ).max().unwrap();
-  let max_row = *map.keys().map(|(a,b)| a ).max().unwrap();
+  let max_col = *map.keys().map(|(_a,b)| b ).max().unwrap();
+  let max_row = *map.keys().map(|(a,_b)| a ).max().unwrap();
   // println!("max {} {}", max_row,max_col);
 
 
@@ -212,28 +210,25 @@ fn solve_part1(map: &mut HashMap<(i32,i32),u8>) -> i32 {
   //   }
   // }
   // println!("starting occupied {}", occupied);
-  let mut new_map = map.clone();
+  let new_map = map.clone();
 
-  let mut changed = 0;
   for row in 0..=max_row {
     for col in 0..=max_col {
       if new_map.get(&(row,col)) != None && new_map.get(&(row,col)).unwrap() == &b'L' {
         if check_adjacent_seats(&new_map, row, col) {
           // println!("filling a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'#');
-          changed += 1;
         }
       } else if is_seat_full(&new_map, row, col) > 0 {
         if count_adjacent_seats(&new_map, row, col) >= 4 {
           // println!("emptying a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'L');
-          changed +=1;
         }
       }
 
     }
   }
-  // println!("Changed {}", changed);
+
   let mut occupied = 0;
   for row in 0..=max_row {
     for col in 0..=max_col {
@@ -247,30 +242,26 @@ fn solve_part1(map: &mut HashMap<(i32,i32),u8>) -> i32 {
 }
 
 fn solve_part2(map: &mut HashMap<(i32,i32),u8>) -> i32 {
-  let mut retval = 0;
 
-  let max_col = *map.keys().map(|(a,b)| b ).max().unwrap();
-  let max_row = *map.keys().map(|(a,b)| a ).max().unwrap();
+  let max_col = *map.keys().map(|(_a,b)| b ).max().unwrap();
+  let max_row = *map.keys().map(|(a,_b)| a ).max().unwrap();
   // println!("max {} {}", max_row,max_col);
 
-  let mut new_map = map.clone();
+  let new_map = map.clone();
   let seat_map = SeatMap {map: new_map, max_col: max_col , max_row: max_row };
 
 
-  let mut changed = 0;
   for row in 0..=max_row {
     for col in 0..=max_col {
       if seat_map.map.get(&(row,col)) != None && seat_map.map.get(&(row,col)).unwrap() == &b'L' {
         if count_visible_seats(&seat_map, row, col, true) == 0 {
           // println!("filling a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'#');
-          changed += 1;
         }
       } else if is_seat_full(&seat_map.map, row, col) > 0 {
         if count_visible_seats(&seat_map, row, col, false) >= 5 {
           // println!("emptying a seat {} {}", row,col);
           map.entry((row,col)).and_modify(|n| *n=b'L');
-          changed +=1;
         }
       }
 
@@ -309,7 +300,7 @@ pub fn solve() {
   }
 
   // solve logic
-  let mut seats = 0;
+  let mut seats;
   let mut last_seats = -1;
 
   for i in 0..100 {
@@ -344,7 +335,7 @@ pub fn solve() {
   // map.entry((93,15)).and_modify(|n| *n=b'#');
   // println!("found {:?}", map.get(&(93,15)));
 
-  let mut seats = 0;
+  let mut seats;
   let mut last_seats = -1;
 
   // print_map(&mut map);
