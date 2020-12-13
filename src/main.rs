@@ -15,6 +15,7 @@ mod dec09;
 mod dec10;
 mod dec11;
 mod dec12;
+mod dec13;
 
 
 pub fn read_input(filename: String) -> Vec<String> {
@@ -189,5 +190,9 @@ fn main() {
 
     let start = Instant::now();
     dec12::solve();
+    println!("Day 12 complete in {:?}", start.elapsed());
+
+    let start = Instant::now();
+    dec13::solve();
     println!("Day 12 complete in {:?}", start.elapsed());
 }

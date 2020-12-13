@@ -160,6 +160,7 @@ fn solve_part2(things: &Vec<Thing>) {
       }
     }
   }
+
   println!("Day 12 Part 2 manhattan is {}", (position.0 as i32).abs() + (position.1 as i32).abs());
 
 }
