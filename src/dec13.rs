@@ -62,33 +62,20 @@ pub fn solve() {
     }
 
     let mut t : i64 ;
-  let mut p = 191000000000;
+  // let mut p = 248000000000;
+  // let mut p = 10000000000;
+  let mut p = 71000000000;
   // let mut p = 1;
   loop {
-    t= 521*p-19;
+    // t= 521*p-19;
+    t = 19*(521*p-1);
     // t = 59*p-4;
     if p % 1000000000 == 0 {
       println!("trying {} at time {}", p, t);
     }
-    
+
     if bus_offset.iter().map(|b| (t+b.0) % b.1 ).sum::<i64>() == 0 {
-
-      let mut found = true;
-      let mut i = 0;
-
-      for b in &buses {
-        // println!("comparing {} slot ahead", i);
-        if *b > 0 {
-          if (t + i) % b != 0 {
-            // println!("{} mod {} is not zero", t+i, b);
-            found = false;
-            break;
-          } else {
-            // println!("{} mod {} is  zero", t+i, b);
-          }
-        }
-        i += 1;
-      }
+      let  found = true;
       if found {
         println!("Found at time {}", t);
         break;
