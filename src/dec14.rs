@@ -98,8 +98,7 @@ pub fn solve() {
         // println!("{}", num);
         // println!("{}", mask);
         let new_num = new_num(num,mask.to_string());
-        mem.entry(*index).or_insert(new_num);
-        // mem.insert(*index,new_num);
+        mem.insert(*index,new_num);
 
       }
     }
