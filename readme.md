@@ -82,7 +82,7 @@ Day 13 part 2 Found at time 702970661767766
 Day 13 complete in 36.438µs
 ```
 ```
-Day 14 part 1 sum is 4919197760108
+Day 14 part 1 sum is 5055782549997
 Day 14 part 2 sum is 4795970362286
-Day 14 complete in 101.901764ms
+Day 14 complete in 91.919287ms
 ```
