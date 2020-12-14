@@ -76,3 +76,8 @@ Day 12 Part 1 manhattan is 1441
 Day 12 Part 2 manhattan is 61616
 Day 12 complete in 281.875µs
 ```
+```
+Day 13 part 1 Found bus 523 at timestamp 1000499 product is 2092
+Day 12 part 2 Found at time 702970661767766
+Day 12 complete in 36.438µs
+```
