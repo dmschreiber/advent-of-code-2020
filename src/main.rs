@@ -195,9 +195,9 @@ fn main() {
 
     let start = Instant::now();
     dec13::solve();
-    println!("Day 12 complete in {:?}", start.elapsed());
+    println!("Day 13 complete in {:?}", start.elapsed());
 
     let start = Instant::now();
     dec14::solve();
-    println!("Day 12 complete in {:?}", start.elapsed());
+    println!("Day 14 complete in {:?}", start.elapsed());
 }

@@ -85,7 +85,7 @@ pub fn solve() {
     if bus_offset.iter().map(|b| (t+b.0) % b.1 ).sum::<i64>() == 0 {
       let  found = true;
       if found {
-        println!("Day 12 part 2 Found at time {}", t);
+        println!("Day 13 part 2 Found at time {}", t);
         break;
       }
     }

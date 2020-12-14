@@ -78,6 +78,11 @@ Day 12 complete in 281.875µs
 ```
 ```
 Day 13 part 1 Found bus 523 at timestamp 1000499 product is 2092
-Day 12 part 2 Found at time 702970661767766
-Day 12 complete in 36.438µs
+Day 13 part 2 Found at time 702970661767766
+Day 13 complete in 36.438µs
+```
+```
+Day 14 part 1 sum is 4919197760108
+Day 14 part 2 sum is 4795970362286
+Day 14 complete in 101.901764ms
 ```

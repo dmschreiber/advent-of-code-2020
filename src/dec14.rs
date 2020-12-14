@@ -58,11 +58,10 @@ fn new_address(address: String, mask: String) -> Vec<u64> {
       ret_string= ret_string + &String::from("1");
     }
   }
-  println!("num    {}", address);
-  println!("mask   {}", mask);
-  println!("result {}", ret_string);
+  // println!("num    {}", address);
+  // println!("mask   {}", mask);
+  // println!("result {}", ret_string);
 
-  // FIGURE OUT HOW TO DO EVERY PERMUTATION 2^count(X)
   vary_address(ret_string, &mut new_addresses);
   new_addresses
 }
@@ -77,7 +76,7 @@ pub fn solve() {
     if args[0] == "mask" {
       thing = Arg::Mask(args[1].to_string());
     } else {
-      println!("{},{}",&args[0][4..(args[0].len()-1)],&args[1]);
+      // println!("{},{}",&args[0][4..(args[0].len()-1)],&args[1]);
       let one = args[0][4..args[0].len()-1].parse::<u64>().unwrap();
       thing = Arg::Mem(one,args[1].parse::<u64>().unwrap());
     }
@@ -109,6 +108,7 @@ pub fn solve() {
   for m in mem.values() {
     retval += m;
   }
+  println!("Day 14 part 1 sum is {:?}", retval);
 
   //// PART 2
   
@@ -125,12 +125,9 @@ pub fn solve() {
         // println!("{}", num);
         // println!("{}", mask);
         let new_add = new_address(num,mask.to_string());
-        println!("{} has {} addresses", mask, new_add.len());
         for a in new_add {
-          print!("{},", a);
           mem.insert(a,*value);
         }
-        println!();
       }
     }
   }
@@ -139,5 +136,5 @@ pub fn solve() {
     retval += m;
   }
 
-  println!("{:?}", retval);
+  println!("Day 14 part 2 sum is {:?}", retval);
 }
