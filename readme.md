@@ -87,8 +87,7 @@ Day 14 part 2 sum is 4795970362286
 Day 14 complete in 91.919287ms
 ```
 ```
-INPUT LINE 0,13,16,17,1,10,6
-num: 276
-num: 31916
-Day 15 complete in 5.957020179s
+Day 15 part 1 276
+Day 15 part 2 31916
+Day 15 complete in 5.594521443s
 ```
