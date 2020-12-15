@@ -188,8 +188,8 @@ fn main() {
     println!("Day 14 complete in {:?}", start.elapsed());
 
     let start = Instant::now();
-    dec15::solve(include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),2020);
-    dec15::solve(include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),30000000);
+    println!("Day 15 part 1 {}", dec15::solve(&include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),2020));
+    println!("Day 15 part 1 {}", dec15::solve(&include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),30000000));
     println!("Day 15 complete in {:?}", start.elapsed());
 
 }
