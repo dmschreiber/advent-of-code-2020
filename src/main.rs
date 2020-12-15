@@ -17,6 +17,7 @@ mod dec11;
 mod dec12;
 mod dec13;
 mod dec14;
+mod dec15;
 
 
 pub fn read_input(filename: String) -> Vec<String> {
@@ -65,21 +66,6 @@ fn dec03() {
 }
 
 fn dec04() {
-
-    // assert!(dec04::validate_birthyear("2002"));
-    // assert!(!dec04::validate_birthyear("2003"));
-    // assert!(dec04::validate_height("60in"));
-    // assert!(dec04::validate_height("190cm"));
-    // assert!(!dec04::validate_height("190in"));
-    // assert!(!dec04::validate_height("190"));
-    // assert!(dec04::validate_haircolor("#123abc"));
-    // assert!(!dec04::validate_haircolor("#123abz"));
-    // assert!(!dec04::validate_haircolor("123abc"));
-    // assert!(dec04::validate_eyecolor("brn"));
-    // assert!(!dec04::validate_eyecolor("wat"));
-    // assert!(dec04::validate_pid("000000001"));
-    // assert!(!dec04::validate_pid("0123456789"));
-
 
     let passports = dec04::read_input("./inputs/dec04.txt".to_string());
 
@@ -200,4 +186,10 @@ fn main() {
     let start = Instant::now();
     dec14::solve();
     println!("Day 14 complete in {:?}", start.elapsed());
+
+    let start = Instant::now();
+    dec15::solve(include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),2020);
+    dec15::solve(include_str!("../inputs/dec15.txt").lines().map(|s| (&*s).to_string() ).collect(),30000000);
+    println!("Day 15 complete in {:?}", start.elapsed());
+
 }

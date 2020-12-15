@@ -1,6 +1,26 @@
 use std::fs;
 use regex::Regex;
 
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_validation() {
+      assert!(super::validate_birthyear("2002"));
+    assert!(!super::validate_birthyear("2003"));
+    assert!(super::validate_height("60in"));
+    assert!(super::validate_height("190cm"));
+    assert!(!super::validate_height("190in"));
+    assert!(!super::validate_height("190"));
+    assert!(super::validate_haircolor("#123abc"));
+    assert!(!super::validate_haircolor("#123abz"));
+    assert!(!super::validate_haircolor("123abc"));
+    assert!(super::validate_eyecolor("brn"));
+    assert!(!super::validate_eyecolor("wat"));
+    assert!(super::validate_pid("000000001"));
+    assert!(!super::validate_pid("0123456789"));
+
+  }
+}
 pub fn read_input(filename: String) -> Vec<String> {
 
   let contents = fs::read_to_string(filename)
