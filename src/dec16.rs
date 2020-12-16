@@ -92,10 +92,8 @@ pub fn solve(filename : String) -> i64 {
   let max_nums = valid_lines[0].len();
   let mut mapped_range = std::collections::HashMap::new();
 
-  loop { // Keep looking until you've mapped them all
-    if mapped_range.len() >= ranges.len() {
-      break;
-    } 
+  // Keep looking until you've mapped them all
+  while mapped_range.len() < ranges.len() {
     
     for index in 0..max_nums {
       let mut which_range_valid = None;
