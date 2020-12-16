@@ -15,6 +15,10 @@ mod tests {
 }
 
 use std::fs;
+use regex::Regex;
+lazy_static! {
+  static ref RULE_REGEX: Regex = Regex::new(r"^(.*): (\d+)-(\d+) or (\d+)-(\d+)$").unwrap();
+}
 
 #[derive(Debug)]
 pub struct Range {
@@ -37,16 +41,13 @@ pub fn solve(filename : String) -> i64 {
   let mut ranges = vec![];
 
   for line in rules_lines {
-    let args : Vec<&str> = line.split(":").collect();
-    let field_name = args[0];
-    let range_nums : Vec<String>= args[1].split("or").map(|n| n.to_string()).collect();
-
-    let rn2 : Vec<i32>= range_nums[0].split("-").map(|n| n.trim().parse::<i32>().unwrap()).collect();
-    let rn3 : Vec<i32>= range_nums[1].split("-").map(|n| n.trim().parse::<i32>().unwrap()).collect();
-    // println!("{:?} {:?}", rn2, rn3);
-    let r = Range { name: field_name.to_string(), lo : rn2[0], hi : rn2[1], lo2 : rn3[0], hi2 : rn3[1] };
-    ranges.push(r);
-
+    if let Some(item) = RULE_REGEX.captures(line) {
+      ranges.push ( Range { name: item[1].to_string(), 
+        lo : item[2].parse().unwrap(), 
+        hi : item[3].parse().unwrap(), 
+        lo2 : item[4].parse().unwrap(), 
+        hi2 : item[5].parse().unwrap() });
+    }
   }
 
   // GET MY NUMBERS
@@ -60,85 +61,67 @@ pub fn solve(filename : String) -> i64 {
     }
   }
 
+  // PROCESS OTHER TICKETS
   let mut fail = 0;
   let mut valid_lines = <Vec<Vec<i32>>>::new();
 
   for line in other_ticket_lines {
     let numbers : Vec<i32>;
     if line != "nearby tickets:" {
-      // println!("{}", line);
-
       numbers = line.split(",").map(|n| n.parse::<i32>().unwrap()).collect();
-      let mut in_range = false;
 
-      for n in &numbers {
-        in_range = false;
-        for range in &ranges {
-            if (n >= &range.lo) && (n <= &range.hi) || (n >= &range.lo2) && (n <= &range.hi2) {
-              // println!("fail range {} {} , {} {} val {}", lo, hi, lo2, hi2, n);
-              in_range = true;
-            }
-          
-        }
-        if !in_range {
+      for (position,n) in numbers.iter().enumerate() {
+        // if it it fits in none of the ranges
+        if ! ranges
+            .iter()
+            .fold(false, |acc,range| acc || (n >= &range.lo) && (n <= &range.hi) || (n >= &range.lo2) && (n <= &range.hi2) ) {
           fail += n;
           break;
-        } 
-      }
-      if in_range {
+
+        } else if position == numbers.len() - 1 {
+          // last number means it's a valid ticket
           valid_lines.push(numbers.clone());
+        }
       }
     }
-
   }
+
   println!("Day 16 part 1 Ticket scanning error rate {}", fail);
+  
   // valid_lines with arrany of number
   let max_nums = valid_lines[0].len();
   let mut mapped_range = std::collections::HashMap::new();
 
-  loop {
+  loop { // Keep looking until you've mapped them all
     if mapped_range.len() >= ranges.len() {
       break;
     } 
     
-    let mut index = 0;
-    loop {
-      if index >= max_nums {
-        break;
-      }
-      // println!("Trying the {} position", index);
+    for index in 0..max_nums {
       let mut which_range_valid = None;
-      let mut valid_range_count = 0;
+
       for (which_range,range) in ranges.iter().enumerate() {
         // skip the range if it's already been mapped
         if mapped_range.get(&which_range) == None {
-          let mut valid = true;
 
-          for n in &valid_lines {
-            if !((n[index] >= range.lo) && (n[index] <= range.hi) || (n[index] >= range.lo2) && (n[index] <= range.hi2)) {
-              valid = false;
-              break;
-            }
-          }
+          let valid = valid_lines
+              .iter()
+              .fold(true, |acc,n| acc && ((n[index] >= range.lo) && (n[index] <= range.hi) || (n[index] >= range.lo2) && (n[index] <= range.hi2) ));
           
           // all numbers in this column meet the range rules
-          if valid {
+          if valid && which_range_valid == None {
             which_range_valid = Some(which_range);
-            valid_range_count += 1;
+          } else if valid { // second one so stop
+            which_range_valid = None;
+            break;
           } 
-          
         }
       }
 
-      // when exactly one range fits a column; store it
-      if valid_range_count == 1 {
-        if let Some(i) = which_range_valid {      
-          mapped_range.insert(i,index);
-
-        }
+      if let Some(i) = which_range_valid {      
+        mapped_range.insert(i,index);
       }
-    
-      index += 1;
+
     }
   }
 
@@ -146,7 +129,6 @@ pub fn solve(filename : String) -> i64 {
   for k in mapped_range.keys() {
     let range = &ranges[*k];
     if range.name.find("departure") != None {
-      // println!("range {:?} at col {} my number is {}", ranges[*k as usize], mapped_range.get(k).unwrap(),my_numbers[*mapped_range.get(k).unwrap() as usize]);
       retval = retval * my_numbers[*mapped_range.get(k).unwrap() as usize] as i64;
     }
   }
