@@ -194,7 +194,7 @@ fn main() {
     println!("Day 15 complete in {:?}", start.elapsed());
 
     let start = Instant::now();
-    println!("Day 16 {}", dec16::solve(&include_str!("../inputs/dec16.txt").lines().map(|s| (&*s).to_string() ).collect()));
+    println!("Day 16 {}", dec16::solve("./inputs/dec16.txt".to_string()));
     println!("Day 16 complete in {:?}", start.elapsed());
 
 }
