@@ -5,12 +5,12 @@ mod tests {
   #[test]
   pub fn dec16_prod() {
       let lines: Vec<String> = include_str!("../inputs/dec16.txt").lines().map(|s| (&*s).to_string() ).collect();
-      super::solve(&lines);
+      assert!(239727793813==super::solve(&lines));
   }
   #[test]
   pub fn dec16_test() {
       let lines: Vec<String> = include_str!("../inputs/dec16-test.txt").lines().map(|s| (&*s).to_string() ).collect();
-      super::solve(&lines);
+      assert!(1==super::solve(&lines));
   }
 }
 
@@ -72,7 +72,7 @@ pub fn solve(lines : &Vec<String>) -> i64 {
       for n in &numbers {
         in_range = false;
         for range in &ranges {
-          let Field::Range(name, lo, hi, lo2, hi2) =range; 
+          let Field::Range(_name, lo, hi, lo2, hi2) =range; 
             if (n >= lo) && (n <= hi) || (n >= lo2) && (n <= hi2) {
               // println!("fail range {} {} , {} {} val {}", lo, hi, lo2, hi2, n);
               in_range = true;
@@ -112,7 +112,7 @@ pub fn solve(lines : &Vec<String>) -> i64 {
       for (which_range,range) in ranges.iter().enumerate() {
         if mapped_range.get(&which_range) == None {
           let mut valid = true;
-          let Field::Range(name, lo, hi, lo2, hi2) =range; 
+          let Field::Range(_name, lo, hi, lo2, hi2) =range; 
           // println!("Trying range {} with {}-{} and {}-{}", name, lo, hi, lo2, hi2);
           for n in &valid_lines {
             if (n[index] >= *lo) && (n[index] <= *hi) || (n[index] >= *lo2) && (n[index] <= *hi2) {

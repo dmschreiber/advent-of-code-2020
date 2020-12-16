@@ -37,6 +37,7 @@ mod tests {
   }
 }
 
+#[allow(dead_code)]
 fn van_eck_sequence(seed : Vec<u32>) -> impl std::iter::Iterator<Item = u32> {
   let mut index = 0;
   let mut last_term = 0;
