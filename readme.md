@@ -91,3 +91,8 @@ Day 15 part 1 276
 Day 15 part 2 31916
 Day 15 complete in 5.594521443s
 ```
+```
+Day 16 part 1 Ticket scanning error rate 23115
+Day 16 239727793813
+Day 16 complete in 1.869946ms
+```
