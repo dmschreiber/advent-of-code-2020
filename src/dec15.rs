@@ -26,11 +26,12 @@ mod tests {
     let mut v = super::van_eck_sequence(args).take(30000000);
     for n in v.by_ref().skip(2019).take(1) {
       println!("{}",n);
+      assert!(1836==n);
     }
 
-    // let mut v = super::van_eck_sequence(args).take(30000000);
     for n in v.by_ref().skip(30000000-2020-1) {
       println!("{}",n);
+      assert!(362==n);
     }
     println!("Rosetta Code way in {:?}", start.elapsed());
   }
