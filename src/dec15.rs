@@ -13,11 +13,49 @@ mod tests {
   #[test]
   pub fn solve_test() {
     let lines: Vec<String> = include_str!("../inputs/dec15-test.txt").lines().map(|s| (&*s).to_string() ).collect();
+    let start = std::time::Instant::now();
     assert!(1836==super::solve(&lines,2020));
     assert!(362==super::solve(&lines,30000000));
+    println!("My way in {:?}", start.elapsed());
+
+    let line = &lines[0];
+    let args : Vec<u32> = line.split(",").map(|s| (&*s).parse::<u32>().unwrap() ).collect();
+    // println!("INPUT LINE {}",line);
+    
+    let start = std::time::Instant::now();
+    let mut v = super::van_eck_sequence(args).take(30000000);
+    for n in v.by_ref().skip(2019).take(1) {
+      println!("{}",n);
+    }
+
+    // let mut v = super::van_eck_sequence(args).take(30000000);
+    for n in v.by_ref().skip(30000000-2020-1) {
+      println!("{}",n);
+    }
+    println!("Rosetta Code way in {:?}", start.elapsed());
   }
 }
 
+fn van_eck_sequence(seed : Vec<u32>) -> impl std::iter::Iterator<Item = u32> {
+  let mut index = 0;
+  let mut last_term = 0;
+  let mut last_pos = std::collections::HashMap::new();
+  std::iter::from_fn(move || {
+      let result = last_term;
+      let mut next_term = 0;
+      if index < seed.len() {
+        last_pos.insert(seed[index],index);
+      } else if let Some(v) = last_pos.get_mut(&last_term) {
+          next_term = index - *v;
+          *v = index;
+      } else {
+          last_pos.insert(last_term, index);
+      }
+      last_term = next_term as u32;
+      index += 1;
+      Some(result)
+  })
+}
 
 pub fn solve(lines : &Vec<String>, position : usize) -> u32 {
 
