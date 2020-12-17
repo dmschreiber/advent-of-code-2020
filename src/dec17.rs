@@ -18,9 +18,6 @@ use std::fs;
 #[derive(Debug,Clone)]
 pub struct ConwayMap {
   map : std::collections::HashMap<(i32,i32,i32),u8>,
-  max_row : i32,
-  max_col : i32,
-  max_z : i32,
 }
 
 #[derive(Debug,Clone)]
@@ -49,20 +46,31 @@ pub fn how_many_neighbors(map : &ConwayMap, position : (i32,i32,i32)) -> i32 {
 
   retval
 }
+pub fn get_max(map : &std::collections::HashMap<(i32,i32,i32),u8>) -> (i32,i32,i32) {
+
+  let max_col = map.keys().map(|(_a,b,_c)| *b ).max().unwrap();
+  let max_row = map.keys().map(|(a,_b, _c)| *a ).max().unwrap();
+  let max_z = map.keys().map(|(_a,_b,c) | *c ).max().unwrap();
+
+  (max_row,max_col,max_z)
+}
+
+pub fn get_min(map : &std::collections::HashMap<(i32,i32,i32),u8>) -> (i32,i32,i32) {
+  let min_col = map.keys().map(|(_a,b,_c)| *b ).min().unwrap();
+  let min_row = map.keys().map(|(a,_b, _c)| *a ).min().unwrap();
+  let min_z = map.keys().map(|(_a,_b,c) | *c ).min().unwrap();
+
+  (min_row,min_col,min_z)
+}
 
 pub fn print(c_map : &ConwayMap) {
-  let max_col = c_map.map.keys().map(|(_a,b,_c)| *b ).max().unwrap();
-  let max_row = c_map.map.keys().map(|(a,_b, _c)| *a ).max().unwrap();
-  let max_z = c_map.map.keys().map(|(_a,_b,c) | *c ).max().unwrap();
+  let maxes = get_max(&c_map.map);
+  let mins = get_min(&c_map.map);
 
-  let min_col = c_map.map.keys().map(|(_a,b,_c)| *b ).min().unwrap();
-  let min_row = c_map.map.keys().map(|(a,_b, _c)| *a ).min().unwrap();
-  let min_z = c_map.map.keys().map(|(_a,_b,c) | *c ).min().unwrap();
-
-  for z in min_z-1..=max_z+1 {
+  for z in mins.2-1..=maxes.2+1 {
     println!("z={}",z);
-    for r in min_row-1..=max_row+1 {
-      for c in min_col-1..max_col+1 {
+    for r in mins.0-1..=maxes.0+1 {
+      for c in mins.1-1..maxes.1+1 {
         if let Some(v) = c_map.map.get(&(r,c,z)) {
           print!("{}",*v as char)
         } else {
@@ -83,47 +91,30 @@ pub fn solve(filename : String) -> i64 {
   let lines : Vec<String> = contents.lines().map(|s| (&*s).to_string()).collect();
   // let mut map = std::collections::HashMap::new();
 
-  let mut c_map = ConwayMap{ map: std::collections::HashMap::new(),
-    max_row : 0,
-    max_col : 0,
-    max_z : 0};
+  let mut c_map = ConwayMap{ map: std::collections::HashMap::new() };
 
   let mut row : i32 = 0;
   let mut col : i32 = 0;
-  let mut z : i32 = 0;
+  let z : i32 = 0;
 
   for line in &lines {
     for b in line.as_bytes() {
-      // if *b == b'#' {
-        c_map.map.insert((row,col,z),*b);
-      // }
+      c_map.map.insert((row,col,z),*b);
       col +=1;
-      c_map.max_col = col;
     }
     row += 1;
     col = 0;
-    c_map.max_row = row;
   }
 
   for index in 0..6 {
   // println!("==> ITeration {:?}", index);
-
-  let max_col = c_map.map.keys().map(|(_a,b,_c)| *b ).max().unwrap();
-  let max_row = c_map.map.keys().map(|(a,_b, _c)| *a ).max().unwrap();
-  let max_z = c_map.map.keys().map(|(_a,_b,c) | *c ).max().unwrap();
-
-  let min_col = c_map.map.keys().map(|(_a,b,_c)| *b ).min().unwrap();
-  let min_row = c_map.map.keys().map(|(a,_b, _c)| *a ).min().unwrap();
-  let min_z = c_map.map.keys().map(|(_a,_b,c) | *c ).min().unwrap();
-
+  let maxes = get_max(&c_map.map);
+  let mins = get_min(&c_map.map);
   let old_map = c_map.clone();
-  // print(&c_map);
-  // println!("{}", how_many_neighbors(&old_map, (1,0,-1)));
-  // return -1;
 
-  for z in min_z-2..=max_z+2 {
-    for r in min_row-2..=max_row+2 {
-      for c in min_col-2..max_col+2 {
+  for z in mins.2-2..=maxes.2+2 {
+    for r in mins.0-2..=maxes.0+2 {
+      for c in mins.1-2..maxes.1+2 {
         // println!("{} {} {}", r, c, z);
         let n = how_many_neighbors(&old_map, (r,c,z));
         match old_map.map.get(&(r,c,z)) {
@@ -139,12 +130,8 @@ pub fn solve(filename : String) -> i64 {
           }
           None => { 
             if n == 3 { 
-              // println!("{} {} {} Not in map but has three",r,c,z);
               c_map.map.insert((r,c,z),b'#');
-              // c_map.map.entry((r,c,z)).and_modify(|n| *n=b'#');
-            } else {
-              // c_map.map.entry((r,c,z)).and_modify(|n| *n=b'.');
-            }
+            } 
           }
         }
       }
@@ -152,22 +139,17 @@ pub fn solve(filename : String) -> i64 {
   }
   }
 
-  let max_col = c_map.map.keys().map(|(_a,b,_c)| *b ).max().unwrap();
-  let max_row = c_map.map.keys().map(|(a,_b, _c)| *a ).max().unwrap();
-  let max_z = c_map.map.keys().map(|(_a,_b,c) | *c ).max().unwrap();
-
-  let min_col = c_map.map.keys().map(|(_a,b,_c)| *b ).min().unwrap();
-  let min_row = c_map.map.keys().map(|(a,_b, _c)| *a ).min().unwrap();
-  let min_z = c_map.map.keys().map(|(_a,_b,c) | *c ).min().unwrap();
+  let maxes = get_max(&c_map.map);
+  let mins = get_min(&c_map.map);
 
   let old_map = c_map.clone();
 
   // println!("{}", how_many_neighbors(&old_map, (1,0,-1)));
   // return -1;
   retval = 0;
-  for z in min_z-1..=max_z+1 {
-    for r in min_row-1..=max_row+1 {
-      for c in min_col-1..max_col+1 {
+  for z in mins.2-1..=maxes.2+1 {
+    for r in mins.0-1..=maxes.0+1 {
+      for c in mins.1-1..maxes.1+1 {
         if let Some(v) = c_map.map.get(&(r,c,z)) {
           if *v == b'#' {
             retval += 1;
@@ -271,10 +253,10 @@ pub fn solve_part2(filename : String) -> i64 {
 
     let old_map = c_map.clone();
 
-    for w in min_w-3..=max_w+3 {
-      for z in min_z-3..=max_z+3 {
-        for r in min_row-3..=max_row+3 {
-          for c in min_col-3..max_col+3 {
+    for w in min_w-2..=max_w+2 {
+      for z in min_z-2..=max_z+2 {
+        for r in min_row-2..=max_row+2 {
+          for c in min_col-2..max_col+2 {
             // println!("{} {} {}", r, c, z);
             let n = how_many_neighbors4d(&old_map, (r,c,z,w));
             match old_map.map.get(&(r,c,z,w)) {
