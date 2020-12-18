@@ -30,55 +30,22 @@ mod tests {
 }
 
 use std::fs;
+use regex::Regex;
+
+lazy_static! {
+  static ref INNER_REGEX: Regex = Regex::new(r"^(.*)\(([0-9 *+]+)\)(.*)$").unwrap();
+}
 
 pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i64 {
-  let retval;
-  let mut new_string = expression;
-  let mut keep_going = true;
 
-  if new_string.find("(") == None  {
-    return eval(new_string);
+  if expression.find("(") == None  {
+    return eval(expression);
   }
-  
-  let mut offset = 0;
-  while keep_going {
-    if let Some(start) = new_string[offset..].find("(")  {
-      if let Some(next_close) = new_string[offset+start+1..].find(")") {
-        match new_string[offset+start+1..].find("(") {
-          Some(next_open) if next_close+start < next_open+start => {
-            retval = eval(new_string[offset+start+1..=offset+next_close+start].to_string());
-
-            if offset+start > 0 {
-              new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-            } else {
-              new_string = "".to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-            }
-            return find_innermost(new_string, &eval);
-            // offset = 0;
-          }
-          None => {
-            retval = eval(new_string[offset+start+1..=offset+next_close+start].to_string());
-
-            if offset+start > 0 {
-              new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-            } else {
-              new_string = "".to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-            }
-
-            return find_innermost(new_string, &eval);
-            // offset = 0;
-          }
-          _ => {
-            offset = offset+1;
-            if offset > new_string.len() {
-              break;
-            }
-          }
-        }
-      }
-    } else {
-      keep_going = false;
-    }
+    
+  if let Some(inner) = INNER_REGEX.captures(&expression) {
+      let r = eval(inner[2].to_string());
+      let new_string = format!("{} {} {}", &inner[1].trim(), r, &inner[3].trim());
+      return find_innermost(new_string, &eval);
   }
 
   panic!("should enver get here");
@@ -91,7 +58,7 @@ pub fn evaluate(expression : String) -> i64 {
   }
   let mut first = true;
   let mut operator = "";
-  let elements = expression.split(" ").collect::<Vec<&str>>();
+  let elements = expression.split_ascii_whitespace().collect::<Vec<&str>>();
 
   for element in elements {
     if first {
@@ -101,9 +68,9 @@ pub fn evaluate(expression : String) -> i64 {
       operator = element;
     } else {
       if operator == "+" {
-        retval = retval + element.parse::<i64>().unwrap();
+        retval = retval + element.trim().parse::<i64>().unwrap();
       } else {
-        retval = retval * element.parse::<i64>().unwrap();
+        retval = retval * element.trim().parse::<i64>().unwrap();
       }
     }
 
@@ -126,7 +93,7 @@ pub fn evaluate_part2(expression : String) -> i64 {
   let next_string;
 
   let has_addition = new_string.find("+") != None;
-  let elements = new_string.clone().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
+  let elements = new_string.clone().split_ascii_whitespace().map(|s| s.to_string()).collect::<Vec<String>>();
 
   let result;
   let mut last_arg = 0;
