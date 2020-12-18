@@ -11,6 +11,7 @@ mod tests {
       assert!(112==super::solve("./inputs/dec17-test.txt".to_string()));
       assert!(848==super::solve_part2("./inputs/dec17-test.txt".to_string()));
   }
+  
 }
 
 use std::fs;
@@ -162,6 +163,7 @@ pub fn solve(filename : String) -> i64 {
 
 pub fn how_many_neighbors_4d(map : &ConwayMap4D, position : (i32,i32,i32,i32)) -> i32 {
   let mut retval = 0;
+
   for w_diff in [-1,0,1].iter() {
     for z_diff in [-1,0,1].iter() {
       for r_diff in [-1,0,1].iter() {
