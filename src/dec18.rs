@@ -26,17 +26,20 @@ mod tests {
       assert!(super::find_innermost("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string(),&super::evaluate_part2)==669060);
       assert!(super::find_innermost("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string(),&super::evaluate_part2)==23340);
       super::solve_part2("./inputs/dec18-test.txt".to_string());
-  }
-  
+  }  
 }
 
 use std::fs;
 
 pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i64 {
-  let mut retval;
+  let retval;
   let mut new_string = expression;
   let mut keep_going = true;
 
+  if new_string.find("(") == None  {
+    return eval(new_string);
+  }
+  
   let mut offset = 0;
   while keep_going {
     if let Some(start) = new_string[offset..].find("(")  {
@@ -49,10 +52,9 @@ pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i6
               new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
             } else {
               new_string = "".to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-
             }
-
-            offset = 0;
+            return find_innermost(new_string, &eval);
+            // offset = 0;
           }
           None => {
             retval = eval(new_string[offset+start+1..=offset+next_close+start].to_string());
@@ -61,9 +63,10 @@ pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i6
               new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
             } else {
               new_string = "".to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
-
             }
-            offset = 0;
+
+            return find_innermost(new_string, &eval);
+            // offset = 0;
           }
           _ => {
             offset = offset+1;
@@ -78,15 +81,13 @@ pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i6
     }
   }
 
-  retval = eval(new_string);
-
-  retval
+  panic!("should enver get here");
 }
 
 pub fn evaluate(expression : String) -> i64 {
   let mut retval = 0;
   if expression.find("(") != None || expression.find(")") != None {
-    panic!("trying to evaluate with paranethsis");
+    panic!("trying to evaluate [{}] with paranethsis", expression);
   }
   let mut first = true;
   let mut operator = "";
@@ -116,7 +117,6 @@ pub fn evaluate_part2(expression : String) -> i64 {
   }
 
   if let Ok(n) = expression.trim().parse::<i64>() {
-    // println!("Just a number {}", n);
     return n;
   }
 
