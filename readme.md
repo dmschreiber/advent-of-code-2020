@@ -101,3 +101,8 @@ Day 17 part 1 213
 Day 17 part 2 1624
 Day 17 complete in 792.11353ms
 ```
+```
+Day 18 part 1 650217205854
+Day 18 part 2 20394514442037
+Day 18 complete in 13.225364ms
+```

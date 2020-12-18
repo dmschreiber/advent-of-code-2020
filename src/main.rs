@@ -204,4 +204,11 @@ fn main() {
     println!("Day 17 part 2 {}", dec17::solve_part2("./inputs/dec17.txt".to_string()));
     println!("Day 17 complete in {:?}", start.elapsed());
     println!("```");
+
+    let start = Instant::now();
+    println!("```");
+    println!("Day 18 part 1 {}", dec18::solve_part1("./inputs/dec18.txt".to_string()));
+    println!("Day 18 part 2 {}", dec18::solve_part2("./inputs/dec18.txt".to_string()));
+    println!("Day 18 complete in {:?}", start.elapsed());
+    println!("```");
 }

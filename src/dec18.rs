@@ -11,20 +11,20 @@ mod tests {
   #[test]
   pub fn dec18_test() {
       assert!(super::evaluate("1 + 2 * 3 + 4 * 5 + 6".to_string())==71);
-      assert!(super::find_innermost("123".to_string(),false)==123);
-      assert!(super::find_innermost("1 + (2 * 3) + (4 * (5 + 6))".to_string(),false)==51);
-      assert!(super::find_innermost("2 * 3 + (4 * 5)".to_string(),false)==26);
-      assert!(super::find_innermost("5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string(),false)==437);
-      assert!(super::find_innermost("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string(),false)==12240);
-      assert!(super::find_innermost("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string(),false)==13632);
+      assert!(super::find_innermost("123".to_string(),&super::evaluate)==123);
+      assert!(super::find_innermost("1 + (2 * 3) + (4 * (5 + 6))".to_string(),&super::evaluate)==51);
+      assert!(super::find_innermost("2 * 3 + (4 * 5)".to_string(),&super::evaluate)==26);
+      assert!(super::find_innermost("5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string(),&super::evaluate)==437);
+      assert!(super::find_innermost("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string(),&super::evaluate)==12240);
+      assert!(super::find_innermost("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string(),&super::evaluate)==13632);
       assert!(26335==super::solve_part1("./inputs/dec18-test.txt".to_string()));
 
       assert!(super::evaluate_part2("1 + 2 * 3 + 4 * 5 + 6".to_string())==231);
-      assert!(super::find_innermost("1 + (2 * 3) + (4 * (5 + 6))".to_string(),true)==51);
-      assert!(super::find_innermost("2 * 3 + (4 * 5)".to_string(),true)==46);
-      assert!(super::find_innermost("5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string(),true)==1445);
-      assert!(super::find_innermost("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string(),true)==669060);
-      assert!(super::find_innermost("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string(),true)==23340);
+      assert!(super::find_innermost("1 + (2 * 3) + (4 * (5 + 6))".to_string(),&super::evaluate_part2)==51);
+      assert!(super::find_innermost("2 * 3 + (4 * 5)".to_string(),&super::evaluate_part2)==46);
+      assert!(super::find_innermost("5 + (8 * 3 + 9 + 3 * 4 * 3)".to_string(),&super::evaluate_part2)==1445);
+      assert!(super::find_innermost("5 * 9 * (7 * 3 * 3 + 9 * 3 + (8 + 6 * 4))".to_string(),&super::evaluate_part2)==669060);
+      assert!(super::find_innermost("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2".to_string(),&super::evaluate_part2)==23340);
       super::solve_part2("./inputs/dec18-test.txt".to_string());
   }
   
@@ -32,7 +32,7 @@ mod tests {
 
 use std::fs;
 
-pub fn find_innermost (expression : String, part2 : bool ) -> i64 {
+pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i64 {
   let mut retval;
   let mut new_string = expression;
   let mut keep_going = true;
@@ -43,10 +43,7 @@ pub fn find_innermost (expression : String, part2 : bool ) -> i64 {
       if let Some(next_close) = new_string[offset+start+1..].find(")") {
         match new_string[offset+start+1..].find("(") {
           Some(next_open) if next_close+start < next_open+start => {
-            retval = match part2 {
-              true => evaluate_part2(new_string[offset+start+1..=offset+next_close+start].to_string()),
-              false => evaluate(new_string[offset+start+1..=offset+next_close+start].to_string())
-            };
+            retval = eval(new_string[offset+start+1..=offset+next_close+start].to_string());
 
             if offset+start > 0 {
               new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
@@ -54,14 +51,11 @@ pub fn find_innermost (expression : String, part2 : bool ) -> i64 {
               new_string = "".to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
 
             }
-              // println!("now i have {}", new_string);
+
             offset = 0;
           }
           None => {
-            retval = match part2 {
-              true =>  evaluate_part2(new_string[offset+start+1..=offset+next_close+start].to_string()),
-              false => evaluate(new_string[offset+start+1..=offset+next_close+start].to_string())
-            };
+            retval = eval(new_string[offset+start+1..=offset+next_close+start].to_string());
 
             if offset+start > 0 {
               new_string = new_string[..=offset+start-1].to_string() + &format!("{}",retval) + &new_string[offset+start+next_close+2..];
@@ -84,10 +78,7 @@ pub fn find_innermost (expression : String, part2 : bool ) -> i64 {
     }
   }
 
-  retval = match part2 {
-    true => evaluate_part2(new_string),
-    false => evaluate(new_string)
-  };
+  retval = eval(new_string);
 
   retval
 }
@@ -120,8 +111,6 @@ pub fn evaluate(expression : String) -> i64 {
 }
 
 pub fn evaluate_part2(expression : String) -> i64 {
-  let mut retval = 0;
-
   if expression.find("(") != None || expression.find(")") != None {
     panic!("trying to evaluate with paranethsis");
   }
@@ -133,13 +122,13 @@ pub fn evaluate_part2(expression : String) -> i64 {
 
   let mut operator = "";
 
-  let mut new_string = expression;
-  let mut next_string = String::from("");
+  let new_string = expression;
+  let next_string;
 
   let has_addition = new_string.find("+") != None;
   let elements = new_string.clone().split(" ").map(|s| s.to_string()).collect::<Vec<String>>();
 
-  let mut result = 0;
+  let result;
   let mut last_arg = 0;
 
   if has_addition {
@@ -180,11 +169,11 @@ pub fn evaluate_part2(expression : String) -> i64 {
     }
 
   }
-  retval
+  return 0;
 }
 
 pub fn solve_part1(filename : String) -> u64 {
-  println!("Day 18 part 1");
+  // println!("Day 18 part 1");
   let mut retval = 0;
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
@@ -192,16 +181,16 @@ pub fn solve_part1(filename : String) -> u64 {
   let lines : Vec<String> = contents.lines().map(|s| (&*s).to_string()).collect();
 
   for line in lines {
-    print!("{}=", &line);
-    let e = find_innermost(line,false) as u64;
-    println!("{}", e);
+    // print!("{}=", &line);
+    let e = find_innermost(line, &evaluate) as u64;
+    // println!("{}", e);
     retval += e;
   }
   retval
 }
 
 pub fn solve_part2(filename : String) -> u64 {
-  println!("Day 18 part 2");
+  // println!("Day 18 part 2");
 
   let mut retval = 0;
   let contents = fs::read_to_string(filename)
@@ -209,9 +198,9 @@ pub fn solve_part2(filename : String) -> u64 {
 
   let lines : Vec<String> = contents.lines().map(|s| (&*s).to_string()).collect();
   for line in lines {
-    print!("{}=", &line);
-    let e = find_innermost(line,true) as u64;
-    println!("{}", e);
+    // print!("{}=", &line);
+    let e = find_innermost(line,&evaluate_part2) as u64;
+    // println!("{}", e);
     retval += e;
   }
 
