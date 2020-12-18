@@ -63,6 +63,7 @@ pub fn get_min(map : &std::collections::HashMap<(i32,i32,i32),u8>) -> (i32,i32,i
   (min_row,min_col,min_z)
 }
 
+#[allow(dead_code)]
 pub fn print(c_map : &ConwayMap) {
   let maxes = get_max(&c_map.map);
   let mins = get_min(&c_map.map);
@@ -84,7 +85,7 @@ pub fn print(c_map : &ConwayMap) {
 }
 
 pub fn solve(filename : String) -> i64 {
-  let mut retval = 0;
+  let mut retval;
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
 
@@ -106,7 +107,7 @@ pub fn solve(filename : String) -> i64 {
     col = 0;
   }
 
-  for index in 0..6 {
+  for _index in 0..6 {
   // println!("==> ITeration {:?}", index);
   let maxes = get_max(&c_map.map);
   let mins = get_min(&c_map.map);
@@ -142,10 +143,6 @@ pub fn solve(filename : String) -> i64 {
   let maxes = get_max(&c_map.map);
   let mins = get_min(&c_map.map);
 
-  let old_map = c_map.clone();
-
-  // println!("{}", how_many_neighbors(&old_map, (1,0,-1)));
-  // return -1;
   retval = 0;
   for z in mins.2-1..=maxes.2+1 {
     for r in mins.0-1..=maxes.0+1 {
@@ -163,7 +160,7 @@ pub fn solve(filename : String) -> i64 {
 }
 
 
-pub fn how_many_neighbors4d(map : &ConwayMap4D, position : (i32,i32,i32,i32)) -> i32 {
+pub fn how_many_neighbors_4d(map : &ConwayMap4D, position : (i32,i32,i32,i32)) -> i32 {
   let mut retval = 0;
   for w_diff in [-1,0,1].iter() {
     for z_diff in [-1,0,1].iter() {
@@ -183,7 +180,8 @@ pub fn how_many_neighbors4d(map : &ConwayMap4D, position : (i32,i32,i32,i32)) ->
   retval
 }
 
-pub fn print4D(c_map : &ConwayMap4D) {
+#[allow(dead_code)]
+pub fn print_4d(c_map : &ConwayMap4D) {
   let max_col = c_map.map.keys().map(|(_a,b,_c, _d)| *b ).max().unwrap();
   let max_row = c_map.map.keys().map(|(a,_b, _c, _d)| *a ).max().unwrap();
   let max_z = c_map.map.keys().map(|(_a,_b,c, _d) | *c ).max().unwrap();
@@ -213,7 +211,7 @@ pub fn print4D(c_map : &ConwayMap4D) {
 
 
 pub fn solve_part2(filename : String) -> i64 {
-  let mut retval = 0;
+  let mut retval;
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
 
@@ -224,22 +222,19 @@ pub fn solve_part2(filename : String) -> i64 {
 
   let mut row : i32 = 0;
   let mut col : i32 = 0;
-  let mut z : i32 = 0;
-  let mut w : i32 = 0;
+  let z : i32 = 0;
+  let w : i32 = 0;
 
   for line in &lines {
     for b in line.as_bytes() {
-      // if *b == b'#' {
-        c_map.map.insert((row,col,z,w),*b);
-      // }
+      c_map.map.insert((row,col,z,w),*b);
       col +=1;
     }
     row += 1;
     col = 0;
   }
 
-  for index in 0..6 {
-    // println!("==> ITeration {:?}", index);
+  for _index in 0..6 {
 
     let max_col = c_map.map.keys().map(|(_a,b,_c, _d)| *b ).max().unwrap();
     let max_row = c_map.map.keys().map(|(a,_b, _c, _d)| *a ).max().unwrap();
@@ -258,7 +253,7 @@ pub fn solve_part2(filename : String) -> i64 {
         for r in min_row-2..=max_row+2 {
           for c in min_col-2..max_col+2 {
             // println!("{} {} {}", r, c, z);
-            let n = how_many_neighbors4d(&old_map, (r,c,z,w));
+            let n = how_many_neighbors_4d(&old_map, (r,c,z,w));
             match old_map.map.get(&(r,c,z,w)) {
               Some(v) => {
                 if *v == b'#' && n >= 2 && n <= 3 {
@@ -272,19 +267,16 @@ pub fn solve_part2(filename : String) -> i64 {
               }
               None => { 
                 if n == 3 { 
-                  // println!("{} {} {} Not in map but has three",r,c,z);
                   c_map.map.insert((r,c,z,w),b'#');
-                  // c_map.map.entry((r,c,z)).and_modify(|n| *n=b'#');
-                } else {
-                  // c_map.map.entry((r,c,z)).and_modify(|n| *n=b'.');
-                }
+                } 
               }
             }
           }
         }
       }
     }
-    // print4D(&c_map);
+    // println!("==> ITeration {:?}", index);
+    // print_4d(&c_map);
 
   }
 
@@ -297,8 +289,6 @@ pub fn solve_part2(filename : String) -> i64 {
   let min_row = c_map.map.keys().map(|(a,_b, _c, _d)| *a ).min().unwrap();
   let min_z = c_map.map.keys().map(|(_a,_b,c, _d) | *c ).min().unwrap();
   let min_w = c_map.map.keys().map(|(_a,_b,_c, d) | *d ).min().unwrap();
-
-  let old_map = c_map.clone();
 
   // println!("{}", how_many_neighbors(&old_map, (1,0,-1)));
   // return -1;
