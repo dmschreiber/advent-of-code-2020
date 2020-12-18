@@ -34,6 +34,8 @@ use regex::Regex;
 
 lazy_static! {
   static ref INNER_REGEX: Regex = Regex::new(r"^(.*)\(([0-9 *+]+)\)(.*)$").unwrap();
+  static ref ADD_REGEX: Regex = Regex::new(r"^(.*?)(\d+)\s+\+\s+(\d+)(.*)$").unwrap();
+  static ref MULTIPLY_REGEX: Regex = Regex::new(r"^(.*?)(\d+)\s+\*\s+(\d+)(.*)$").unwrap();
 }
 
 pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i64 {
@@ -50,6 +52,7 @@ pub fn find_innermost (expression : String, eval: &dyn Fn(String) -> i64 ) -> i6
 
   panic!("should enver get here");
 }
+
 
 pub fn evaluate(expression : String) -> i64 {
   let mut retval = 0;
@@ -87,56 +90,22 @@ pub fn evaluate_part2(expression : String) -> i64 {
     return n;
   }
 
-  let mut operator = "";
 
   let new_string = expression;
   let next_string;
 
-  let has_addition = new_string.find("+") != None;
-  let elements = new_string.clone().split_ascii_whitespace().map(|s| s.to_string()).collect::<Vec<String>>();
-
   let result;
-  let mut last_arg = 0;
 
-  if has_addition {
-    for (i,element) in elements.iter().enumerate() {
-      if let Ok(n) = element.parse::<i64>() {
-        if operator == "+" {
-          result = last_arg + n;
-          if i == 2 {
-            next_string = format!("{} {}",result, &elements[i+1..].join(" ").to_string()).to_string();
-          } else {
-            next_string = format!("{} {} {}",elements[..i-2].join(" "), result, &elements[i+1..].join(" ")).to_string();
-          }
-          // println!("new string is {}", next_string);
-          return evaluate_part2(next_string);
-        }
-        last_arg = n;
-      } else if *element == "+" || *element == "*" {
-        operator = element;
-      } 
-    }
-  } else {
-    for (i,element) in elements.iter().enumerate() {
-      if let Ok(n) = element.parse::<i64>() {
-        if operator == "*" {
-          result = last_arg * n;
-          if i == 2 {
-            next_string = format!("{} {}",result, &elements[i+1..].join(" ").to_string()).to_string();
-          } else {
-            next_string = format!("{} {} {}",elements[..i-2].join(" "), result, &elements[i+1..].join(" ")).to_string();
-          }
-          // println!("new string is {}", next_string);
-          return evaluate_part2(next_string);
-        }
-        last_arg = n;
-      } else if *element == "+" || *element == "*" {
-        operator = element;
-      } 
-    }
-
+  if let Some(inner) = ADD_REGEX.captures(&new_string) {
+    result = inner[2].parse::<i64>().unwrap() + inner[3].parse::<i64>().unwrap();
+    next_string = format!("{} {} {}", inner[1].to_string(), result, inner[4].to_string());
+    return evaluate_part2(next_string);
+  } else if let Some(inner) = MULTIPLY_REGEX.captures(&new_string) {
+    result = inner[2].parse::<i64>().unwrap() * inner[3].parse::<i64>().unwrap();
+    next_string = format!("{} {} {}", inner[1].to_string(), result, inner[4].to_string());
+    return evaluate_part2(next_string);
   }
-  return 0;
+  panic!("shouldn't get here");
 }
 
 pub fn solve_part1(filename : String) -> u64 {
