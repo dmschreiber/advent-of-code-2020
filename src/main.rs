@@ -20,7 +20,7 @@ mod dec14;
 mod dec15;
 mod dec16;
 mod dec17;
-
+mod dec18;
 
 pub fn read_input(filename: String) -> Vec<String> {
 
