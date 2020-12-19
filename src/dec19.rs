@@ -12,7 +12,8 @@ mod tests {
   pub fn dec19_test() {
       // assert!(super::evaluate("1 + 2 * 3 + 4 * 5 + 6".to_string())==71);
       assert!(2==super::solve_part1("./inputs/dec19-test.txt".to_string()));
-
+      
+    
       // super::solve_part2("./inputs/dec18-test.txt".to_string());
   }  
 }
@@ -22,6 +23,7 @@ use regex::Regex;
 
 lazy_static! {
   static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+)$").unwrap();
+  static ref RULE_SIMPLE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) \| (\d+)$").unwrap();
   static ref RULE_LITERAL_REGEX: Regex = Regex::new(r#"^(\d+): .([ab]).$"#).unwrap();
   static ref RULE_BASIC1_REGEX: Regex = Regex::new(r"^(\d+): (\d+)$").unwrap();
   static ref RULE_BASIC2_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+)$").unwrap();
@@ -29,6 +31,7 @@ lazy_static! {
 }
 #[derive(Debug)]
 enum Rule {
+  SimpleOr(u32,u32),
   Or(u32,u32,u32,u32),
   Basic1(u32),
   Basic2(u32,u32),
@@ -36,19 +39,90 @@ enum Rule {
   Literal(String),  
 }
 
-fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : String) -> bool {
+fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>) -> Option<String> {
+
+  if line == None { return None; }
+  let my_string = line.unwrap().clone();
+  println!("PROCESSING RULE {} against string {}", rule_number, my_string);
   let rule = rules.get(&rule_number).unwrap();
   let retval = 
   match rule {
-    Rule::Literal(l) => { line.find(l) != None }
-    Rule::Basic3(r1,r2,r3) => { does_match(rules, *r1, line.clone()) && 
-                                does_match(rules, *r2, line.clone()) &&
-                                does_match(rules, *r3, line.clone()) }
-    Rule::Or(p1_a1,p1_a2,p2_a1,p2_a2) => 
-                              { (does_match(rules, *p1_a1, line.clone()) && does_match(rules, *p1_a2, line.clone())) 
-                                ||
-                                (does_match(rules, *p2_a1, line.clone()) && does_match(rules, *p2_a2, line.clone())) }
-    _ => { false }                              
+    Rule::Literal(l) => { 
+                      if my_string[..1] == *l {
+                      // if let Some(at_pos) = my_string.find(l)  { 
+                        let new_string = format!("{}",&my_string[1..]).to_string();
+                        println!("found {} in {} returning {}", l,my_string,new_string);
+                        Some(new_string)
+                        // Some(line.unwrap()[at_pos..].to_string())
+                      } else {
+                        println!("did not find {} in {}", l,my_string);
+                        None 
+                      }
+                    }
+    Rule::Basic3(r1,r2,r3) => { if let Some(s1) = does_match(rules, *r1, Some(my_string)) {
+                            println!("Basic3.1 success with {}", s1);
+                                    if let Some(s2) = does_match(rules, *r2, Some(s1)) {
+                                      println!("Basic3.2 success with {}", s2);
+                                      if let Some(s3) = does_match(rules, *r3, Some(s2)) {
+                                        println!("Basic3.3 success");
+                                        Some(s3)
+                                      } else {
+                                        None
+                                      }
+                                    } else {
+                                      None
+                                    }
+                                } else { None }
+                              }
+    Rule::Basic1(r1) => { if let Some(s1) = does_match(rules, *r1, Some(my_string)) {
+                                Some(s1)
+                              } else {
+                                None
+                              }
+                            }
+    Rule::Basic2(r1,r2) => { if let Some(s1) = does_match(rules, *r1, Some(my_string)) {
+                                if let Some(s2) = does_match(rules, *r2, Some(s1)) {
+                                    Some(s2)
+                                  } else {
+                                    None
+                                  }
+                                } else { None }
+                            }
+    Rule::SimpleOr(p1_a1,p2_a1) => {
+      if let Some(s1) = does_match(rules,*p1_a1, Some(my_string.clone())) {
+        Some(s1)
+      } else if let Some(s1) = does_match(rules,*p2_a1, Some(my_string.clone())) {
+        Some(s1)
+      } else {
+        None
+      }
+    }
+    Rule::Or(p1_a1,p1_a2,p2_a1,p2_a2) => { 
+                      println!("=> OR {} {} | {} {}", p1_a1, p1_a2, p2_a1, p2_a2);
+                      let p1 : Option<String>; 
+                      if let Some(s1) = does_match(rules, *p1_a1, Some(my_string.clone())) {
+                        if let Some(s2) = does_match(rules, *p1_a2, Some(s1)) {
+                            p1 = Some(s2);
+                          } else {
+                            p1 = None;
+                          }
+                        } else { p1 = None; }
+                        if p1 == None { println!("==> OR part 1 failed"); }
+                        if p1 == None {
+                          if let Some(s1) = does_match(rules, *p2_a1, Some(my_string.clone())) {
+                            if let Some(s2) = does_match(rules, *p2_a2, Some(s1)) {
+                                Some(s2)
+                              } else {
+                                None
+                              }
+                            } else {
+                               None 
+                            }
+                        } else {
+                          p1
+                        }
+                     }
+    _ => { None }                              
     };
 
   retval
@@ -77,6 +151,13 @@ pub fn solve_part1(filename : String) -> u64 {
       rules.insert(rule_number,Rule::Or(p1_a1,p1_a2,p2_a1,p2_a2));
 
       println!("{} {} {} {} {}", rule_number, p1_a1, p1_a2, p2_a1, p2_a2);
+    } else if let Some(args) = RULE_SIMPLE_OR_REGEX.captures(line) {
+      println!("SIMPLE OR");
+      let rule_number = args[1].parse::<u32>().unwrap();
+      let p1_a1 = args[2].parse::<u32>().unwrap();
+      let p2_a1 = args[3].parse::<u32>().unwrap();
+      rules.insert(rule_number,Rule::SimpleOr(p1_a1,p2_a1));
+
     } else if let Some(args) = RULE_LITERAL_REGEX.captures(line) {
       let rule_number = args[1].parse::<u32>().unwrap();
       let literal = args[2].to_string();
@@ -101,24 +182,29 @@ pub fn solve_part1(filename : String) -> u64 {
       rules.insert(rule_number, Rule::Basic1(l1));
       println!("BASIC 1 {} {}", rule_number, &l1);
 
+    } else {
+      panic!("unexpected rule format! ({})",line);
     }
-    println!("{:?}", rules);
+    // println!("{:?}", rules);
 
   }
 
-  assert!(does_match(&rules,4,"abc".to_string()));
-  assert!(does_match(&rules,5,"abc".to_string()));
-  assert!(does_match(&rules,0,"ababbb".to_string()));
-  assert!(does_match(&rules,0,"abbbab".to_string()));
-  assert!(!does_match(&rules,0,"bababa".to_string()));
-  assert!(!does_match(&rules,0,"aaabbb".to_string()));
-  
+  // assert!(does_match(&rules,4,Some("ab".to_string())) != None);
+  // assert!(does_match(&rules,5,Some("ba".to_string())) != None);
+  // println!("{:?}",does_match(&rules,0,Some("ababbb".to_string())));
+  // assert!(does_match(&rules,0,Some("ababbb".to_string())) == Some("".to_string()));
+  // assert!(does_match(&rules,0,Some("abbbab".to_string())) == Some("".to_string()));
+  // assert!(does_match(&rules,0,Some("bababa".to_string())) == None);
+  // assert!(does_match(&rules,0,Some("aaabbb".to_string())) == None);
+  // assert!(does_match(&rules,0,Some("aaaabbb".to_string())) != Some("".to_string()));
 
-  // for line in messages_lines {
-  //   if does_match(&rules, 0,line.to_string()) {
-  //     retval += 1;
-  //   }
-  // }
+  for line in messages_lines {
+    let m = does_match(&rules, 0,Some(line.to_string()));
+    println!("{} - {:?}", line, m);
+    if m == Some("".to_string()) {
+      retval += 1;
+    }
+  }
   retval
 }
 
