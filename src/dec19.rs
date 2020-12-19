@@ -104,18 +104,8 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
     { 
         match value 
         {
-          Arg::Literal(l) => 
-                    {
-                      if my_string[..1] == *l {
-                      // if let Some(at_pos) = my_string.find(l)  { 
-                        let new_string = format!("{}",&my_string[1..]).to_string();
-
-                        Some(new_string)
-                      } else {
-                        // println!("did not find {} in {}", l,my_string);
-                        None 
-                      }
-                    }
+          Arg::Literal(l) if *l == my_string[..1] => {Some(format!("{}",&my_string[1..]).to_string()) } 
+          Arg::Literal(l) => { None }
           Arg::Basic1(r1) => { do_basic1(rules, *r1, Some(my_string)) }      
           Arg::Basic2(r1,r2) => { do_basic2(rules, *r1, *r2, Some(my_string)) }
           Arg::Basic3(r1,r2,r3) => { do_basic3(rules, *r1, *r2, *r3, Some(my_string)) }
@@ -125,6 +115,25 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
     {
       match p1 
       {
+        Arg::Basic1(p1_a1) => {
+          match p2 {
+            Arg::Basic1(p2_a1) => {
+              if let Some(s1) = do_basic1(rules, *p1_a1, Some(my_string.clone())) {
+                Some(s1)
+              } else {
+                do_basic1(rules, *p2_a1, Some(my_string.clone()))
+              }
+            }
+            Arg::Basic2(p2_a1,p2_a2) => {
+              if let Some(s1) = do_basic1(rules, *p1_a1, Some(my_string.clone())) {
+                Some(s1)
+              } else {
+                do_basic2(rules, *p2_a1, *p2_a2, Some(my_string.clone()))
+              }
+            }
+            _ => {panic!("Or with 1 and more than one arg")}
+          }
+        }        
         Arg::Basic2(p1_a1,p1_a2) => 
         {
           match p2 
@@ -142,18 +151,7 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
             _ => { panic!("Or with more than two args")}
           }
         }
-        Arg::Basic1(p1_a1) => {
-          match p2 {
-            Arg::Basic1(p2_a1) => {
-              if let Some(s1) = do_basic1(rules, *p1_a1, Some(my_string.clone())) {
-                Some(s1)
-              } else {
-                do_basic1(rules, *p2_a1, Some(my_string.clone()))
-              }
-            }
-            _ => {panic!("Or with 1 and more than one arg")}
-          }
-        }
+
         _ => { panic!("Or with more than two args")}
       }
     }
