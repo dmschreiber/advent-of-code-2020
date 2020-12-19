@@ -213,5 +213,5 @@ fn main() {
     println!("Day 18 complete in {:?}", start.elapsed());
     println!("```");
 
-    println!("Day 19 part 1 {}", dec19::solve_part1("./inputs/dec19.txt".to_string()));
+    dec19::solve("./inputs/dec19.txt".to_string());
     }
