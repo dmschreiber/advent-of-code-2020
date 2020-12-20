@@ -22,6 +22,7 @@ mod dec16;
 mod dec17;
 mod dec18;
 mod dec19;
+mod dec20;
 
 pub fn read_input(filename: String) -> Vec<String> {
 
@@ -214,4 +215,5 @@ fn main() {
     println!("```");
 
     dec19::solve("./inputs/dec19.txt".to_string());
+    dec20::solve("./inputs/dec20.txt".to_string());
     }
