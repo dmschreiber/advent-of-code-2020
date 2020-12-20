@@ -10,39 +10,42 @@ mod tests {
       rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
       rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
-      println!("part two prod 2 {}",super::solve_part2(&rules, &messages_lines));
+      // println!("part two prod 2 {}",super::solve_part2(&rules, &messages_lines));
 
   }
   #[test]
   pub fn dec19_test() {
-    let (rules,messages_lines) = super::load_rules("./inputs/dec19-test.txt".to_string());
-    assert!(2==super::solve_part1(&rules, &messages_lines));
+    // let (rules,messages_lines) = super::load_rules("./inputs/dec19-test.txt".to_string());
+    // assert!(2==super::solve_part1(&rules, &messages_lines));
       
-    assert!(super::does_match(&rules,4,Some("ab".to_string()),None) != None);
-    assert!(super::does_match(&rules,5,Some("ba".to_string()),None) != None);
+    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("ababbb".to_string()),None) == Some("".to_string()));
+    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("abbbab".to_string()),None) == Some("".to_string()));
+    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("bababa".to_string()),None) == None);
+    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaabbb".to_string()),None) == None);
+    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaaabbb".to_string()),None) != Some("".to_string()));
 
-    assert!(super::does_match(&rules,0,Some("ababbb".to_string()),None) == Some("".to_string()));
-    assert!(super::does_match(&rules,0,Some("abbbab".to_string()),None) == Some("".to_string()));
-    assert!(super::does_match(&rules,0,Some("bababa".to_string()),None) == None);
-    assert!(super::does_match(&rules,0,Some("aaabbb".to_string()),None) == None);
-    assert!(super::does_match(&rules,0,Some("aaaabbb".to_string()),None) != Some("".to_string()));
+    let (mut rules,messages_lines) = super::load_rules("./inputs/dec19-test2.txt".to_string());
+    // assert!(3==super::solve_part1(&rules, &messages_lines));
 
-      let (mut rules,messages_lines) = super::load_rules("./inputs/dec19-test2.txt".to_string());
-      assert!(3==super::solve_part1(&rules, &messages_lines));
+    rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
+    rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
-      rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
-      rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
+    println!("part two test 2 {}",super::solve_part2(&rules, &messages_lines));
 
-      // println!("part two test 2 {}",super::solve_part2(&rules, &messages_lines));
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaaabbaaaabbaaa".to_string()),None)==None);
+    // println!("{:?}",super::does_match(&rules,0,Some("aaaaabbaabaaaaababaa".to_string()),None));
+    // println!("{:?}",super::does_match(&rules,42,Some("aaaaabbaabaaaaababaa".to_string()),None));
+    // println!("{:?}",super::does_match(&rules,42,Some("bbaabaaaaababaa".to_string()),None));
+    // println!("{:?}",super::does_match(&rules,11,Some("aaaaababaa".to_string()),None));
 
-      println!("Should match {:?}", super::does_match(&rules,0,Some("aaaaabbaabaaaaababaa".to_string()),None));
-      assert!(super::does_match(&rules,0,Some("aaaabbaaaabbaaa".to_string()),None)==None);
+    let (mut rules,messages_lines) = super::load_rules("./inputs/dec19-test3.txt".to_string());
+    println!("Test 3 {:?}",super::solve_part1(&rules, &messages_lines));
+
   }  
 }
 
 use std::fs;
 use regex::Regex;
-use backtrace::Backtrace;
 
 lazy_static! {
   static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+)$").unwrap();
@@ -57,7 +60,7 @@ lazy_static! {
   static ref RULE_BASIC3_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) (\d+)$").unwrap();
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum Arg {
   Basic1(u32),
   Basic2(u32,u32),
@@ -65,14 +68,15 @@ pub enum Arg {
   Literal(String),  
 }
 
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq)]
 pub enum Rule {
   Or(Arg,Arg),
   Value(Arg),
 }
 
 fn do_basic1(rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  if let Some(s1) = does_match(rules, rule_number, line,level) {
+  let r = rules.get(&rule_number).unwrap();
+  if let Some(s1) = does_match(rules, r.clone(), line,level) {
     Some(s1)
   } else {
     None
@@ -80,18 +84,37 @@ fn do_basic1(rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, li
 }
 
 fn do_basic2(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  if let Some(s1) = does_match(rules, r1, line,level.clone()) {
-    if let Some(s2) = does_match(rules, r2, Some(s1),level.clone()) {
+  let r1_o = rules.get(&r1).unwrap();
+  let r2_o = rules.get(&r2).unwrap();
+
+  if let Some(s1) = does_match(rules, r1_o.clone(), line.clone(),level.clone()) 
+  {
+    if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) 
+    {
         Some(s2)
-      } else {
-        None
-      }
-    } else { None }
+    } else if let Rule::Or(a1,a2) = r1_o {
+      if std::mem::discriminant(a1) == std::mem::discriminant(&Arg::Basic1(1)) && 
+        std::mem::discriminant(a2) == std::mem::discriminant(&Arg::Basic2(1,1))
+      {
+        if let Some(s1) = does_match(rules, Rule::Value(a2.clone()), line, level.clone()) {
+          if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) 
+          {
+              Some(s2)
+          } else {None }
+        } else { None }
+      } else 
+      { None }
+    } else { None } // second rule
+  } else { None } // first rule
 }
 fn do_basic3(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, r3 : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  if let Some(s1) = does_match(rules, r1, line,level.clone()) {
-    if let Some(s2) = does_match(rules, r2, Some(s1),level.clone()) {
-      if let Some(s3) = does_match(rules, r3, Some(s2),level.clone()) {
+  let r1_o = rules.get(&r1).unwrap();
+  let r2_o = rules.get(&r2).unwrap();
+  let r3_o = rules.get(&r3).unwrap();
+
+  if let Some(s1) = does_match(rules, r1_o.clone(), line,level.clone()) {
+    if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) {
+      if let Some(s3) = does_match(rules, r3_o.clone(), Some(s2),level.clone()) {
         Some(s3)
       } else {
         None
@@ -102,12 +125,12 @@ fn do_basic3(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, r
   } else { None }
 }
 
-fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>, level : Option<String>) -> Option<String> {
+fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line : Option<String>, level : Option<String>) -> Option<String> {
   if line == None { return None; }
   // if line == Some("".to_string()) {return None; }
 
   let my_string = line.unwrap().clone();
-  let rule = rules.get(&rule_number).unwrap();
+  // let rule = rules.get(&rule_number).unwrap();
   
   let level_format;
   if level == None {
@@ -115,7 +138,7 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
   } else {
     level_format = level.unwrap();
   }
-  // println!("{} PROCESSING RULE {:2} against string {} - {:?}", level_format,rule_number, &my_string, rule);
+  // println!("{} PROCESSING RULE against string {} - {:?}", level_format, &my_string, rule);
 
   let retval = 
   match rule 
@@ -125,7 +148,7 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
         match value 
         {
           Arg::Literal(l) => 
-          { if my_string.len() == 0 { Some(my_string) }
+          { if my_string.len() == 0 { Some("".to_string()) }
             else if *l == my_string[..1] { 
               // println!("{} returning Some {}",level_format,my_string);
               Some(format!("{}",&my_string[1..]).to_string()) 
@@ -133,9 +156,9 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
               None
             }
           }
-          Arg::Basic1(r1) => { do_basic1(rules, *r1, Some(my_string),Some(format!("{}>",level_format))) }      
-          Arg::Basic2(r1,r2) => { do_basic2(rules, *r1, *r2, Some(my_string),Some(format!("{}>",level_format))) }
-          Arg::Basic3(r1,r2,r3) => { do_basic3(rules, *r1, *r2, *r3, Some(my_string),Some(format!("{}>",level_format))) }
+          Arg::Basic1(r1) => { do_basic1(rules, r1, Some(my_string),Some(format!("{}>",level_format))) }      
+          Arg::Basic2(r1,r2) => { do_basic2(rules, r1, r2, Some(my_string),Some(format!("{}>",level_format))) }
+          Arg::Basic3(r1,r2,r3) => { do_basic3(rules, r1, r2, r3, Some(my_string),Some(format!("{}>",level_format))) }
         }
     }
     Rule::Or(p1,p2) => 
@@ -145,17 +168,17 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
         Arg::Basic1(p1_a1) => {
           match p2 {
             Arg::Basic1(p2_a1) => {
-              if let Some(s1) = do_basic1(rules, *p1_a1, Some(my_string.clone()), Some(format!("{}>",level_format))) {
+              if let Some(s1) = do_basic1(rules, p1_a1, Some(my_string.clone()), Some(format!("{}>",level_format))) {
                 Some(s1)
               } else {
-                do_basic1(rules, *p2_a1, Some(my_string.clone()),Some(format!("{}>",level_format)))
+                do_basic1(rules, p2_a1, Some(my_string.clone()),Some(format!("{}>",level_format)))
               }
             }
             Arg::Basic2(p2_a1,p2_a2) => {
-              if let Some(s1) = do_basic1(rules, *p1_a1, Some(my_string.clone()),Some(format!("{}>",level_format))) {
+              if let Some(s1) = do_basic1(rules, p1_a1, Some(my_string.clone()),Some(format!("{}>",level_format))) {
                 Some(s1)
               } else {
-                do_basic2(rules, *p2_a1, *p2_a2, Some(my_string.clone()),Some(format!("{}>",level_format)))
+                do_basic2(rules, p2_a1, p2_a2, Some(my_string.clone()),Some(format!("{}>",level_format)))
               }
             }
             _ => {panic!("Or with 1 and more than one arg")}
@@ -165,20 +188,20 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
         {
           match p2 
           {
-            Arg::Basic1(p2_a1) => { panic!("or with 2 and 1")}
+            Arg::Basic1(_p2_a1) => { panic!("or with 2 and 1")}
             Arg::Basic2(p2_a1,p2_a2) => 
             { 
-              let p1 = do_basic2(rules,*p1_a1,*p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format))); 
+              let p1 = do_basic2(rules,p1_a1,p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format))); 
               if p1 == None {
-                do_basic2(rules,*p2_a1,*p2_a2,Some(my_string.clone()),Some(format!("{}>",level_format)))
+                do_basic2(rules,p2_a1,p2_a2,Some(my_string.clone()),Some(format!("{}>",level_format)))
               } else {
                 p1
               }
             }
             Arg::Basic3(p2_a1,p2_a2,p2_a3) => {
-              let p1 = do_basic2(rules, *p1_a1, *p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format)));
+              let p1 = do_basic2(rules, p1_a1, p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format)));
               if p1 == None {
-                do_basic3(rules, *p2_a1, *p2_a2, *p2_a3, Some(my_string.clone()),Some(format!("{}>",level_format)))
+                do_basic3(rules, p2_a1, p2_a2, p2_a3, Some(my_string.clone()),Some(format!("{}>",level_format)))
               } else {
                 p1
               }
@@ -190,7 +213,6 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, 
         _ => { panic!("Or with more than two args")}
       }
     }
-    _ => { None }                              
     };
   if retval != None {
     // println!("{} RULE RESULT {:?}", level_format, retval);
@@ -277,7 +299,8 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
   let mut retval = 0;
 
   for line in messages_lines {
-    let m = does_match(&rules, 0,Some(line.to_string()),None);
+    let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
+    println!("{} - {:?}", line, m);
     if m == Some("".to_string()) {
       retval += 1;
     }
@@ -290,7 +313,7 @@ pub fn solve_part2(rules : &std::collections::HashMap::<u32,Rule>, messages_line
   let mut retval = 0;
 
   for line in messages_lines {
-    let m = does_match(&rules, 0,Some(line.to_string()),None);
+    let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
 
     if m == Some("".to_string()) {
       println!("{} - {:?}", line, m);
