@@ -93,8 +93,7 @@ fn do_basic2(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, l
     {
         Some(s2)
     } else if let Rule::Or(a1,a2) = r1_o {
-      if std::mem::discriminant(a1) == std::mem::discriminant(&Arg::Basic1(1)) && 
-        std::mem::discriminant(a2) == std::mem::discriminant(&Arg::Basic2(1,1))
+      if std::mem::discriminant(a1) != std::mem::discriminant(a2)
       {
         if let Some(s1) = does_match(rules, Rule::Value(a2.clone()), line, level.clone()) {
           if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) 
@@ -148,7 +147,7 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line :
         match value 
         {
           Arg::Literal(l) => 
-          { if my_string.len() == 0 { Some("".to_string()) }
+          { if my_string.len() == 0 { None }
             else if *l == my_string[..1] { 
               // println!("{} returning Some {}",level_format,my_string);
               Some(format!("{}",&my_string[1..]).to_string()) 
