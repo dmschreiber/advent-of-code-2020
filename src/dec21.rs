@@ -55,7 +55,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   
   for t1 in my_things {
     for t2 in things {
-      if t1 == t2 { break; } // uncomment for test; need to find out why
+      if filter_by != None && t1 == t2 { break; } // works for prod and test; slower prod
 
       let ignore_allergens = allergen_map.keys().map(|s| s.to_string()).collect();
       let ignore_ingredients = allergen_map.values().map(|s| s.to_string()).collect();
@@ -85,7 +85,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   // v.sort_by(|a, b| a.allergens[0].cmp(&b.allergens[0] ));
   v.dedup_by(|a, b| format!("{}:{}",a.ingredients.join("~"),a.allergens.join("~"))
                 ==  format!("{}:{}",b.ingredients.join("~"),b.allergens.join("~")));
-  // println!("--> From {} to {} foods", things.len(), v.len());
+  println!("--> From {} to {} foods", things.len(), v.len());
   for (index,t) in v.iter().enumerate() {
     // println!("{:?} {:?}", t.allergens, t.ingredients);
     if index == 10 { break; }
