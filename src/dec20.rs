@@ -406,6 +406,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
   let mut borders = vec![]; // std::collections::HashMap::<u32,Tile>::new();
   let mut inner = vec![];
 
+  // sort tiles into corner, borders and inner
   for t in things {
     for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
       let mut unique_sides = 0;
@@ -416,7 +417,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
         }
       }
       if unique_sides == 2 {
-        if let Some(id) = corner_hint {
+        if let Some(id) = corner_hint { // use my hint to put the right tile first == upper left
           if id == t.id {
             corners.insert(0,t.clone());
           } else {
@@ -442,7 +443,9 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
   let mut grid = build_border(&corners, &borders, size);
   let mut next_corner_hint = None;
 
-  if size > 2 {
+  // if I have more than corners, figure out which tile should be the inner upper left
+  // and pass it as my corner hint
+  if size > 2 { 
     let mut upper_left_corner = vec![];
     upper_left_corner.push(grid.get(&(0,1)).unwrap().clone());
     upper_left_corner.push(grid.get(&(1,0)).unwrap().clone());
@@ -464,6 +467,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
     }
   }
 
+  // if I have inner tiles, copy my inner grid into my outer grid before I return it
   if inner.len() > 1 {
     let sub_grid = border(&inner,next_corner_hint);
     for row in 0..size-2 {
@@ -475,10 +479,11 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
         }
       }
     }
-    grid
-  } else {
-    grid
+  } else if inner.len() == 1 {
+    let t = inner[0].clone();
+    grid.insert((size/2,size/2),t);
   }
+  return grid;
 }
 
 pub fn solve_part2(filename : String) {

@@ -220,6 +220,7 @@ fn main() {
     println!("Day 19 partialy complete in {:?}", start.elapsed());
     let start = Instant::now();
     dec20::solve_part1("./inputs/dec20.txt".to_string());
+    dec20::solve_part2("./inputs/dec20.txt".to_string());
     println!("Day 20 partially complete in {:?}", start.elapsed());
 
     let start = Instant::now();
