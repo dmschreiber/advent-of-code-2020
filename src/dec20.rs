@@ -391,8 +391,11 @@ pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
   }
   println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
   println!("{} Tiles", things.len());
+
   let size = (things.len() as f64).sqrt() as u32;
-  build_border(&corners, &borders, size);
+  let grid = build_border(&corners, &borders, size);
+  println!("0-1 {}", grid.get(&(0,1)).unwrap().id);
+  println!("1-0 {}", grid.get(&(1,0)).unwrap().id);
   inner
 }
 
