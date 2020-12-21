@@ -170,6 +170,35 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
 
   // println!("borders {:?}", borders_vec);
 
+  if WIDTH == 2 {
+    let t = corners_vec[0].clone();
+    let index = corners_vec.iter().position(|x| *x == t).unwrap();
+    corners_vec.remove(index);
+    retval.insert((0,0),t.clone());
+
+    for rotation_sides in t.all_rotations() {
+      let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
+      if v == vec![0,1,1,0] {
+
+        let t1 = get_match(&corners_vec, t.id, rotation_sides[1]).unwrap().clone();
+        let index = corners_vec.iter().position(|x| *x == t1).unwrap();
+        corners_vec.remove(index);
+        retval.insert((0,1),t1);
+
+        let t2 = get_match(&corners_vec, t.id, rotation_sides[2]).unwrap().clone();
+        let index = corners_vec.iter().position(|x| *x == t2).unwrap();
+        corners_vec.remove(index);
+        retval.insert((1,0),t2);
+
+        break;
+      }
+    }
+
+    retval.insert((1,1),corners_vec[0].clone());
+
+    return retval;
+  }
+
   for row in 0..WIDTH {
     for col in 0..WIDTH {
       // println!("{} {}", row, col);
@@ -411,33 +440,35 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
 
   let size = (things.len() as f64).sqrt() as u32;
   let mut grid = build_border(&corners, &borders, size);
+  let mut next_corner_hint = None;
 
-  let mut upper_left_corner = vec![];
-  upper_left_corner.push(grid.get(&(0,1)).unwrap().clone());
-  upper_left_corner.push(grid.get(&(1,0)).unwrap().clone());
+  if size > 2 {
+    let mut upper_left_corner = vec![];
+    upper_left_corner.push(grid.get(&(0,1)).unwrap().clone());
+    upper_left_corner.push(grid.get(&(1,0)).unwrap().clone());
 
-  let mut corner_id = 0;
-  for t in &inner {
-    for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
-      let mut unique_matches = 0;
-      for (_index,s) in rotation.iter().enumerate() {
-        let c = count_matches(&upper_left_corner, t.id, *s);
-        if c == 1 {
-          unique_matches += 1;
+    for t in &inner {
+      for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
+        let mut unique_matches = 0;
+        for (_index,s) in rotation.iter().enumerate() {
+          let c = count_matches(&upper_left_corner, t.id, *s);
+          if c == 1 {
+            unique_matches += 1;
+          }
         }
-      }
-      if unique_matches == 2 {
-          corner_id = t.id;
-          break;
+        if unique_matches == 2 {
+            next_corner_hint = Some(t.id);
+            break;
+        }
       }
     }
   }
 
-  if inner.len() > 4 {
-    let sub_grid = border(&inner,Some(corner_id));
+  if inner.len() > 1 {
+    let sub_grid = border(&inner,next_corner_hint);
     for row in 0..size-2 {
       for col in 0..size-2 {
-        println!("Getting {} {} from subgrid", row, col);
+        // println!("Getting {} {} from subgrid", row, col);
         if let Some(t) = sub_grid.get(&(row,col)) {
           grid.insert((row+1,col+1),t.clone());
 
