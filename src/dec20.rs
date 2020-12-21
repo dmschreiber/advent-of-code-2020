@@ -168,18 +168,18 @@ pub fn build_border(corners : &HashMap<u32,Tile>, borders : &HashMap<u32,Tile>, 
 
   // let WIDTH = 3;
 
-  println!("borders {:?}", borders_vec);
+  // println!("borders {:?}", borders_vec);
 
   for row in 0..WIDTH {
     for col in 0..WIDTH {
-      println!("{} {}", row, col);
+      // println!("{} {}", row, col);
       if row == 0 && col == 0 {
         let t = corners_vec[0].clone();
         let index = corners_vec.iter().position(|x| *x == t).unwrap();
         corners_vec.remove(index);
 
         let t_id = t.id;
-        println!("Tile: {}", t_id);
+        // println!("Tile: {}", t_id);
         retval.insert((row,col),t.clone());
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
@@ -292,7 +292,7 @@ pub fn build_border(corners : &HashMap<u32,Tile>, borders : &HashMap<u32,Tile>, 
   
         }
       }  else if col > 0 && row > 0 && col < WIDTH-1 && row < WIDTH-1 {
-        println!("NO LOGIC - INSIDE");
+        // println!("NO LOGIC - INSIDE");
         // retval.get(&(row,col)).unwrap();
 
       } else if row == 0 || row == WIDTH-1 {
@@ -365,23 +365,12 @@ pub fn get_match(things : &Vec<Tile>, skip_id : u32, side : u32) -> Option<Tile>
 None
 }
 
-pub fn solve_part2(filename : String) {
-  let contents = fs::read_to_string(filename)
-  .expect("Something went wrong reading the file");
-
-  let tiles : Vec<String> = contents.split("\n\n").map(|s| (&*s).to_string()).collect();
-  
-  let mut things = Vec::new();
-
-  for tile in tiles {
-    let lines : Vec<String> = tile.lines().map(|s| (&*s).to_string()).collect();
-    things.push(make_tile(lines));
-  }
-
+pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
   let mut corners = std::collections::HashMap::<u32,Tile>::new();
   let mut borders = std::collections::HashMap::<u32,Tile>::new();
-  let mut inner = std::collections::HashMap::<u32,Tile>::new();
-  for t in &things {
+  let mut inner = vec![];
+
+  for t in things {
     for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
       let mut unique_sides = 0;
       for (_index,s) in rotation.iter().enumerate() {
@@ -395,7 +384,8 @@ pub fn solve_part2(filename : String) {
       } else if unique_sides == 1 {
         borders.insert(t.id, t.clone());
       } else {
-        inner.insert(t.id, t.clone());
+        inner.push(t.clone());
+        inner.dedup();
       }
     }
   }
@@ -403,5 +393,27 @@ pub fn solve_part2(filename : String) {
   println!("{} Tiles", things.len());
   let size = (things.len() as f64).sqrt() as u32;
   build_border(&corners, &borders, size);
+  inner
+}
+
+pub fn solve_part2(filename : String) {
+  let contents = fs::read_to_string(filename)
+  .expect("Something went wrong reading the file");
+
+  let tiles : Vec<String> = contents.split("\n\n").map(|s| (&*s).to_string()).collect();
+  
+  let mut things = Vec::new();
+
+  for tile in tiles {
+    let lines : Vec<String> = tile.lines().map(|s| (&*s).to_string()).collect();
+    things.push(make_tile(lines));
+  }
+
+
+  let mut inner = border(&things);
+  println!("{}", inner.len());
+  while inner.len() > 1 {
+    inner = border(&inner);
+  }
 
 }
