@@ -161,16 +161,14 @@ pub fn solve_part1(filename : String) -> u64 {
     retval
 }
 
-pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> HashMap<(u32,u32),Tile> {
+pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> HashMap<(u32,u32),Tile> {
   let mut retval = std::collections::HashMap::<(u32,u32),Tile>::new();
   let mut borders_vec : Vec<Tile> = borders.clone(); // borders.values().cloned().collect();
   let mut corners_vec : Vec<Tile> = corners.clone(); // values().cloned().collect();
 
-  // let WIDTH = 3;
-
   // println!("borders {:?}", borders_vec);
 
-  if WIDTH == 2 {
+  if width == 2 {
     let t = corners_vec[0].clone();
     let index = corners_vec.iter().position(|x| *x == t).unwrap();
     corners_vec.remove(index);
@@ -199,8 +197,8 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
     return retval;
   }
 
-  for row in 0..WIDTH {
-    for col in 0..WIDTH {
+  for row in 0..width {
+    for col in 0..width {
       // println!("{} {}", row, col);
       if row == 0 && col == 0 {
         let t = corners_vec[0].clone();
@@ -228,7 +226,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if row == 0 && col == WIDTH-2 {
+      } else if row == 0 && col == width-2 {
         let t = retval.get(&(row,col)).unwrap().clone();
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
@@ -243,7 +241,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if row == 0 && col == WIDTH-1 {
+      } else if row == 0 && col == width-1 {
         let t = retval.get(&(row,col)).unwrap().clone();
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
@@ -258,7 +256,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if row == WIDTH-2 && col == 0 {
+      } else if row == width-2 && col == 0 {
         let t = retval.get(&(row,col)).unwrap().clone();
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
@@ -273,7 +271,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if row == WIDTH-1 && col == 0 { // LL corner
+      } else if row == width-1 && col == 0 { // LL corner
         let t = retval.get(&(row,col)).unwrap().clone();
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
@@ -288,7 +286,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if row == WIDTH-1 && col == WIDTH-2 { // second from lower right corner
+      } else if row == width-1 && col == width-2 { // second from lower right corner
         let t = retval.get(&(row,col)).unwrap().clone();
         for rotation_sides in t.all_rotations() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
@@ -303,7 +301,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
         }
 
-      } else if col == 0 || col == WIDTH-1 {
+      } else if col == 0 || col == width-1 {
         let t = retval.get(&(row,col)).unwrap();
         if retval.get(&(row+1,col)) == None {
           for rotation_sides in t.all_rotations() {
@@ -320,11 +318,11 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
           }
   
         }
-      }  else if col > 0 && row > 0 && col < WIDTH-1 && row < WIDTH-1 {
+      }  else if col > 0 && row > 0 && col < width-1 && row < width-1 {
         // println!("NO LOGIC - INSIDE");
         // retval.get(&(row,col)).unwrap();
 
-      } else if row == 0 || row == WIDTH-1 {
+      } else if row == 0 || row == width-1 {
         let t = retval.get(&(row,col)).unwrap();
         if retval.get(&(row,col+1)) == None {
           for rotation_sides in t.all_rotations() {
@@ -349,22 +347,6 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
   }
 
   retval
-}
-
-pub fn check_fit(t : Tile, pattern : Vec<u32>) -> bool {
-
-  for rotation_sides in t.all_rotations() {
-    let mut pattern_match = true;
-    for (index,s) in rotation_sides.iter().enumerate() {
-      if pattern[index] > 0 {
-        pattern_match = pattern_match && pattern[index] == *s;
-      }
-    }
-    if pattern_match { return pattern_match; }
-  }
-  
-  return false;
-
 }
 
 pub fn count_matches(things : &Vec<Tile>, skip_id : u32, side : u32) -> u32 {
