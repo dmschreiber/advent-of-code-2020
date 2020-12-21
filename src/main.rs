@@ -218,6 +218,6 @@ fn main() {
     dec19::solve("./inputs/dec19.txt".to_string());
     println!("Day 19 complete in {:?}", start.elapsed());
     let start = Instant::now();
-    dec20::solve("./inputs/dec20.txt".to_string());
+    dec20::solve_part1("./inputs/dec20.txt".to_string());
     println!("Day 20 complete in {:?}", start.elapsed());
     }
