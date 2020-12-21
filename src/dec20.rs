@@ -36,16 +36,19 @@ impl Tile {
   fn all_rotations(&self) -> Vec<Vec<u32>> {
     let mut v = Vec::new();
 
+    // 0 degree; 90 degree; 180 degree; 270 degree rotation
     v.push(vec![self.sides[0],self.sides[1],self.sides[2],self.sides[3]]);
     v.push(vec![self.rev_sides[3],self.sides[0],self.rev_sides[1],self.sides[2]]);
     v.push(vec![self.rev_sides[2],self.rev_sides[3],self.rev_sides[0], self.rev_sides[1]]);
     v.push(vec![self.sides[1],self.rev_sides[2],self.sides[3], self.rev_sides[0]]);
 
+    // flip on vertical axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
     v.push(vec![self.sides[0],self.sides[3],self.sides[2],self.sides[1]]);
     v.push(vec![self.rev_sides[1],self.sides[0],self.rev_sides[3],self.sides[2]]);
     v.push(vec![self.rev_sides[2],self.rev_sides[1],self.rev_sides[0], self.rev_sides[3]]);
     v.push(vec![self.sides[3],self.rev_sides[2],self.sides[1], self.rev_sides[0]]);
 
+    // flip on horizontal axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
     v.push(vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]]);
     v.push(vec![self.sides[3],self.sides[2],self.sides[1],self.sides[0]]);
     v.push(vec![self.rev_sides[0],self.sides[3],self.rev_sides[2], self.sides[1]]);
@@ -167,7 +170,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
   let mut corners_vec : Vec<Tile> = corners.clone(); // values().cloned().collect();
 
   // println!("borders {:?}", borders_vec);
-
+  // SPECIAL CASE for 2x2; all corners no borders
   if width == 2 {
     let t = corners_vec[0].clone();
     let index = corners_vec.iter().position(|x| *x == t).unwrap();
@@ -193,10 +196,10 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
     }
 
     retval.insert((1,1),corners_vec[0].clone());
-
     return retval;
   }
 
+  // GENERAL CASE for widthxwidth where width>2
   for row in 0..width {
     for col in 0..width {
       // println!("{} {}", row, col);
@@ -355,6 +358,7 @@ pub fn count_matches(things : &Vec<Tile>, skip_id : u32, side : u32) -> u32 {
   for t in things {
     if t.id != skip_id {
       for rotation_sides in t.all_rotations() {
+        // let rotation_sides = &t.sides;
         let mut side_count = 0;
         for s in rotation_sides {
           if s == side { side_count += 1; }
@@ -451,6 +455,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
 
   // if I have inner tiles, copy my inner grid into my outer grid before I return it
   if inner.len() > 1 {
+    // build the border with my inner tiles (all over again)
     let sub_grid = border(&inner,next_corner_hint);
     for row in 0..size-2 {
       for col in 0..size-2 {
@@ -473,7 +478,6 @@ pub fn solve_part2(filename : String) {
   .expect("Something went wrong reading the file");
 
   let tiles : Vec<String> = contents.split("\n\n").map(|s| (&*s).to_string()).collect();
-  
   let mut things = Vec::new();
   let size = (tiles.len() as f64).sqrt() as u32;
 
@@ -482,9 +486,10 @@ pub fn solve_part2(filename : String) {
     things.push(make_tile(lines));
   }
 
-
+  // call to make the successive borders
   let grid = border(&things,None);
 
+  // display the tile ids in formation
   for row in 0..size {
     for col in 0..size {
       if let Some(t) = grid.get(&(row,col)) {
