@@ -318,17 +318,24 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> 
       }
     }     
   }
-  for row in 0..WIDTH {
-    for col in 0..WIDTH {
-      if let Some(t) = retval.get(&(row,col)) {
-        print!(" {:4} ", t.id);
-      } else {
-        print!(" ???? ");
+
+  retval
+}
+
+pub fn check_fit(t : Tile, pattern : Vec<u32>) -> bool {
+
+  for rotation_sides in t.all_rotations() {
+    let mut pattern_match = true;
+    for (index,s) in rotation_sides.iter().enumerate() {
+      if pattern[index] > 0 {
+        pattern_match = pattern_match && pattern[index] == *s;
       }
     }
-    println!();
+    if pattern_match { return pattern_match; }
   }
-  retval
+  
+  return false;
+
 }
 
 pub fn count_matches(things : &Vec<Tile>, skip_id : u32, side : u32) -> u32 {
@@ -365,7 +372,7 @@ pub fn get_match(things : &Vec<Tile>, skip_id : u32, side : u32) -> Option<Tile>
 None
 }
 
-pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
+pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u32),Tile> {
   let mut corners = vec![]; // std::collections::HashMap::<u32,Tile>::new();
   let mut borders = vec![]; // std::collections::HashMap::<u32,Tile>::new();
   let mut inner = vec![];
@@ -380,7 +387,15 @@ pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
         }
       }
       if unique_sides == 2 {
-        corners.push(t.clone());
+        if let Some(id) = corner_hint {
+          if id == t.id {
+            corners.insert(0,t.clone());
+          } else {
+            corners.push(t.clone());
+          }
+        } else {
+          corners.push(t.clone());
+        }
         corners.dedup();
       } else if unique_sides == 1 {
         borders.push(t.clone());
@@ -395,10 +410,44 @@ pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
   println!("{} Tiles", things.len());
 
   let size = (things.len() as f64).sqrt() as u32;
-  let grid = build_border(&corners, &borders, size);
-  println!("0-1 {}", grid.get(&(0,1)).unwrap().id);
-  println!("1-0 {}", grid.get(&(1,0)).unwrap().id);
-  inner
+  let mut grid = build_border(&corners, &borders, size);
+
+  let mut upper_left_corner = vec![];
+  upper_left_corner.push(grid.get(&(0,1)).unwrap().clone());
+  upper_left_corner.push(grid.get(&(1,0)).unwrap().clone());
+
+  let mut corner_id = 0;
+  for t in &inner {
+    for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
+      let mut unique_matches = 0;
+      for (_index,s) in rotation.iter().enumerate() {
+        let c = count_matches(&upper_left_corner, t.id, *s);
+        if c == 1 {
+          unique_matches += 1;
+        }
+      }
+      if unique_matches == 2 {
+          corner_id = t.id;
+          break;
+      }
+    }
+  }
+
+  if inner.len() > 4 {
+    let sub_grid = border(&inner,Some(corner_id));
+    for row in 0..size-2 {
+      for col in 0..size-2 {
+        println!("Getting {} {} from subgrid", row, col);
+        if let Some(t) = sub_grid.get(&(row,col)) {
+          grid.insert((row+1,col+1),t.clone());
+
+        }
+      }
+    }
+    grid
+  } else {
+    grid
+  }
 }
 
 pub fn solve_part2(filename : String) {
@@ -408,6 +457,7 @@ pub fn solve_part2(filename : String) {
   let tiles : Vec<String> = contents.split("\n\n").map(|s| (&*s).to_string()).collect();
   
   let mut things = Vec::new();
+  let size = (tiles.len() as f64).sqrt() as u32;
 
   for tile in tiles {
     let lines : Vec<String> = tile.lines().map(|s| (&*s).to_string()).collect();
@@ -415,10 +465,17 @@ pub fn solve_part2(filename : String) {
   }
 
 
-  let mut inner = border(&things);
-  println!("{}", inner.len());
-  while inner.len() > 1 {
-    inner = border(&inner);
+  let grid = border(&things,None);
+
+  for row in 0..size {
+    for col in 0..size {
+      if let Some(t) = grid.get(&(row,col)) {
+        print!(" {:4} ", t.id);
+      } else {
+        print!(" ???? ");
+      }
+    }
+    println!();
   }
 
 }
