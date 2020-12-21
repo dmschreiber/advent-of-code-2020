@@ -15,7 +15,6 @@ mod tests {
 
 use std::fs;
 use regex::Regex;
-use std::time::{Instant};
 use std::collections::HashMap;
 
 // 
@@ -104,7 +103,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   v.dedup_by(|a, b| format!("{}:{}",a.ingredients.join("~"),a.allergens.join("~"))
                 ==  format!("{}:{}",b.ingredients.join("~"),b.allergens.join("~")));
   // println!("--> From {} to {} foods", things.len(), v.len());
-  for (index,t) in v.iter().enumerate() {
+  for (index,_t) in v.iter().enumerate() {
     // println!("{:?} {:?}", t.allergens, t.ingredients);
     if index == 10 { break; }
   }
