@@ -115,3 +115,9 @@ Day 19 part 1 complete in 183.217939ms
 3803x3539x1571x1439=30425930368573 in 1.618080383s
 Day 20 complete in 1.621750835s
 ```
+```
+Day 21 Crtical allergens ["dairy", "fish", "nuts", "peanuts", "sesame", "shellfish", "soy", "wheat"]
+Day 21 part 2 - Crtitical ingredients lmzg,cxk,bsqh,bdvmx,cpbzbx,drbm,cfnt,kqprv
+Day 21 part 1 2162
+Day 21 complete in 932.130034ms
+```

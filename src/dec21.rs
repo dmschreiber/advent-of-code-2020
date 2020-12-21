@@ -3,7 +3,7 @@ mod tests {
 
   #[test]
   pub fn dec21_prod() {
-    println!("Day 21 part 1 {}", super::solve_part1("./inputs/dec21.txt".to_string()));
+    assert!(2162==super::solve_part1("./inputs/dec21.txt".to_string()));
     // super::solve_part2("./inputs/dec21.txt".to_string());
 
   }
@@ -63,7 +63,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
       let result2 = find_common(&t1.ingredients,&t2.ingredients, &ignore_ingredients);
 
       if result1.len() == 1 && result2.len() == 1 {
-        println!("{:?} - {:?}", result1, result2);
+        // println!("{:?} - {:?}", result1, result2);
         allergen_map.insert(result1[0].to_string(),result2[0].to_string());
       } else if result1.len() == 1 {
         let this_allergen = result1[0].clone();
@@ -81,10 +81,10 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
       }
     }
   }
-  v.sort_by(|a, b| a.allergens[0].cmp(&b.allergens[0] ));
+  // v.sort_by(|a, b| a.allergens[0].cmp(&b.allergens[0] ));
   v.dedup_by(|a, b| format!("{}:{}",a.ingredients.join("~"),a.allergens.join("~"))
                 ==  format!("{}:{}",b.ingredients.join("~"),b.allergens.join("~")));
-  println!("--> From {} to {} foods", things.len(), v.len());
+  // println!("--> From {} to {} foods", things.len(), v.len());
   for (index,t) in v.iter().enumerate() {
     // println!("{:?} {:?}", t.allergens, t.ingredients);
     if index == 10 { break; }
@@ -96,7 +96,8 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
     } else {
       let mut retval = vec![];
       println!("Allergens {}", unique_allergens.join(", "));
-      for _i in 0..2 {
+      while allergen_map.keys().len() < unique_allergens.len() {
+      // for _i in 0..2 {
         for a in &unique_allergens {
           retval = reduce_list(&v, allergen_map,Some(a.to_string()));
 
@@ -146,11 +147,11 @@ pub fn solve_part1(filename : String) -> u64 {
     }
   }
   println!();
-  println!("Map {:?}", allergen_map);
+  // println!("Map {:?}", allergen_map);
   let mut critical_allergens : Vec<String> = allergen_map.keys().map(|s| s.to_string()).collect();
   critical_allergens.sort();
-  println!("Crtical allergens {:?}", critical_allergens);
-  println!("Crtitical ingredients {}", critical_allergens.iter().map(|a| allergen_map.get(a).unwrap().to_string() ).collect::<Vec<String>>().join(","));
+  println!("Day 21 Crtical allergens {:?}", critical_allergens);
+  println!("Day 21 part 2 - Crtitical ingredients {}", critical_allergens.iter().map(|a| allergen_map.get(a).unwrap().to_string() ).collect::<Vec<String>>().join(","));
 
   return retval;
 }
