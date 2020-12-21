@@ -109,7 +109,22 @@ Day 18 complete in 13.225364ms
 
 ```
 Day 19 part 1 complete in 183.217939ms
+Day 20 part 2 ** incomplete **
 ```
+
+```
+3803x3539x1571x1439=30425930368573 in 1.618080383s
+Day 20 complete in 1.621750835s
+Day 20 part 2 ** incomplete **
+```
+
+```
+Day 21 Crtical allergens ["dairy", "fish", "nuts", "peanuts", "sesame", "shellfish", "soy", "wheat"]
+Day 21 part 1 2162
+Day 21 part 2 - Crtitical ingredients lmzg,cxk,bsqh,bdvmx,cpbzbx,drbm,cfnt,kqprv
+Day 21 complete in 932.130034ms
+```
+
 ### Day 19 Part 2 Notes:
 My matching algorithm isn't working with the modified rules (it processes, but not correctly according to the test data set)
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
@@ -119,10 +134,6 @@ Next steps:
 - Instead of changing the two rules, implement the newly modified Rule 0 manually to account for the looping cases.
 - Recognize that the parts of the modified rule themselves aren't modified.
 
-```
-3803x3539x1571x1439=30425930368573 in 1.618080383s
-Day 20 complete in 1.621750835s
-```
 
 ### Day 20 part 2 notes:
 My algorithm now seems to successfully create a grid of tiles that correctly match one another.
@@ -132,10 +143,3 @@ Next steps:
 - collect up all the tiles correctly oriented inner pattern
 - figure out if the assembled image is oriented correctly (flip or rotate)
 - search for the sea monsters; count the # symbols and subtract the SeaMonsterCount*N(sea_monster)
-
-```
-Day 21 Crtical allergens ["dairy", "fish", "nuts", "peanuts", "sesame", "shellfish", "soy", "wheat"]
-Day 21 part 1 2162
-Day 21 part 2 - Crtitical ingredients lmzg,cxk,bsqh,bdvmx,cpbzbx,drbm,cfnt,kqprv
-Day 21 complete in 932.130034ms
-```
