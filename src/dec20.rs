@@ -3,18 +3,19 @@ mod tests {
 
   #[test]
   pub fn dec20_prod() {
-    super::solve("./inputs/dec20.txt".to_string());
+    assert!(30425930368573==super::solve("./inputs/dec20.txt".to_string()));
 
   }
   #[test]
   pub fn dec20_test() {
-      super::solve("./inputs/dec20-test.txt".to_string());
+      assert!(20899048083289==super::solve("./inputs/dec20-test.txt".to_string()));
   }  
 }
 
 use std::fs;
 use regex::Regex;
 use std::time::{Instant};
+use std::collections::HashMap;
 
 lazy_static! {
   static ref TILE_ID_REGEX: Regex = Regex::new(r"^Tile (\d+):$").unwrap();
@@ -106,7 +107,7 @@ pub fn make_tile(lines : Vec<String>) -> Tile {
   panic!("never returned a tile");
 }
 
-pub fn solve(filename : String) {
+pub fn solve(filename : String) -> u64 {
     let contents = fs::read_to_string(filename)
     .expect("Something went wrong reading the file");
   
@@ -124,13 +125,15 @@ pub fn solve(filename : String) {
     let start = Instant::now();
 
     let mut corners = std::collections::HashMap::<u32,Tile>::new();
+    let mut borders = std::collections::HashMap::<u32,Tile>::new();
+    let mut inner = std::collections::HashMap::<u32,Tile>::new();
     for t in &things {
-      println!("Trying {}", t.id);
-      for (r_index,rotation) in t.all_rotations().iter().enumerate() {
+      // println!("Trying {}", t.id);
+      for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
         let mut unique_sides = 0;
-        for (index,s) in rotation.iter().enumerate() {
+        for (_index,s) in rotation.iter().enumerate() {
           let c = count_matches(&things,t.id,*s);
-          // println!("Tile {} rotation {:?} {} side index {} with value {} is {} others", t.id, rotation, r_index, index, *s, c);
+          println!("Tile {} rotation {:?} {} side index {} with value {} is {} others", t.id, rotation, _r_index, _index, *s, c);
           if c == 0 {
             unique_sides += 1;
           }
@@ -138,17 +141,172 @@ pub fn solve(filename : String) {
         if unique_sides == 2 {
           // println!("{:?} rotation {:?} has {} unique sides", t, rotation, unique_sides);
           corners.insert(t.id, t.clone());
+        } else if unique_sides == 1 {
+          borders.insert(t.id, t.clone());
+        } else {
+          inner.insert(t.id, t.clone());
         }
       }
     }
-
+    println!("{} Tiles", things.len());
+    println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
     let mut retval : u64 = 1;
     for c in corners.values() {
-      println!("{}", c.id);
+      println!("{}", c.id );
       retval = retval * c.id as u64;
     }
     println!("{}={} in {:?}", corners.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join("x"), retval, start.elapsed());
+    build_border(&corners, &borders);
+    retval
+}
+
+pub fn build_border(corners : &HashMap<u32,Tile>, borders : &HashMap<u32,Tile>) -> HashMap<(u32,u32),Tile> {
+  let mut retval = std::collections::HashMap::<(u32,u32),Tile>::new();
+  let mut borders_vec : Vec<Tile> = borders.values().cloned().collect();
+  let mut corners_vec : Vec<Tile> = corners.values().cloned().collect();
+
+  let WIDTH = 3;
+
+  println!("borders {:?}", borders_vec);
+
+  for row in 0..WIDTH {
+    for col in 0..WIDTH {
+      println!("{} {}", row, col);
+      if row == 0 && col == 0 {
+        let t = corners_vec[0].clone();
+        let index = corners_vec.iter().position(|x| *x == t).unwrap();
+        corners_vec.remove(index);
+
+        let t_id = t.id;
+        println!("Tile: {}", t_id);
+        retval.insert((row,col),t.clone());
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
+
+          if v == vec![0,1,1,0] {
+            let t1 = get_match(&borders_vec, t_id, rotation_sides[1]).unwrap().clone();
+            let index = borders_vec.iter().position(|x| *x == t1).unwrap();
+            borders_vec.remove(index);
+            retval.insert((0,1),t1);
+
+            let t2 = get_match(&borders_vec, t_id, rotation_sides[2]).unwrap().clone();
+            let index = borders_vec.iter().position(|x| *x == t2).unwrap();
+            borders_vec.remove(index);
+            retval.insert((1,0),t2);
+    
+            break;
+          }
+        }
+      } else if row == 0 && col == WIDTH-2 {
+        let t = retval.get(&(row,col)).unwrap().clone();
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
+          if v == vec![0,1,0,0] {
+
+            let t1 = get_match(&corners_vec, t.id, rotation_sides[1]).unwrap().clone();
+            let index = corners_vec.iter().position(|x| *x == t1).unwrap();
+            corners_vec.remove(index);
+            retval.insert((row,col+1),t1);
+
+            break;
+          }
+        }
+      } else if row == WIDTH-2 && col == 0 {
+        let t = retval.get(&(row,col)).unwrap().clone();
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
+          if v == vec![0,0,1,0] {
+
+            let t1 = get_match(&corners_vec, t.id, rotation_sides[2]).unwrap().clone();
+            let index = corners_vec.iter().position(|x| *x == t1).unwrap();
+            corners_vec.remove(index);
+            retval.insert((row+1,col),t1);
+
+            break;
+          }
+        }
+
+      } else if row == 0 && col == WIDTH-1 {
+        let t = retval.get(&(row,col)).unwrap().clone();
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
+          if v == vec![0,0,1,0] {
+
+            let t1 = get_match(&borders_vec, t.id, rotation_sides[2]).unwrap().clone();
+            let index = borders_vec.iter().position(|x| *x == t1).unwrap();
+            borders_vec.remove(index);
+            retval.insert((row+1,col),t1);
+
+            break;
+          }
+        }
+
+      } else if row == WIDTH-1 && col == 0 { // LL corner
+        let t = retval.get(&(row,col)).unwrap().clone();
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
+          if v == vec![0,1,0,0] {
+
+            let t1 = get_match(&borders_vec, t.id, rotation_sides[1]).unwrap().clone();
+            let index = borders_vec.iter().position(|x| *x == t1).unwrap();
+            borders_vec.remove(index);
+            retval.insert((row,col+1),t1);
+
+            break;
+          }
+        }
+
+      } else if row == WIDTH-1 && col == WIDTH-2 { // second from lower right corner
+        let t = retval.get(&(row,col)).unwrap().clone();
+        for rotation_sides in t.all_rotations() {
+          let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
+          if v == vec![0,1,0,0] {
+
+            let t1 = get_match(&corners_vec, t.id, rotation_sides[1]).unwrap().clone();
+            let index = corners_vec.iter().position(|x| *x == t1).unwrap();
+            corners_vec.remove(index);
+            retval.insert((row,col+1),t1);
+
+            break;
+          }
+        }
+
+      } else if col == 0 || col == WIDTH-1 {
+        let t = retval.get(&(row,col)).unwrap();
+        if retval.get(&(row+1,col)) == None {
+          for rotation_sides in t.all_rotations() {
+            let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
+            if v == vec![0,0,1,0] {
+  
+              let t1 = get_match(&borders_vec, t.id, rotation_sides[2]).unwrap().clone();
+              let index = borders_vec.iter().position(|x| *x == t1).unwrap();
+              corners_vec.remove(index);
+              retval.insert((row+1,col),t1);
+  
+              break;
+            }
+          }
+  
+        }
+      }  else if col > 0 && row > 0 && col < WIDTH-1 && row < WIDTH-1 {
+        println!("NO LOGIC - INSIDE");
+        // retval.get(&(row,col)).unwrap();
+
+      }
+    }     
   }
+  for row in 0..3 {
+    for col in 0..3 {
+      if let Some(t) = retval.get(&(row,col)) {
+        print!(" {:4} ", t.id);
+      } else {
+        print!(" ???? ");
+      }
+    }
+    println!();
+  }
+  retval
+}
 
 pub fn count_matches(things : &Vec<Tile>, skip_id : u32, side : u32) -> u32 {
   let mut retval = 0;
@@ -156,12 +314,30 @@ pub fn count_matches(things : &Vec<Tile>, skip_id : u32, side : u32) -> u32 {
   for t in things {
     if t.id != skip_id {
       for rotation_sides in t.all_rotations() {
+        let mut side_count = 0;
         for s in rotation_sides {
-          if s == side { retval += 1; }
+          if s == side { side_count += 1; }
         }
+        retval = std::cmp::max(retval,side_count);
       }
     }
   }
   
   retval
+}
+
+pub fn get_match(things : &Vec<Tile>, skip_id : u32, side : u32) -> Option<Tile> {
+
+  for t in things {
+  if t.id != skip_id {
+    for rotation_sides in t.all_rotations() {
+      for s in rotation_sides {
+        if s == side {
+          return Some(t.clone());
+        }
+      }
+    }
+  }
+}
+None
 }

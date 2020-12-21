@@ -106,3 +106,12 @@ Day 18 part 1 650217205854
 Day 18 part 2 20394514442037
 Day 18 complete in 13.225364ms
 ```
+
+```
+Day 19 part 1 complete in 183.217939ms
+```
+
+```
+3803x3539x1571x1439=30425930368573 in 1.618080383s
+Day 20 complete in 1.621750835s
+```

@@ -38,7 +38,7 @@ mod tests {
     // println!("{:?}",super::does_match(&rules,42,Some("bbaabaaaaababaa".to_string()),None));
     // println!("{:?}",super::does_match(&rules,11,Some("aaaaababaa".to_string()),None));
 
-    let (mut rules,messages_lines) = super::load_rules("./inputs/dec19-test3.txt".to_string());
+    let (rules,messages_lines) = super::load_rules("./inputs/dec19-test3.txt".to_string());
     println!("Test 3 {:?}",super::solve_part1(&rules, &messages_lines));
 
   }  
