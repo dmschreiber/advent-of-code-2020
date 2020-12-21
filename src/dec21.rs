@@ -51,10 +51,11 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   let mut unique_allergens = vec![];
 
   let my_things = things.iter().filter(|a| filter_by == None || a.allergens[0] == filter_by.clone().unwrap() );
-
+  if things.len() == 1 { return things.clone(); };
+  
   for t1 in my_things {
     for t2 in things {
-      if t1 == t2 { break; }
+      if t1 == t2 { break; } // uncomment for test; need to find out why
 
       let ignore_allergens = allergen_map.keys().map(|s| s.to_string()).collect();
       let ignore_ingredients = allergen_map.values().map(|s| s.to_string()).collect();
