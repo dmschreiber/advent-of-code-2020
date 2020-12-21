@@ -161,10 +161,10 @@ pub fn solve_part1(filename : String) -> u64 {
     retval
 }
 
-pub fn build_border(corners : &HashMap<u32,Tile>, borders : &HashMap<u32,Tile>, WIDTH : u32) -> HashMap<(u32,u32),Tile> {
+pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, WIDTH : u32) -> HashMap<(u32,u32),Tile> {
   let mut retval = std::collections::HashMap::<(u32,u32),Tile>::new();
-  let mut borders_vec : Vec<Tile> = borders.values().cloned().collect();
-  let mut corners_vec : Vec<Tile> = corners.values().cloned().collect();
+  let mut borders_vec : Vec<Tile> = borders.clone(); // borders.values().cloned().collect();
+  let mut corners_vec : Vec<Tile> = corners.clone(); // values().cloned().collect();
 
   // let WIDTH = 3;
 
@@ -366,8 +366,8 @@ None
 }
 
 pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
-  let mut corners = std::collections::HashMap::<u32,Tile>::new();
-  let mut borders = std::collections::HashMap::<u32,Tile>::new();
+  let mut corners = vec![]; // std::collections::HashMap::<u32,Tile>::new();
+  let mut borders = vec![]; // std::collections::HashMap::<u32,Tile>::new();
   let mut inner = vec![];
 
   for t in things {
@@ -380,16 +380,18 @@ pub fn border (things : &Vec<Tile>) -> Vec<Tile> {
         }
       }
       if unique_sides == 2 {
-        corners.insert(t.id, t.clone());
+        corners.push(t.clone());
+        corners.dedup();
       } else if unique_sides == 1 {
-        borders.insert(t.id, t.clone());
+        borders.push(t.clone());
+        borders.dedup();
       } else {
         inner.push(t.clone());
         inner.dedup();
       }
     }
   }
-  println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
+  // println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
   println!("{} Tiles", things.len());
 
   let size = (things.len() as f64).sqrt() as u32;
