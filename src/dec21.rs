@@ -50,12 +50,30 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   let mut should_continue = false;
   let mut unique_allergens = vec![];
 
+  let mut allergen_count = HashMap::<String,u32>::new();
+  for t in things {
+    for a in &t.allergens {
+      if let Some(unique_a) = allergen_count.get_mut(a) {
+        *unique_a = *unique_a + 1;
+      } else {
+        allergen_count.insert(a.clone(),1);
+      }
+    }
+  }
+
+  // Can skip matching myself unless an allergen only appears once
+  let fast_forward = allergen_count.values().filter(|a| **a == 1).collect::<Vec<_>>().len() == 0;
+
   let my_things = things.iter().filter(|a| filter_by == None || a.allergens[0] == filter_by.clone().unwrap() );
   if things.len() == 1 { return things.clone(); };
   
   for t1 in my_things {
     for t2 in things {
-      if filter_by != None && t1 == t2 { break; } // works for prod and test; slower prod
+      if fast_forward {
+        if t1 == t2 { break; }
+      } else {
+        if filter_by != None && t1 == t2 { break; } // works for prod and test; slower prod
+      }
 
       let ignore_allergens = allergen_map.keys().map(|s| s.to_string()).collect();
       let ignore_ingredients = allergen_map.values().map(|s| s.to_string()).collect();
@@ -85,7 +103,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
   // v.sort_by(|a, b| a.allergens[0].cmp(&b.allergens[0] ));
   v.dedup_by(|a, b| format!("{}:{}",a.ingredients.join("~"),a.allergens.join("~"))
                 ==  format!("{}:{}",b.ingredients.join("~"),b.allergens.join("~")));
-  println!("--> From {} to {} foods", things.len(), v.len());
+  // println!("--> From {} to {} foods", things.len(), v.len());
   for (index,t) in v.iter().enumerate() {
     // println!("{:?} {:?}", t.allergens, t.ingredients);
     if index == 10 { break; }
@@ -96,7 +114,7 @@ pub fn reduce_list (things : &Vec<Food>, allergen_map : &mut HashMap::<String,St
       return reduce_list(&v, allergen_map,Some(unique_allergens[0].clone()));
     } else {
       let mut retval = vec![];
-      println!("Allergens {}", unique_allergens.join(", "));
+      // println!("Allergens {}", unique_allergens.join(", "));
       while allergen_map.keys().len() < unique_allergens.len() {
       // for _i in 0..2 {
         for a in &unique_allergens {

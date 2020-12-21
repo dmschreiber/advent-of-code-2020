@@ -130,14 +130,16 @@ My matching algorithm isn't working with the modified rules (it processes, but n
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
 I find that I run out of string and am still trying to match, unsure whether that's failure or success.
 My matching in the OR case with different arguments on the left & right mean I needed to potentially go back to the beginning of my Basic2 upon failing the second Argument (rather than just fail)
-Next steps:
+
+#### Next steps:
 - Instead of changing the two rules, implement the newly modified Rule 0 manually to account for the looping cases.
 - Recognize that the parts of the modified rule themselves aren't modified.
 
 
 ### Day 20 part 2 notes:
 My algorithm now seems to successfully create a grid of tiles that correctly match one another.
-Next steps:
+
+#### Next steps:
 - find the right orientation for each tile given their position
 - strip the border or each tile, rotate to the right orientation and emit the inner pattern
 - collect up all the tiles correctly oriented inner pattern
