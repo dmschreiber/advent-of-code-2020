@@ -11,6 +11,7 @@ mod tests {
   pub fn dec22_test() {
       assert!(306==super::solve_part1("./inputs/dec22-test.txt".to_string()));
       assert!(291==super::solve_part2("./inputs/dec22-test.txt".to_string()));
+      println!("{}",super::format_deck_v2(&vec![45,35,48,34,42,18,32,11,47,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13]));
   }  
 }
 
@@ -71,8 +72,14 @@ pub fn solve_part1(filename : String) -> u64 {
 
 // 1~2~3
 fn format_deck(d : &Vec<u32>) -> String {
-  let deck_string = d.iter().map(|n| n.to_string()).collect::<Vec<String>>().join("~");
+  let deck_string = d.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
+  // println!("{}", deck_string);
   return deck_string;
+}
+
+fn format_deck_v2(d : &Vec<u32>) -> u64 {
+  let deck : u64 = d.iter().fold(0, |acc, n| (acc << 6) as u64 + *n as u64);
+  return deck;
 }
 
 fn play_combat(p1 : Vec<u32>, p2 : Vec<u32>, sub_game_history : &mut HashMap::<String,u32>, game : u32) -> (u32,Vec<u32>) {
@@ -85,7 +92,12 @@ fn play_combat(p1 : Vec<u32>, p2 : Vec<u32>, sub_game_history : &mut HashMap::<S
   let mut winner = 0;
   while winner == 0 
   {
-    if game == 1 { println!("Game {} round {} (history {})", game, round, sub_game_history.keys().len()); }
+    if game <= 5 { 
+      println!("Game {} round {} (history {})", game, round, sub_game_history.keys().len()); 
+      // if sub_game_history.keys().len() > 0 {
+      //   println!("{:?}", sub_game_history);
+      // }
+    }
     // if cards are in teh same order as in past, player 1 wins
     let current_decks = format!("{}:{}",format_deck(&player1), format_deck(&player2));
     if deck_history.contains(&current_decks) 
@@ -109,7 +121,6 @@ fn play_combat(p1 : Vec<u32>, p2 : Vec<u32>, sub_game_history : &mut HashMap::<S
         let current_decks = format!("{}:{}",format_deck(&player1), format_deck(&player2));
         if let Some(w) = sub_game_history.get(&current_decks) {
           round_winner = *w;
-
         } else {
           let (sub_game_winner, _deck) = play_combat(player1.clone(), player2.clone(), sub_game_history, game+1);
           sub_game_history.insert(current_decks, sub_game_winner);
