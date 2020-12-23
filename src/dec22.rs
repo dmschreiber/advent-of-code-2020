@@ -3,16 +3,35 @@ mod tests {
 
   #[test]
   pub fn dec22_prod() {
-    super::solve_part1("./inputs/dec22.txt".to_string());
-    super::solve_part2("./inputs/dec22.txt".to_string());
+    assert!(29764==super::solve_part1("./inputs/dec22.txt".to_string()));
+    assert!(32556!=super::solve_part2("./inputs/dec22.txt".to_string()));
 
   }
   #[test]
   pub fn dec22_test() {
       assert!(306==super::solve_part1("./inputs/dec22-test.txt".to_string()));
       assert!(291==super::solve_part2("./inputs/dec22-test.txt".to_string()));
-      super::format_deck_v3(&vec![45,35,48,34,42,18,32,11,47,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13]);
-      super::format_deck_v3(&vec![45,35,48,34,42,18,32,47,11,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13]);
+      // let sample = vec![45,35,48,34,42,18,32,11,47,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13];
+      // let sample2 = vec![42,32,48,32,42,12,32,12,42,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13];
+
+      // let sample = vec![45,35,48];
+      // let sample2 = vec![42,32,48];
+      // let sample = vec![45,35,48,34,42,18,32,11,47,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13];
+      // let sample2 = vec![42,32,48,32,42,12,32,12,42,38,37,5,46,28,25,24,33,26,44,29,31,17,43,27,49,30,36,13];
+
+      // println!("v1 sample {}", super::format_deck_v2(&sample));
+      // println!("v1 sample2 {}", super::format_deck_v2(&sample2));
+      // println!("v2p1 {}",super::format_deck_v2(&sample) << 32 + super::format_deck_v2(&sample2));
+      // println!("v2p2 {}",super::format_deck_v2(&sample2) << 32 + super::format_deck_v2(&sample));
+      // println!("v3 {}",super::format_deck_v3(&sample));
+      // println!("{}",u64::MAX);
+      // println!("{}", super::format_deck_v3(&sample));
+      // println!("{}", super::format_deck_v3(&sample2));
+      // assert!(u32::MAX as u128 > super::format_deck_v3(&sample));
+      // assert!(u32::MAX as u128 > super::format_deck_v3(&sample2));
+      // println!("v3p1 {}", super::format_deck_v3(&sample) << 32 + super::format_deck_v3(&vec![1,2,3,4,5,6]));
+      // println!("v3p2 {}", super::format_deck_v3(&sample) << 32 as u128 + super::format_deck_v3(&vec![7,8,9,10,11]));
+
   }  
 }
 
@@ -20,7 +39,7 @@ use std::fs;
 use regex::Regex;
 use std::collections::HashMap;
 use std::time::{Instant};
-use sha2::{Sha256, Digest};
+// use sha1::{Sha256, Digest};
 
 
 pub fn solve_part1(filename : String) -> u64 {
@@ -44,11 +63,11 @@ pub fn solve_part1(filename : String) -> u64 {
     player1.remove(0);
     player2.remove(0);
     if card1 > card2 {
-      println!("{} v {}, player 1 wins", card1, card2);
+      // println!("{} v {}, player 1 wins", card1, card2);
       player1.insert(player1.len(),card1);
       player1.insert(player1.len(), card2);
     } else {
-      println!("{} v {}, player 2 wins", card1, card2);
+      // println!("{} v {}, player 2 wins", card1, card2);
       player2.insert(player2.len(), card2);
       player2.insert(player2.len(),card1);
     }
@@ -87,19 +106,17 @@ fn format_deck_v2(d : &Vec<u32>) -> u128 {
   return deck;
 }
 
-fn format_deck_v3(d : &Vec<u32>) -> u64 {
-
-  // process input message
-  let deck_string = d.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
-
-  // acquire hash digest in the form of GenericArray,
-  // which in this case is equivalent to [u8; 20]
-
-  // println!("{} {}", result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
-  let mut s = sha2::Sha256::new();
-  s.input(deck_string.as_bytes());
-  let retval = s.result()[..].iter().fold(0, |acc,n| (acc << 8) as u64 + *n as u64);
-  println!("{:?}",retval);
+fn format_deck_v3(d : &Vec<u32>) -> u128 {
+  let retval = 0;
+  // // process input message
+  // let deck_string = d.iter().map(|n| n.to_string()).collect::<Vec<String>>().join(",");
+  // // println!("{} {}", result[..], hex!("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed"));
+  // let mut s = sha1::Sha256::new();
+  // s.input(deck_string.as_bytes());
+  // let v : Vec<u8> = s.result()[..].iter().map(|a| *a).collect();
+  // println!("{:?} {}", v, v.len());
+  // let retval = v.iter().fold(0, |acc,n| (acc << 8) as u128 + *n as u128);
+  // // println!("{:?}",retval);
   retval
 }
 
@@ -113,7 +130,7 @@ fn get_loser(w : u32) -> u32 {
   return ed;
 }
 
-fn play_combat(p1 : &Vec<u32>, p2 : &Vec<u32>, sub_game_history : &mut HashMap::<(u32,u128,u128),u32>, game : u32) -> (u32,Vec<u32>) {
+fn play_combat(p1 : &Vec<u32>, p2 : &Vec<u32>, sub_game_history : &mut HashMap::<String,u32>, game : u32) -> (u32,Vec<u32>) {
   let start = Instant::now();
 
   // println!("Let's play game {}", game);
@@ -126,7 +143,9 @@ fn play_combat(p1 : &Vec<u32>, p2 : &Vec<u32>, sub_game_history : &mut HashMap::
   while winner == 0 
   {
     if game <= 3 { 
-      println!("Game {} round {} (history {}) player 1: {} player 2: {}", game, round, sub_game_history.keys().len(), player1.len(), player2.len()); 
+      // println!("Game {} round {} (history {}) player 1: {} player 2: {}", game, round, sub_game_history.keys().len(), player1.len(), player2.len()); 
+      // println!("--Player 1's deck: {:?}", player1);
+      // println!("--Player 2's deck: {:?}", player2);
     }
     // if cards are in teh same order as in past, player 1 wins
     let current_decks = (format_deck_v2(&player1),format_deck_v2(&player2));
@@ -149,19 +168,22 @@ fn play_combat(p1 : &Vec<u32>, p2 : &Vec<u32>, sub_game_history : &mut HashMap::
       let round_winner;
       if player1.len() >= card1 as usize && player2.len() >= card2 as usize {
         if game <= 3 { 
-          println!("playing a subgame to determine winner");
+          // println!("playing a subgame to determine winner");
         }
         // let local_start = Instant::now();
-        let current_decks = (game, format_deck_v2(&player1),format_deck_v2(&player2));
+
+        let current_decks = format!("{}:{}",format_deck(&player1), format_deck(&player2));
         
         let history_w = sub_game_history.get(&current_decks);
 
         if let Some(w) = history_w {
           round_winner = *w;
         } else {
-          let (sub_game_winner, _deck) = play_combat(&player1, &player2, sub_game_history, game+1);
+          let (sub_game_winner, _deck) = play_combat(&player1[..card1 as usize].to_vec(), &player2[..card2 as usize].to_vec(), sub_game_history, game+1);
           sub_game_history.insert(current_decks, sub_game_winner);
-          sub_game_history.insert((current_decks.0,current_decks.2,current_decks.1),get_loser(sub_game_winner));
+
+          let current_decks = format!("{}:{}",format_deck(&player2), format_deck(&player1));
+          sub_game_history.insert(current_decks,get_loser(sub_game_winner));
           round_winner = sub_game_winner;
         }
       } else {
@@ -189,7 +211,7 @@ fn play_combat(p1 : &Vec<u32>, p2 : &Vec<u32>, sub_game_history : &mut HashMap::
   }
   // println!("Game winner player {}", winner);
   if game == 4 {
-   println!("Level {} took {:?}", game, start.elapsed());
+  //  println!("Level {} took {:?}", game, start.elapsed());
   }
 
   if winner == 1 {

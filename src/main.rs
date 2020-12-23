@@ -230,5 +230,7 @@ fn main() {
 
     let start = Instant::now();
     println!("Day 22 part 1 {}", dec22::solve_part1("./inputs/dec22.txt".to_string()));
+    println!("Day 22 part 2 {}", dec22::solve_part2("./inputs/dec22.txt".to_string()));
+    
     println!("Day 22 complete in {:?}", start.elapsed());
 }
