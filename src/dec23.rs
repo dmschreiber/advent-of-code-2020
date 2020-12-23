@@ -3,8 +3,8 @@ mod tests {
 
   #[test]
   pub fn dec23_prod() {
-    println!("Day 23 part 1 {}", super::solve_part1("364289715".to_string(),100));
-    assert!(98645732==super::solve_part1("364289715".to_string(),100));
+    println!("Day 23 part 1 {}", super::solve_part1("364289715".to_string(),100,false));
+    assert!(98645732==super::solve_part1("364289715".to_string(),100,false));
 
   }
   #[test]
@@ -17,8 +17,8 @@ mod tests {
 
     // assert!(25467389==super::solve_part1("389125467".to_string(),100));
 
-    assert!(92658374==super::solve_part1("389125467".to_string(),10));
-    assert!(67384529==super::solve_part1("389125467".to_string(),100));
+    assert!(92658374==super::solve_part1("389125467".to_string(),10,false));
+    assert!(67384529==super::solve_part1("389125467".to_string(),100,false));
       
     // assert!(149245887792==super::solve_part2("389125467".to_string(),1000));
     // assert!(149245887792==super::solve_part2("389125467".to_string(),10000000));
@@ -96,8 +96,17 @@ fn find(cup_vec : &Vec<u32>, target : u32) -> usize {
   return cup_vec.iter().position(|&r| r == target).unwrap();
 
 }
-pub fn solve_part1(cups : String, moves : u32) -> u32 {
+
+pub const MAX_CUPS : u32 = 100000;
+
+pub fn solve_part1(cups : String, moves : u32, part_two : bool) -> u32 {
   let mut cup_vec = cups.as_bytes().iter().map(|c| (*c - b'0') as u32).collect::<Vec<u32>>();
+  if part_two {
+    let max = cup_vec.iter().map(|n| *n).max().unwrap();
+    let mut cup_rest = (max+1..MAX_CUPS+1).collect::<Vec<u32>>();
+    cup_vec.append(&mut cup_rest);
+    assert!(cup_vec.len()==MAX_CUPS as usize);
+  }
 
   let mut current = cup_vec[0];
 
@@ -106,22 +115,11 @@ pub fn solve_part1(cups : String, moves : u32) -> u32 {
 
     cup_vec = adjust_cups(&cup_vec, current);
     // let subset = cup_vec[1..4].to_vec().clone();
-
-    let pick_up = &cup_vec[1..4].to_vec().clone();    
-    // let removed : Vec<_> = cup_vec.splice(1..4, vec![]).collect();
-
-    let d = get_destination_with_ignore(&cup_vec,current,&pick_up);
-    println!("destination is {}", cup_vec[d]); // add to ignore pick_up
-    // cup_vec[1..d].iter().map()
-    for pos in 1..=d-3 {
-      cup_vec.get_mut(pos);
-      cup_vec[pos] = cup_vec[pos+3];
-    }
-    cup_vec[d-2] = pick_up[0];
-    cup_vec[d-1] = pick_up[1];
-    cup_vec[d] = pick_up[2];
-
-    // cup_vec.splice(d+1..d+1, removed.iter().cloned());
+    
+    let removed : Vec<_> = cup_vec.splice(1..4, vec![]).collect();
+    let d = get_destination(&cup_vec,current);
+    // println!("destination is {}", cup_vec[d]); // add to ignore pick_up
+    cup_vec.splice(d+1..d+1, removed.iter().cloned());
 
     let current_index = find(&cup_vec, current);
     if current_index == cup_vec.len() - 1 {
@@ -140,7 +138,6 @@ pub fn solve_part1(cups : String, moves : u32) -> u32 {
 // PART 2 *****
 // 
 // 
-pub const MAX_CUPS : u32 = 100000;
 
 pub fn solve_part2(cups : String, moves : u32) -> u64 {
   let mut cup_vec = Vec::with_capacity(MAX_CUPS as usize);
