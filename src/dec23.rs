@@ -31,6 +31,7 @@ use std::fs;
 use std::iter;
 use regex::Regex;
 use std::collections::HashMap;
+use std::collections::LinkedList;
 use std::time::{Instant};
 // use sha1::{Sha256, Digest};
 
@@ -70,34 +71,12 @@ fn get_destination(cup_vec : &Vec<u32>, target : u32) -> usize {
 }
 
 
-fn get_destination_with_ignore(cup_vec : &Vec<u32>, target : u32, ignore : &Vec<u32>) -> usize {
-  let mut running_target = target - 1;
-  let mut dest = None;
-  let min = cup_vec.iter().map(|n| *n).min().unwrap();
-  let max = cup_vec.iter().map(|n| *n).max().unwrap();
-
-   while dest == None {
-    //  println!("min {}, max {}, dest {:?}, running_target {}", min, max, dest, running_target);
-    if !ignore.contains(&running_target) {
-      dest = cup_vec.iter().position(|&r| r == running_target);
-    }
-    if running_target < min {
-      running_target = max;
-    } else {
-      running_target = running_target - 1;
-    }
-  }
-  // println!("RETURNING min {}, max {}, dest {:?}, running_target {}", min, max, dest, running_target);
-
-  dest.unwrap()
-}
-
 fn find(cup_vec : &Vec<u32>, target : u32) -> usize {
   return cup_vec.iter().position(|&r| r == target).unwrap();
 
 }
 
-pub const MAX_CUPS : u32 = 100000;
+pub const MAX_CUPS : u32 = 1000000;
 
 pub fn solve_part1(cups : String, moves : u32, part_two : bool) -> u64 {
   let mut cup_vec = cups.as_bytes().iter().map(|c| (*c - b'0') as u32).collect::<Vec<u32>>();
