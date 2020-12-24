@@ -201,7 +201,7 @@ pub fn solve_part1(cups : String, moves : u32, part_two : bool) -> u64 {
     back_of_list.push_front(cup_list.pop_front().unwrap()); // new list without three items
 
     let d = get_destination_list(&back_of_list, current); // index of destination
-    if part_two { println!("After get_destination {:?}", start.elapsed()); }
+    // if part_two { println!("After get_destination {:?}", start.elapsed()); }
     // if !part_two {
     //   let v = cup_list.iter().map(|n| *n).collect::<Vec<u32>>();
     //   let v2 = back_of_list.iter().map(|n| *n).collect::<Vec<u32>>();
