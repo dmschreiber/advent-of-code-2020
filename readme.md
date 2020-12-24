@@ -140,6 +140,12 @@ Day 23 part 2 689500518476
 Day 23 complete in 9.992848065s
 ```
 
+```
+Day 24 part 1 479
+Day 24 part 2 4135
+Day 24 complete in 377.938478ms
+```
+
 ### Day 19 Part 2 Notes:
 My matching algorithm isn't working with the modified rules (it processes, but not correctly according to the test data set)
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
