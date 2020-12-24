@@ -125,6 +125,21 @@ Day 21 part 2 - Crtitical ingredients lmzg,cxk,bsqh,bdvmx,cpbzbx,drbm,cfnt,kqprv
 Day 21 complete in 932.130034ms
 ```
 
+```
+GAME SCORE 29764 
+Day 22 part 1 29764
+player 1 wins game
+GAME SCORE 32588 
+Day 22 part 2 32588
+Day 22 complete in 923.009752ms
+```
+
+```
+Day 23 part 1 98645732
+Day 23 part 2 689500518476
+Day 23 complete in 9.992848065s
+```
+
 ### Day 19 Part 2 Notes:
 My matching algorithm isn't working with the modified rules (it processes, but not correctly according to the test data set)
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
