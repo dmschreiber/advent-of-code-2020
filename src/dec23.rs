@@ -68,33 +68,28 @@ pub fn get_return_value(cup_vec : Vec<u32>) -> u64 {
 }
 fn get_destination_list(cup_list : &LinkedList<u32>, target : u32) -> usize {
   let mut running_target = target - 1;
-  let mut dest = None;
-  let min = cup_list.iter().map(|n| *n).min().unwrap();
-  let max = cup_list.iter().map(|n| *n).max().unwrap();
+  // let mut dest = None;
+  let mut min = 0;
+  let mut max = MAX_CUPS;
   // println!("{:?} min {} max {}", cup_list.iter().map(|n| *n).collect::<Vec<u32>>(), min, max);
 
-   while dest == None {
-     if cup_list.contains(&running_target) {
-      //  println!("running target {} in list", running_target);
-      for (i,number) in cup_list.iter().enumerate() {
-        if running_target == *number {
-          dest = Some(i);
-        }
-      }
-     } else {
-      //  println!("running target {} not in list", running_target);
-       dest = None;
-     }
-//    dest = cup_vec.iter().position(|&r| r == running_target);
-    if running_target < min {
+   loop {
+    //  println!("running target {} in list", running_target);
+
+    if let Some(index) = cup_list.iter().position(|&r| r == running_target) {
+      return index;
+    } else {
+      // if min == MAX_CUPS { min = *cup_list.iter().min().unwrap(); }
+      // if max == 0 { max = *cup_list.iter().max().unwrap(); }
+
+    }
+
+    if running_target == min {
       running_target = max;
     } else {
       running_target = running_target - 1;
     }
-    // println!("new running_target {}", running_target);
   }
-
-  dest.unwrap()
 
 }
 
@@ -129,18 +124,29 @@ fn adjust_cup_list(cup_list : &mut LinkedList<u32>, current : u32) {
       break;
     }
   }
+  let mut split;
   if position != 0 {
-    let split = cup_list.split_off(position);
-    for n in split.iter().rev() {
-      cup_list.push_front(*n);
+    split = cup_list.split_off(position);
+    split.append(cup_list);
+    cup_list.clear();
+    for n in split {
+      cup_list.push_back(n);
     }
   }
-  // println!("Adjust cup_list end ({}) {:?}",current, cup_list.iter().map(|n| *n).collect::<Vec<u32>>());
 
 }
 
 fn find_in_list(cup_list : &LinkedList<u32>, target : u32) -> usize {
   return cup_list.iter().position(|&r| r == target).unwrap();
+}
+
+fn find_two_in_list(cup_list :  &LinkedList<u32>, target : u32) -> (usize,u32) {
+  let mut iter = cup_list.iter();
+  let index = iter.position(|&r| r == target).unwrap();
+  // println!("Skip {}", *cup_list.iter().next().unwrap());
+  let next_val = iter.next().unwrap();
+
+  (index,*next_val)
 }
 
 fn find(cup_vec : &Vec<u32>, target : u32) -> usize {
@@ -163,41 +169,47 @@ pub fn solve_part1(cups : String, moves : u32, part_two : bool) -> u64 {
   for n in cup_vec {
     cup_list.push_back(n);
   }
+  if part_two {
+    println!("Begin part 2 with list of {} items", cup_list.len());
+  }
 
   let mut current = cup_list.front().unwrap().clone();
 
   for i in 0..moves {
     let start = Instant::now();
-    adjust_cup_list(&mut cup_list, current);
-    if !part_two {
-      println!("Begin move {}\n cups {:?} \n current ({}) {:?}", i+1, cup_list.iter().map(|n| *n).collect::<Vec<u32>>(), current, start.elapsed());
-    } else {
-      if i+1 % 1000 == 0 {
-        println!("Move {}", i);
+
+    // adjust_cup_list(&mut cup_list, current); // moved in-line
+    let mut position = 0;
+    for (index,a) in cup_list.iter().enumerate() {
+      if *a == current {
+        position = index;
+        break;
       }
     }
+    let mut split;
+    if position != 0 {
+      split = cup_list.split_off(position);
+      split.append(&mut cup_list);
+      cup_list = split;
+    }  
 
-    // cup_vec = adjust_cups(&cup_vec, *current);
+    // if !part_two {
+    //   println!("Begin move {}\n cups {:?} \n current ({}) {:?}", i+1, cup_list.iter().map(|n| *n).collect::<Vec<u32>>(), current, start.elapsed());
+    // } 
     
     let mut back_of_list = cup_list.split_off(4);
     back_of_list.push_front(cup_list.pop_front().unwrap()); // new list without three items
 
     let d = get_destination_list(&back_of_list, current); // index of destination
-    if !part_two {
-      let v = cup_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      let v2 = back_of_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      println!("pick up: {:?}", v);
-      println!("Destination {}", v2[d]);
-    }
-    let mut new_back_of_list = back_of_list.split_off(d+1); 
+    if part_two { println!("After get_destination {:?}", start.elapsed()); }
+    // if !part_two {
+    //   let v = cup_list.iter().map(|n| *n).collect::<Vec<u32>>();
+    //   let v2 = back_of_list.iter().map(|n| *n).collect::<Vec<u32>>();
+    //   println!("pick up: {:?}", v);
+    //   println!("Destination {}", v2[d]);
+    // }
 
-    if !part_two {
-      let v = new_back_of_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      let v2 = back_of_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      let v3 = cup_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      println!("assemble {:?} {:?} {:?}", v2, v3, v);
-    }
-    
+    let mut new_back_of_list = back_of_list.split_off(d+1); 
     back_of_list.append(&mut cup_list); // append removed cups
     back_of_list.append(&mut new_back_of_list); // append previous back of list
 
@@ -205,34 +217,20 @@ pub fn solve_part1(cups : String, moves : u32, part_two : bool) -> u64 {
     // cup_vec.splice(d+1..d+1, removed.iter().cloned());
 
     cup_list = back_of_list;
-    if !part_two {
-      let v = cup_list.iter().map(|n| *n).collect::<Vec<u32>>();
-      println!("new list looks like: {:?}", v);
-    }
 
-    let current_index = find_in_list(&cup_list, current);
+    let (current_index,next_current) = find_two_in_list(&cup_list, current);
     if !part_two {
       println!("current_index {}", current_index);
     }
 
     // let current_index = find(&cup_vec, *current);
     if current_index == cup_list.len() - 1 {
-      if !part_two {
-        println!("current_index last in the list");
-      }
       current = cup_list.front().unwrap().clone();
     } else {
-      for (index,n) in cup_list.iter().enumerate() {
-        if index == current_index + 1 {
-            if !part_two {
-              println!("current_index now {} with value {}", index, *n);
-            }
-            current = *n;
-        }
-      }
+      current = next_current;
     }
     if part_two {
-      if i+1 % 1000 == 0 {
+      if (i+1) % 1000 == 0 {
         println!("Move {} in {:?}", i+1, start.elapsed());
       }
     }

@@ -236,4 +236,5 @@ fn main() {
     println!("Day 22 complete in {:?}", start.elapsed());
 
     println!("Day 23 part 1 {}", dec23::solve_part1("364289715".to_string(), 100,false));
+    println!("Day 23 part 2 {}", dec23::solve_part1("364289715".to_string(), 10000000,true));
 }
