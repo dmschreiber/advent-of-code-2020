@@ -247,5 +247,8 @@ fn main() {
     println!("Day 24 part 2 {}", dec24::solve_part2("./inputs/dec24.txt".to_string(),100));
     println!("Day 24 complete in {:?}", start.elapsed());
 
+    let start = Instant::now();
     println!("Day 25 part 1 {}", dec25::solve_part1(15733400,6408062));
+    println!("Day 25 complete in {:?}", start.elapsed());
+
 }
