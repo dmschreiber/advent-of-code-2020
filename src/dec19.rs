@@ -9,8 +9,9 @@ mod tests {
 
       // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
       // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
-
-      // println!("part two prod 2 {}",super::solve_part2(&rules, &messages_lines));
+      let val = super::solve_part2(&rules, &messages_lines);
+      println!("part two prod 2 {}",val);
+      assert!(val==355);
 
   }
   #[test]
@@ -72,6 +73,17 @@ mod tests {
         println!(" [[{} shouldn't match but does]]", &l);
       } else if !matched && matched_lines.contains(&l) {
         println!(" [[{} doesn't match but should]]", &l);
+        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),Some(l.to_string()),None);
+        println!("{:?}",result);
+        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
+        println!("{:?}",result);
+        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
+        println!("{:?}",result);
+        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
+        println!("{:?}",result);
+        let result = super::does_match(&rules,rules.get(&31).unwrap().clone(),result,None);
+        println!("{:?}",result);
+        break;
       }
     }
     let val = super::solve_part2(&rules, &messages_lines);
@@ -347,30 +359,13 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
   for line in messages_lines {
     let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
     if m == Some("".to_string()) {
-      println!("{} - {:?}", line.len(), m);
+      // println!("{} - {:?}", line.len(), m);
       retval += 1;
     }
   }
   retval
 }
 
-fn rule_42_31_recusive (rules : &std::collections::HashMap::<u32,Rule>, line : &String) -> Option<String> {
-  // at this point, either match 31 or recurseively call match 42 then 31
-  let result = do_basic2(&rules, 42, 31, Some(line.to_string()), None);
-  // print!(" 42 31 ->{:?}", result);
-  if result == None || result == Some("".to_string()) {
-    return result;
-  } else {
-    let result = do_basic1(&rules, 42, Some(line.to_string()), None);
-    // print!(" 42 ->{:?}", result);
-    if result == None || result == Some("".to_string()) {
-      return None;
-    } else {
-      return rule_42_31_recusive(&rules, &result.unwrap().clone());
-    }
-  }
-
-}
 
 fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &String) -> bool {
   let mut result;
@@ -383,19 +378,23 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
 
   // Option 2 is 42(n+2) 31
   // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
-  // 42 42 42 31, 42 42 42 42 31, ... 42 (n times) then 31 where n > 2
+  // 42 42 42 31, 42 42 42 42 31, ... 42 (n+2) times then 31 where n >= 1
   // IN TEST Rule 42 matches 5 chars; Rule 31 matches 5 chars
   // IN PROD Rule 42 and Rule 31 match 8 chars
   // println!("LINE {}", messages_line);
-  result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-  // print!("matching 42 42 ->{:?}", result);
 
-  // Now check either 42 31 _OR_ 42 42 31 _OR_ 42 42 42 31 etc
-  if result != None && result != Some("".to_string()) { // this is either no-match or partial match
-    result = rule_42_31_recusive(&rules, &result.unwrap().clone());
-  }
-  if result == Some("".to_string()) {
-    return true;
+  for n in 1..=9 {
+    // Do Rule 42 n+2 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+    // Do Rule 31 one times
+    result = do_basic1(&rules, 31, result, None);
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
   }
 
   // remaining option 3
@@ -408,12 +407,13 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
   // Option 3 summary
   // 42(n+2) 31(n+1) n>=1 n<=5
 
-  // Do Rule 42 n+2 times
   for n in 1..=6 {
+    // Do Rule 42 n+2 times
     result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
     for _i in 0..n {
       result = do_basic1(&rules, 42, result, None);
     }
+    // Do Rule 31 n+1 times
     result = do_basic1(&rules, 31, result, None);
     for _i in 0..n {
       result = do_basic1(&rules, 31, result, None);
@@ -425,6 +425,7 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
   }
 
   // remaining option 4
+  // ******* NOTES ********
   // 42 8 42 11 31 -> 42 (42 | 42 8) 42 (42 31 | 42 11 31) 31
   //                  42 (42 | 42 (42 | 42 8)) 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31
 
@@ -445,18 +446,160 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
   // 42 42 42 8 42 42 42 11 31 31 31
   // 42 42 42 (42 | 42 8) 42 42 42 (42 31 | 42 11 31) 31 31 31
   // 42x8 31x4, 42(n+8) 31x4, 42x8 31(n+4), 42x4 8 42x4 11 31x4 <-- too long
-  //
+  // ******* END NOTES ********
   // Option 4 Summary (9 options)
   // 
   // 42x4 31x2
+  result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
+  result = do_basic1(&rules, 42, result, None);
+  result = do_basic2(&rules, 31, 31, result, None);
+
+  if result == Some("".to_string()) {
+    return true;
+  }  
+
+
   // 42(n+3) 31x2 n>=1
+  for n in 1..=8 {
+    // Do Rule 42 n+3 times
+    result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+    // Do Rule 31 two times
+    result = do_basic2(&rules, 31, 31, result, None);
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }
+
   // 42(n+4) 31(n+2) n>= 1
+  for n in 1..=5 {
+    // Do Rule 42 n+4 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+    // Do Rule 31 n+2 times
+    result = do_basic2(&rules, 31, 31, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 31, result, None);
+    }
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }
+
   // 42x6 31x3
+  // Do Rule 42 6 times
+  result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+  result = do_basic2(&rules, 42, 42, result, None);
+  result = do_basic2(&rules, 42, 42, result, None);
+
+  // Do Rule 31 3 times
+  result = do_basic2(&rules, 31, 31, result, None);
+  result = do_basic1(&rules, 31, result, None);
+
+  if result == Some("".to_string()) {
+    return true;
+  }  
+
   // 42(n+6) 31x3 n>=1
+  for n in 1..=5 {
+    // Do Rule 42 n+6 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+    // Do Rule 31 3 times
+  // Do Rule 31 3 times
+    result = do_basic2(&rules, 31, 31, result, None);
+    result = do_basic1(&rules, 31, result, None);
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }
+
   // 42(n+6) 31(n+3) n>=1
+  for n in 1..=5 {
+    // Do Rule 42 n+6 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+
+    // Do Rule 31 n+3 times
+    result = do_basic3(&rules, 31, 31, 31, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 31, result, None);
+    }
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }  
   // 42x8 31x4
+  // Do Rule 42 8 times
+  result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+  result = do_basic2(&rules, 42, 42, result, None);
+  result = do_basic2(&rules, 42, 42, result, None);
+  result = do_basic2(&rules, 42, 42, result, None);
+
+  // Do Rule 31 4 times
+  result = do_basic2(&rules, 31, 31, result, None);
+  result = do_basic2(&rules, 31, 31, result, None);
+
+  if result == Some("".to_string()) {
+    return true;
+  }  
+
   // 42(n+8) 31x4 n>=1
+  for n in 1..=5 {
+    // Do Rule 42 n+8 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+
+    // Do Rule 31 4 times
+    result = do_basic2(&rules, 31, 31, result, None);
+    result = do_basic2(&rules, 31, 31, result, None);
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }  
+
   // 42x8 31(n+4) n>=1
+  for n in 1..=5 {
+    // Do Rule 42 n+8 times
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+    result = do_basic2(&rules, 42, 42, result, None);
+
+    // Do Rule 31 n+4 times
+    result = do_basic2(&rules, 31, 31, result, None);
+    result = do_basic2(&rules, 31, 31, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 31, result, None);
+    }
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }  
 
   return false;
 }
