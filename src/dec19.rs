@@ -7,8 +7,8 @@ mod tests {
       println!("Day 19 part 1 is {}", super::solve_part1(&rules, &messages_lines));
       assert!(226==super::solve_part1(&rules, &messages_lines));
 
-      rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
-      rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
+      // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
+      // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
       // println!("part two prod 2 {}",super::solve_part2(&rules, &messages_lines));
 
@@ -35,6 +35,45 @@ mod tests {
     // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
     // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
+    let all_lines = vec!["abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa",
+                        "bbabbbbaabaabba",
+                        "babbbbaabbbbbabbbbbbaabaaabaaa",
+                        "aaabbbbbbaaaabaababaabababbabaaabbababababaaa",
+                        "bbbbbbbaaaabbbbaaabbabaaa",
+                        "bbbababbbbaaaaaaaabbababaaababaabab",
+                        "ababaaaaaabaaab",
+                        "ababaaaaabbbaba",
+                        "baabbaaaabbaaaababbaababb",
+                        "abbbbabbbbaaaababbbbbbaaaababb",
+                        "aaaaabbaabaaaaababaa",
+                        "aaaabbaaaabbaaa",
+                        "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa",
+                        "babaaabbbaaabaababbaabababaaab",
+                        "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba"];
+                        
+    let matched_lines = vec![
+                        "bbabbbbaabaabba",
+                        "babbbbaabbbbbabbbbbbaabaaabaaa",
+                        "aaabbbbbbaaaabaababaabababbabaaabbababababaaa",
+                        "bbbbbbbaaaabbbbaaabbabaaa",
+                        "bbbababbbbaaaaaaaabbababaaababaabab",
+                        "ababaaaaaabaaab",
+                        "ababaaaaabbbaba",
+                        "baabbaaaabbaaaababbaababb",
+                        "abbbbabbbbaaaababbbbbbaaaababb",
+                        "aaaaabbaabaaaaababaa",
+                        "aaaabbaabbaaaaaaabbbabbbaaabbaabaaa",
+                        "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba",
+    ];               
+    
+    for l in all_lines {
+      let matched = super::rule_zero(&rules, &l.to_string()); 
+      if matched && !matched_lines.contains(&l) {
+        println!(" [[{} shouldn't match but does]]", &l);
+      } else if !matched && matched_lines.contains(&l) {
+        println!(" [[{} doesn't match but should]]", &l);
+      }
+    }
     let val = super::solve_part2(&rules, &messages_lines);
     println!("part two test should wrong (3 not 12) - {}",val);
 
@@ -307,8 +346,8 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
 
   for line in messages_lines {
     let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
-    // println!("{} - {:?}", line, m);
     if m == Some("".to_string()) {
+      println!("{} - {:?}", line.len(), m);
       retval += 1;
     }
   }
@@ -318,12 +357,12 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
 fn rule_42_31_recusive (rules : &std::collections::HashMap::<u32,Rule>, line : &String) -> Option<String> {
   // at this point, either match 31 or recurseively call match 42 then 31
   let result = do_basic2(&rules, 42, 31, Some(line.to_string()), None);
-  print!(" 42 31 ->{:?}", result);
+  // print!(" 42 31 ->{:?}", result);
   if result == None || result == Some("".to_string()) {
     return result;
   } else {
     let result = do_basic1(&rules, 42, Some(line.to_string()), None);
-    print!(" 42 ->{:?}", result);
+    // print!(" 42 ->{:?}", result);
     if result == None || result == Some("".to_string()) {
       return None;
     } else {
@@ -334,27 +373,92 @@ fn rule_42_31_recusive (rules : &std::collections::HashMap::<u32,Rule>, line : &
 }
 
 fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &String) -> bool {
+  let mut result;
 
-  let m = does_match(&rules, Rule::Value(Arg::Basic3(42,42,31)),Some(messages_line.to_string()),None);
-
-  if m== Some("".to_string()) {
+  // Option 1 is just 42 42 31
+  result = does_match(&rules, Rule::Value(Arg::Basic3(42,42,31)),Some(messages_line.to_string()),None);
+  if result == Some("".to_string()) {
     return true;
-  } else { // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
-           // 42 42 42 31, 42 42 42 42 31, ... 42 (n times) then 31 where n > 2
-           // 42 matches 5 chars; 31 matches 5 chars
-    println!();
-    println!("LINE {}", messages_line);
-    let result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    print!("matching 42 42 ->{:?}", result);
-
-    // Now check either 42 31 _OR_ 42 42 31
-    if result == None || result == Some("".to_string()) { // this is either no-match or partial match
-      return false;
-    } else {
-      let result = rule_42_31_recusive(&rules, &result.unwrap().clone());
-      return result != None;
-    }
   }
+
+  // Option 2 is 42(n+2) 31
+  // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
+  // 42 42 42 31, 42 42 42 42 31, ... 42 (n times) then 31 where n > 2
+  // IN TEST Rule 42 matches 5 chars; Rule 31 matches 5 chars
+  // IN PROD Rule 42 and Rule 31 match 8 chars
+  // println!("LINE {}", messages_line);
+  result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+  // print!("matching 42 42 ->{:?}", result);
+
+  // Now check either 42 31 _OR_ 42 42 31 _OR_ 42 42 42 31 etc
+  if result != None && result != Some("".to_string()) { // this is either no-match or partial match
+    result = rule_42_31_recusive(&rules, &result.unwrap().clone());
+  }
+  if result == Some("".to_string()) {
+    return true;
+  }
+
+  // remaining option 3
+  // 42 42 11 31 -> 42 42 (42 31 | 42 11 31) 31 -> 42 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31 
+  //                                            -> 42 42 (42 31 | 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31) 31
+  // 42 42 42 31 31, 42 42 42 42 31 31 31, 42 42 42 42 42 31 31 31 31, 
+  //                                       42x(n+2) and 31x(n+1) where n>=1 and n <= 5
+  // 42 42 42 42 42 42 31 31 31 31 31 is the longest that could match
+  // for all n>= 2 match 42 n+1 times and 31 n times (lengths 25, 35, 45, 55, etc chars IN TEST)
+  // Option 3 summary
+  // 42(n+2) 31(n+1) n>=1 n<=5
+
+  // Do Rule 42 n+2 times
+  for n in 1..=6 {
+    result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 42, result, None);
+    }
+    result = do_basic1(&rules, 31, result, None);
+    for _i in 0..n {
+      result = do_basic1(&rules, 31, result, None);
+    }
+
+    if result == Some("".to_string()) {
+      return true;
+    }  
+  }
+
+  // remaining option 4
+  // 42 8 42 11 31 -> 42 (42 | 42 8) 42 (42 31 | 42 11 31) 31
+  //                  42 (42 | 42 (42 | 42 8)) 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31
+
+  // option 4.1         opion 4.2                      option 4.3                            option 4.4
+  // 42 42 42 42 31 31, 42 42 8 42 42 31 31,           42 42 42 42 11 31 31,                
+  //                --> 42 42 (42 | 42 8) 42 42 31 31, 42 42 42 42 (42 31 | 42 11 31) 31 31, 
+  //                    42(n+3) 31 31 n>=1             42(n+4) 31(n+2) n>= 1                 
+  //  
+  // option 4.4
+  // 42 42 8 42 42 11 31 31
+  // 42 42 (42 | 42 8) 42 42 (42 31 | 42 11 31) 31 31
+
+  // option 4.4.1                option 4.4.2                  option 4.4.3                   
+  // 42 42 42 42 42 42 31 31 31, 42 42 42 8 42 42 42 31 31 31, 42 42 42 42 42 42 11 31 31 31, 
+  //                             42(n+6) 31 31 31 n>=1         42(n+6) 31(n+3) n>=1
+
+  // option 4.4.4
+  // 42 42 42 8 42 42 42 11 31 31 31
+  // 42 42 42 (42 | 42 8) 42 42 42 (42 31 | 42 11 31) 31 31 31
+  // 42x8 31x4, 42(n+8) 31x4, 42x8 31(n+4), 42x4 8 42x4 11 31x4 <-- too long
+  //
+  // Option 4 Summary (9 options)
+  // 
+  // 42x4 31x2
+  // 42(n+3) 31x2 n>=1
+  // 42(n+4) 31(n+2) n>= 1
+  // 42x6 31x3
+  // 42(n+6) 31x3 n>=1
+  // 42(n+6) 31(n+3) n>=1
+  // 42x8 31x4
+  // 42(n+8) 31x4 n>=1
+  // 42x8 31(n+4) n>=1
+
+  return false;
 }
 
 pub fn solve_part2(rules : &std::collections::HashMap::<u32,Rule>, messages_lines : &Vec<String>) -> u64 {
