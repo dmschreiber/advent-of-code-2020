@@ -15,31 +15,36 @@ mod tests {
   }
   #[test]
   pub fn dec19_test() {
-    // let (rules,messages_lines) = super::load_rules("./inputs/dec19-test.txt".to_string());
-    // assert!(2==super::solve_part1(&rules, &messages_lines));
-      
-    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("ababbb".to_string()),None) == Some("".to_string()));
-    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("abbbab".to_string()),None) == Some("".to_string()));
-    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("bababa".to_string()),None) == None);
-    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaabbb".to_string()),None) == None);
-    // assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaaabbb".to_string()),None) != Some("".to_string()));
+    let (rules,messages_lines) = super::load_rules("./inputs/dec19-test.txt".to_string());
+    assert!(2==super::solve_part1(&rules, &messages_lines));
+
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("ababbb".to_string()),None) == Some("".to_string()));
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("abbbab".to_string()),None) == Some("".to_string()));
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("bababa".to_string()),None) == None);
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaabbb".to_string()),None) == None);
+    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaaabbb".to_string()),None) != Some("".to_string()));
+
+    let (rules,messages_lines) = super::load_rules("./inputs/dec19-test3.txt".to_string());
+    println!("Test 3 {:?}",super::solve_part1(&rules, &messages_lines));
 
     let (mut rules,messages_lines) = super::load_rules("./inputs/dec19-test2.txt".to_string());
-    // assert!(3==super::solve_part1(&rules, &messages_lines));
+    assert!(3==super::solve_part1(&rules, &messages_lines));
 
-    rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
-    rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
+    rules.remove(&8);
+    rules.remove(&11);
+    // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
+    // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
-    println!("part two test 2 {}",super::solve_part2(&rules, &messages_lines));
+    let val = super::solve_part2(&rules, &messages_lines);
+    println!("part two test should wrong (3 not 12) - {}",val);
 
-    assert!(super::does_match(&rules,rules.get(&0).unwrap().clone(),Some("aaaabbaaaabbaaa".to_string()),None)==None);
+    assert!(12==val);
+
     // println!("{:?}",super::does_match(&rules,0,Some("aaaaabbaabaaaaababaa".to_string()),None));
     // println!("{:?}",super::does_match(&rules,42,Some("aaaaabbaabaaaaababaa".to_string()),None));
     // println!("{:?}",super::does_match(&rules,42,Some("bbaabaaaaababaa".to_string()),None));
     // println!("{:?}",super::does_match(&rules,11,Some("aaaaababaa".to_string()),None));
 
-    let (rules,messages_lines) = super::load_rules("./inputs/dec19-test3.txt".to_string());
-    println!("Test 3 {:?}",super::solve_part1(&rules, &messages_lines));
 
   }  
 }
@@ -75,11 +80,14 @@ pub enum Rule {
 }
 
 fn do_basic1(rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  let r = rules.get(&rule_number).unwrap();
-  if let Some(s1) = does_match(rules, r.clone(), line,level) {
-    Some(s1)
+  if let Some(r) = rules.get(&rule_number) {
+    if let Some(s1) = does_match(rules, r.clone(), line,level) {
+      Some(s1)
+    } else {
+      None
+    }
   } else {
-    None
+    panic!("Can't find rule {}", rule_number);
   }
 }
 
@@ -299,7 +307,7 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
 
   for line in messages_lines {
     let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
-    println!("{} - {:?}", line, m);
+    // println!("{} - {:?}", line, m);
     if m == Some("".to_string()) {
       retval += 1;
     }
@@ -307,15 +315,58 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
   retval
 }
 
+fn rule_42_31_recusive (rules : &std::collections::HashMap::<u32,Rule>, line : &String) -> Option<String> {
+  // at this point, either match 31 or recurseively call match 42 then 31
+  let result = do_basic2(&rules, 42, 31, Some(line.to_string()), None);
+  print!(" 42 31 ->{:?}", result);
+  if result == None || result == Some("".to_string()) {
+    return result;
+  } else {
+    let result = do_basic1(&rules, 42, Some(line.to_string()), None);
+    print!(" 42 ->{:?}", result);
+    if result == None || result == Some("".to_string()) {
+      return None;
+    } else {
+      return rule_42_31_recusive(&rules, &result.unwrap().clone());
+    }
+  }
+
+}
+
+fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &String) -> bool {
+
+  let m = does_match(&rules, Rule::Value(Arg::Basic3(42,42,31)),Some(messages_line.to_string()),None);
+
+  if m!= None {
+    return true;
+  } else { // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
+           // 42 42 42 31, 42 42 42 42 31, ... 42 (n times) then 31 where n > 2
+           // 42 matches 5 chars; 31 matches 5 chars
+    let mut result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+    println!();
+    println!("LINE {}", messages_line);
+    print!("matching 42 42 ->{:?}", result);
+
+    // Now check either 42 31 _OR_ 42 42 31
+    if result == Some("".to_string()) {
+      return true;
+    } else if result == None {
+      return false;
+    } else {
+      let result = rule_42_31_recusive(&rules, &result.unwrap().clone());
+      return result != None;
+    }
+  }
+  return false;
+}
+
 pub fn solve_part2(rules : &std::collections::HashMap::<u32,Rule>, messages_lines : &Vec<String>) -> u64 {
 
   let mut retval = 0;
 
   for line in messages_lines {
-    let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
-
-    if m == Some("".to_string()) {
-      println!("{} - {:?}", line, m);
+    if rule_zero(&rules, &line) {
+      
       retval += 1;
     }
   }
