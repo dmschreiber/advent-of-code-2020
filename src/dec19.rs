@@ -337,27 +337,24 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
 
   let m = does_match(&rules, Rule::Value(Arg::Basic3(42,42,31)),Some(messages_line.to_string()),None);
 
-  if m!= None {
+  if m== Some("".to_string()) {
     return true;
   } else { // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
            // 42 42 42 31, 42 42 42 42 31, ... 42 (n times) then 31 where n > 2
            // 42 matches 5 chars; 31 matches 5 chars
-    let mut result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
     println!();
     println!("LINE {}", messages_line);
+    let result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
     print!("matching 42 42 ->{:?}", result);
 
     // Now check either 42 31 _OR_ 42 42 31
-    if result == Some("".to_string()) {
-      return true;
-    } else if result == None {
+    if result == None || result == Some("".to_string()) { // this is either no-match or partial match
       return false;
     } else {
       let result = rule_42_31_recusive(&rules, &result.unwrap().clone());
       return result != None;
     }
   }
-  return false;
 }
 
 pub fn solve_part2(rules : &std::collections::HashMap::<u32,Rule>, messages_lines : &Vec<String>) -> u64 {
