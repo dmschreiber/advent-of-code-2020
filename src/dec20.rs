@@ -57,6 +57,40 @@ impl Tile {
 
     v
   }
+
+  fn get_row_col(&self, row : usize, col : usize) -> char {
+
+    let mut rotate_row = row;
+    let mut rotate_col = col;
+
+    if let Some(r) = self.rotation  {
+      if r == 0 {
+      // no nothing
+      } else if r >= 1 && r <= 3 {
+        for _i in 0..r {
+          let save_row = rotate_row;
+          rotate_row = 7-rotate_col;
+          rotate_col = save_row;
+        }
+      } else if r >= 4 && r <= 7 {
+        rotate_col = 7 - rotate_col;
+        for _i in 0..r-4 {
+          let save_row = rotate_row;
+          rotate_row = 7-rotate_col;
+          rotate_col = save_row;
+        }
+      } else if r >= 8 && r <= 11 {
+        rotate_row = 7 - rotate_row;
+        for _i in 0..r-8 {
+          let save_row = rotate_row;
+          rotate_row = 7-rotate_col;
+          rotate_col = save_row;
+        }
+      }
+    }
+    let retval = self.lines[rotate_row+1].as_bytes()[rotate_col+1] as char;
+    return retval;
+  }
 }
 
 pub fn make_tile(lines : Vec<String>) -> Tile {
@@ -512,4 +546,20 @@ pub fn solve_part2(filename : String) {
     println!();
   }
 
+// println!("{}", t.lines.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"));
+// println!("rotated");
+// the following doesn't print right
+for grid_row in 0..size {
+    for grid_col in 0..size {
+      if let Some(t) = grid.get(&(grid_row,grid_col)) {
+        for row in 0..8 {
+          for col in 0..8 {
+            print!("{}", t.get_row_col(row,col));
+          }
+        }
+      }    
+    }
+    println!();
+
+  }
 }
