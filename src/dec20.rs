@@ -34,26 +34,56 @@ pub struct Tile {
 }
 
 impl Tile {
+  fn reverse (&self, side : u32) -> u32 {
+    if self.sides.contains(&side) {
+      let index = self.sides.iter().position(|k| *k == side).unwrap();
+      return self.rev_sides[index];
+    } else {
+      let index = self.rev_sides.iter().position(|k| *k == side).unwrap();
+      return self.sides[index];
+    }
+  }
+
   fn all_rotations(&self) -> Vec<Vec<u32>> {
     let mut v = Vec::new();
 
+    let mut basic = vec![self.sides[0],self.sides[1],self.sides[2],self.sides[3]];
     // 0 degree; 90 degree; 180 degree; 270 degree rotation
-    v.push(vec![self.sides[0],self.sides[1],self.sides[2],self.sides[3]]);
-    v.push(vec![self.rev_sides[3],self.sides[0],self.rev_sides[1],self.sides[2]]);
-    v.push(vec![self.rev_sides[2],self.rev_sides[3],self.rev_sides[0], self.rev_sides[1]]);
-    v.push(vec![self.sides[1],self.rev_sides[2],self.sides[3], self.rev_sides[0]]);
+    v.push(basic.clone());
+
+    for _i in 0..3 {
+      basic = vec![self.reverse(basic[3]),basic[0],self.reverse(basic[1]), basic[2]];
+      v.push(basic.clone());
+    }
+    // v.push(vec![self.sides[0],self.sides[1],self.sides[2],self.sides[3]]);
+    // v.push(vec![self.rev_sides[3],self.sides[0],self.rev_sides[1],self.sides[2]]);
+    // v.push(vec![self.sides[2],self.rev_sides[3],self.rev_sides[0], self.rev_sides[1]]);
+    // v.push(vec![self.sides[1],self.sides[2],self.sides[3], self.rev_sides[0]]);
 
     // flip on vertical axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
-    v.push(vec![self.sides[0],self.sides[3],self.sides[2],self.sides[1]]);
-    v.push(vec![self.rev_sides[1],self.sides[0],self.rev_sides[3],self.sides[2]]);
-    v.push(vec![self.rev_sides[2],self.rev_sides[1],self.rev_sides[0], self.rev_sides[3]]);
-    v.push(vec![self.sides[3],self.rev_sides[2],self.sides[1], self.rev_sides[0]]);
+    basic = vec![self.rev_sides[0],self.sides[3],self.rev_sides[2],self.sides[1]];
+    v.push(basic.clone());
+    for _i in 0..3 {
+      basic = vec![self.reverse(basic[3]),basic[0],self.reverse(basic[1]), basic[2]];
+      v.push(basic.clone());
+    }
+
+    // v.push(vec![self.sides[0],self.sides[3],self.sides[2],self.sides[1]]);
+    // v.push(vec![self.rev_sides[1],self.sides[0],self.rev_sides[3],self.sides[2]]);
+    // v.push(vec![self.rev_sides[2],self.rev_sides[1],self.rev_sides[0], self.rev_sides[3]]);
+    // v.push(vec![self.sides[3],self.rev_sides[2],self.sides[1], self.rev_sides[0]]);
 
     // flip on horizontal axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
-    v.push(vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]]);
-    v.push(vec![self.sides[3],self.sides[2],self.sides[1],self.sides[0]]);
-    v.push(vec![self.rev_sides[0],self.sides[3],self.rev_sides[2], self.sides[1]]);
-    v.push(vec![self.rev_sides[1],self.rev_sides[0],self.rev_sides[3], self.rev_sides[2]]);
+    basic = vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]];
+    v.push(basic.clone());
+    for _i in 0..3 {
+      basic = vec![self.reverse(basic[3]),basic[0],self.reverse(basic[1]), basic[2]];
+      v.push(basic.clone());
+    }
+    // v.push(vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]]);
+    // v.push(vec![self.sides[3],self.sides[2],self.sides[1],self.sides[0]]);
+    // v.push(vec![self.rev_sides[0],self.sides[3],self.rev_sides[2], self.sides[1]]);
+    // v.push(vec![self.rev_sides[1],self.rev_sides[0],self.rev_sides[3], self.rev_sides[2]]);
 
     v
   }
@@ -64,33 +94,71 @@ impl Tile {
     let mut rotate_col = col;
 
     if let Some(r) = self.rotation  {
-      if r == 0 {
-      // no nothing
-      } else if r >= 1 && r <= 3 {
-        for _i in 0..r {
-          let save_row = rotate_row;
-          rotate_row = 7-rotate_col;
-          rotate_col = save_row;
-        }
-      } else if r >= 4 && r <= 7 {
-        rotate_col = 7 - rotate_col;
-        for _i in 0..r-4 {
-          let save_row = rotate_row;
-          rotate_row = 7-rotate_col;
-          rotate_col = save_row;
-        }
-      } else if r >= 8 && r <= 11 {
-        rotate_row = 7 - rotate_row;
-        for _i in 0..r-8 {
-          let save_row = rotate_row;
-          rotate_row = 7-rotate_col;
-          rotate_col = save_row;
-        }
-      }
+      let (r,c) = rotate_coordinates(row, col, 8, r);
+      rotate_row = r;
+      rotate_col = c;
+
+      // if r == 0 {
+      // // no nothing
+      // } else if r >= 1 && r <= 3 {
+      //   for _i in 0..r {
+      //     let save_row = rotate_row;
+      //     rotate_row = 7-rotate_col;
+      //     rotate_col = save_row;
+      //   }
+      // } else if r >= 4 && r <= 7 {
+      //   rotate_col = 7 - rotate_col;
+      //   for _i in 0..r-4 {
+      //     let save_row = rotate_row;
+      //     rotate_row = 7-rotate_col;
+      //     rotate_col = save_row;
+      //   }
+      // } else if r >= 8 && r <= 11 {
+      //   rotate_row = 7 - rotate_row;
+      //   for _i in 0..r-8 {
+      //     let save_row = rotate_row;
+      //     rotate_row = 7-rotate_col;
+      //     rotate_col = save_row;
+      //   }
+      // }
     }
+
     let retval = self.lines[rotate_row+1].as_bytes()[rotate_col+1] as char;
     return retval;
   }
+}
+
+fn rotate_coordinates (row : usize, col : usize, size : usize, rotation : usize) -> (usize, usize) {
+  let mut rotate_row = row;
+  let mut rotate_col = col;
+  let r = rotation;
+
+  if r == 0 {
+  // no nothing
+  } else if r >= 1 && r <= 3 {
+    for _i in 0..r {
+      let save_col = rotate_col;
+      rotate_col = size-rotate_row-1;
+      rotate_row = save_col;
+    }
+  } else if r >= 4 && r <= 7 {
+    rotate_col = size - rotate_col - 1;
+    for _i in 0..r-4 {
+      let save_col = rotate_col;
+      rotate_col = size-rotate_row-1;
+      rotate_row = save_col;
+    }
+  } else if r >= 8 && r <= 11 {
+    rotate_row = size - rotate_row - 1;
+    for _i in 0..r-8 {
+      let save_col = rotate_col;
+      rotate_col = size-rotate_row-1;
+      rotate_row = save_col;
+    }
+  }
+  
+  return (rotate_row, rotate_col);
+
 }
 
 pub fn make_tile(lines : Vec<String>) -> Tile {
@@ -532,7 +600,8 @@ pub fn solve_part2(filename : String) {
   // display the tile ids in formation
   for row in 0..size {
     for col in 0..size {
-      if let Some(t) = grid.get(&(row,col)) {
+      let (r,c) = rotate_coordinates(row.try_into().unwrap(), col.try_into().unwrap(), 3, 7);
+      if let Some(t) = grid.get(&(r.try_into().unwrap(),c.try_into().unwrap())) {
         print!(" {:4}", t.id);
         if t.rotation == None {
           print!("-None   ")
@@ -548,15 +617,14 @@ pub fn solve_part2(filename : String) {
 
 // println!("{}", t.lines.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"));
 // println!("rotated");
+
 // the following doesn't print right
-for grid_row in 0..size {
-    for grid_col in 0..size {
-      if let Some(t) = grid.get(&(grid_row,grid_col)) {
-        for row in 0..8 {
-          for col in 0..8 {
-            print!("{}", t.get_row_col(row,col));
-          }
-        }
+use std::convert::TryInto;
+
+for grid_row in 0..size*8 {
+    for grid_col in 0..size*8 {
+      if let Some(t) = grid.get(&(grid_row/8,grid_col/8)) {
+        print!("{}", t.get_row_col((grid_row % 8).try_into().unwrap(),(grid_col % 8).try_into().unwrap()));
       }    
     }
     println!();
