@@ -330,7 +330,8 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
   // GENERAL CASE for widthxwidth where width>2
   for row in 0..width {
     for col in 0..width {
-      // println!("{} {}", row, col);
+      println!("Trying {} {}", row, col);
+
       if row == 0 && col == 0 {
         let mut t = corners_vec[0].clone();
         let index = corners_vec.iter().position(|x| *x == t).unwrap();
@@ -348,28 +349,34 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
               t.rotation = Some(my_rotation);
             }
             retval.insert((row,col),t.clone());
-
-            let t1 = get_match(&borders_vec, t_id, rotation_sides[1]).unwrap().clone();
-            let index = borders_vec.iter().position(|x| *x == t1).unwrap();
-            borders_vec.remove(index);
-            retval.insert((0,1),t1);
-
-            let t2 = get_match(&borders_vec, t_id, rotation_sides[2]).unwrap().clone();
-            let index = borders_vec.iter().position(|x| *x == t2).unwrap();
-            borders_vec.remove(index);
-            retval.insert((1,0),t2);
-    
-            // break;
           }
         }
+          let rotation_sides = &t.all_rotations()[t.rotation.unwrap()];
+          let t1 = get_match(&borders_vec, t_id, rotation_sides[1]).unwrap().clone();
+          println!("CORNER");
+          t.print_with_border(true);
+          println!("0,1");
+          t1.print_with_border(false);
+          let index = borders_vec.iter().position(|x| *x == t1).unwrap();
+          borders_vec.remove(index);
+          retval.insert((0,1),t1);
+
+          let t2 = get_match(&borders_vec, t_id, rotation_sides[2]).unwrap().clone();
+          let index = borders_vec.iter().position(|x| *x == t2).unwrap();
+          borders_vec.remove(index);
+          retval.insert((1,0),t2);
+    
 
       } else if row == 0 && col == width-2 {
+        let west_n = retval.get(&(row,col-1)).unwrap().clone();
         let mut t = retval.get_mut(&(row,col)).unwrap();
         let t_id = t.clone().id;
         for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t_id, *s)).collect();
 
-          if v == vec![0,1,0,0] {
+          let match_west_side = west_n.all_rotations()[west_n.rotation.unwrap()][1];
+          if v == vec![0,1,0,0] && rotation_sides[3] == match_west_side {
+          // if v == vec![0,1,0,0] {
             t.rotation = Some(my_rotation);
             let t1 = get_match(&corners_vec, t.id, rotation_sides[1]).unwrap().clone();
             let index = corners_vec.iter().position(|x| *x == t1).unwrap();
@@ -380,7 +387,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
           }          
         }
 
-      } else if row == 0 && col == width-1 {
+      } else if row == 0 && col == width-1 { // UR corner
         let west_n = retval.get(&(row,col-1)).unwrap().clone();
         let mut t = retval.get_mut(&(row,col)).unwrap();
         for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
@@ -399,10 +406,14 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
         }
 
       } else if row == width-2 && col == 0 {
+        let north_n = retval.get(&(row-1,col)).unwrap().clone();
         let mut t = retval.get_mut(&(row,col)).unwrap();
         for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
-          if v == vec![0,0,1,0] {
+          let match_north_side = north_n.all_rotations()[north_n.rotation.unwrap()][2];
+
+          if v == vec![0,0,1,0] && rotation_sides[0] == match_north_side {
+          // if v == vec![0,0,1,0] {
             t.rotation = Some(my_rotation);
             let t1 = get_match(&corners_vec, t.id, rotation_sides[2]).unwrap().clone();
             let index = corners_vec.iter().position(|x| *x == t1).unwrap();
@@ -419,8 +430,8 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
         for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&borders_vec, t.id, *s)).collect();
           let match_north_side = north_n.all_rotations()[north_n.rotation.unwrap()][2];
-          // if v == vec![0,1,0,0] && rotation_sides[0] == match_north_side {
-          if v == vec![0,1,0,0] {
+          if v == vec![0,1,0,0] && rotation_sides[0] == match_north_side {
+          // if v == vec![0,1,0,0] {
             t.rotation = Some(my_rotation);
             let t1 = get_match(&borders_vec, t.id, rotation_sides[1]).unwrap().clone();
             let index = borders_vec.iter().position(|x| *x == t1).unwrap();
@@ -432,10 +443,13 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
         }
 
       } else if row == width-1 && col == width-2 { // second from lower right corner
+        let west_n = retval.get(&(row,col-1)).unwrap().clone();
         let mut t = retval.get_mut(&(row,col)).unwrap();
         for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
           let v : Vec<u32> = rotation_sides.iter().map(|s| count_matches(&corners_vec, t.id, *s)).collect();
-          if v == vec![0,1,0,0] {
+          let match_west_side = west_n.all_rotations()[west_n.rotation.unwrap()][1];
+          if v == vec![0,1,0,0] && rotation_sides[3] == match_west_side {
+          // if v == vec![0,1,0,0] {
             t.rotation = Some(my_rotation);
             let t1 = get_match(&corners_vec, t.id, rotation_sides[1]).unwrap().clone();
             let index = corners_vec.iter().position(|x| *x == t1).unwrap();
@@ -449,7 +463,6 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
       } else if col == 0 || col == width-1 {
         let north_n = retval.get(&(row-1,col)).unwrap().clone();
           // let north_n = retval.get(&(row-1,col)).unwrap().clone();
-          // println!("Trying {} {}", row, col);
           if retval.get(&(row+1,col)) == None {
             let mut t = retval.get_mut(&(row,col)).unwrap();
             for (my_rotation,rotation_sides) in t.all_rotations().iter().enumerate() {
@@ -461,10 +474,8 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
               } else {
                 match_north_side = north_n.all_rotations()[north_n.rotation.unwrap()][2];
               }
-              // if v == vec![0,0,1,0] && rotation_sides[0] == match_north_side {
-              if v == vec![0,0,1,0] {
-                // println!("{:?}", north_n.all_rotations()[north_n.rotation.unwrap()]);
-                // println!("{:?}", rotation_sides);
+              if v == vec![0,0,1,0] && rotation_sides[0] == match_north_side {
+              // if v == vec![0,0,1,0] {
                 t.rotation = Some(my_rotation);
                 let t1 = get_match(&borders_vec, t.id, rotation_sides[2]).unwrap().clone();
                 let index = borders_vec.iter().position(|x| *x == t1).unwrap();
@@ -481,7 +492,6 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
         // retval.get(&(row,col)).unwrap();
 
       } else if row == 0 || row == width-1 {
-        println!("Trying {} {}", row, col);
         let west_n = retval.get(&(row,col-1)).unwrap().clone();
         if retval.get(&(row,col+1)) == None {
           let mut t = retval.get_mut(&(row,col)).unwrap();
@@ -621,8 +631,11 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
     let a = top.all_rotations()[top.rotation.unwrap()][2];
     let b = left.all_rotations()[left.rotation.unwrap()][1];
     inner[which].rotation = inner[which].find_rotation(vec![Some(a.try_into().unwrap()),None,None,Some(b.try_into().unwrap())]); 
+    grid.insert((1,1),inner[which].clone());
   }
 
+  
+  
   // if I have inner tiles, copy my inner grid into my outer grid before I return it
   if inner.len() > 1 {
     // build the border with my inner tiles (all over again)
@@ -762,23 +775,6 @@ pub fn solve_part2(filename : String) {
       }
     }
   }
-  // let t = grid.get(&(1,0)).unwrap();
-  // let s = t.all_rotations().clone();
-  // let s = s[t.rotation.unwrap()].clone();
-  // println!("{} {:?}", t.id, s);
-
-  // let t = grid.get(&(0,0)).unwrap();
-  // t.print_with_border(false);
-  // println!("rotated with {:?}", t.rotation);
-  // t.print_with_border(true);
-  // println!();
-  // for (i,s) in t.all_rotations().iter().enumerate() {
-  //   println!("{} {} {:?} - {:?}", t.id, i, s, t.rotation);
-  // }
-  // let t = grid.get(&(2,1)).unwrap();
-  // let s = t.all_rotations().clone();
-  // let s = s[t.rotation.unwrap()].clone();
-  // println!("{} {:?}", t.id, s);
 
 // println!("{}", t.lines.iter().map(|s| s.to_string()).collect::<Vec<String>>().join("\n"));
 for grid_row in 0..size*10 {
@@ -796,14 +792,10 @@ for grid_row in 0..size*10 {
 
 }
 
-println!("11,0");
-
-let t = grid.get(&(11,0)).unwrap();
-t.print_with_border(false);
-
-println!("11,0");
-
-// the following doesn't print right
+// the following is the actual eventual image
+let v1 = "                  #".as_bytes(); 
+let v2 = "#    ##    ##    ###".as_bytes();
+let v3 = " #  #  #  #  #  #".as_bytes(); 
 
 for grid_row in 0..size*8 {
     for grid_col in 0..size*8 {
@@ -818,6 +810,5 @@ for grid_row in 0..size*8 {
     }
     println!();
     if grid_row % 8 == 7 {println!(); }
-
   }
 }
