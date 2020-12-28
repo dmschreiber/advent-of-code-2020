@@ -108,14 +108,16 @@ Day 18 complete in 13.225364ms
 ```
 
 ```
-Day 19 part 1 complete in 183.217939ms
-Day 20 part 2 ** incomplete **
+Day 19 part 1 is 226
+Day 19 part 2 is 355
+Day 19 complete in 592.192538ms
 ```
 
 ```
 3803x3539x1571x1439=30425930368573 in 1.618080383s
 Day 20 complete in 1.621750835s
-Day 20 part 2 ** incomplete **
+Rough water count 2453
+Day 20  complete in 7.106600784s
 ```
 
 ```
@@ -156,18 +158,7 @@ My matching algorithm isn't working with the modified rules (it processes, but n
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
 I find that I run out of string and am still trying to match, unsure whether that's failure or success.
 My matching in the OR case with different arguments on the left & right mean I needed to potentially go back to the beginning of my Basic2 upon failing the second Argument (rather than just fail)
-
-#### Next steps:
-- Instead of changing the two rules, implement the newly modified Rule 0 manually to account for the looping cases.
-- Recognize that the parts of the modified rule themselves aren't modified.
-
+Coded rule zero manually.
 
 ### Day 20 part 2 notes:
-My algorithm now seems to successfully create a grid of tiles that correctly match one another.
-
-#### Next steps:
-- find the right orientation for each tile given their position
-- strip the border or each tile, rotate to the right orientation and emit the inner pattern
-- collect up all the tiles correctly oriented inner pattern
-- figure out if the assembled image is oriented correctly (flip or rotate)
-- search for the sea monsters; count the # symbols and subtract the SeaMonsterCount*N(sea_monster)
+My algorithm now seems to successfully create a grid of tiles that correctly match one another. It took much longer than I expected to get the matching correct given all the possible orientations. It really bent my mind.

@@ -177,7 +177,9 @@ pub fn solve_part2(filename : String, days : u32) -> u64 {
   for day in 0..days {
     flip_tiles(&mut tiles);
     retval = tiles.values().fold(0,|acc,n| if n.is_black { acc + 1 } else { acc } );
-    println!("Day {} - {} tiles", day+1, retval);
+    if day == days-1 {
+      println!("Day {} - {} tiles", day+1, retval);
+    }
   }
   print_tiles(&tiles);
 

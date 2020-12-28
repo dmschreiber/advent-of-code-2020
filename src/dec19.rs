@@ -3,12 +3,10 @@ mod tests {
 
   #[test]
   pub fn dec19_prod() {
-      let (mut rules,messages_lines) = super::load_rules("./inputs/dec19.txt".to_string());
+      let (rules,messages_lines) = super::load_rules("./inputs/dec19.txt".to_string());
       println!("Day 19 part 1 is {}", super::solve_part1(&rules, &messages_lines));
       assert!(226==super::solve_part1(&rules, &messages_lines));
 
-      // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
-      // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
       let val = super::solve_part2(&rules, &messages_lines);
       println!("part two prod 2 {}",val);
       assert!(val==355);
@@ -33,8 +31,6 @@ mod tests {
 
     rules.remove(&8);
     rules.remove(&11);
-    // rules.entry(8).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic1(42),super::Arg::Basic2(42,8)));
-    // rules.entry(11).and_modify(|n| *n = super::Rule::Or(super::Arg::Basic2(42,31),super::Arg::Basic3(42,11,31)));
 
     let all_lines = vec!["abbbbbabbbaaaababbaabbbbabababbbabbbbbbabaaaa",
                         "bbabbbbaabaabba",
@@ -90,12 +86,6 @@ mod tests {
     println!("part two test should wrong (3 not 12) - {}",val);
 
     assert!(12==val);
-
-    // println!("{:?}",super::does_match(&rules,0,Some("aaaaabbaabaaaaababaa".to_string()),None));
-    // println!("{:?}",super::does_match(&rules,42,Some("aaaaabbaabaaaaababaa".to_string()),None));
-    // println!("{:?}",super::does_match(&rules,42,Some("bbaabaaaaababaa".to_string()),None));
-    // println!("{:?}",super::does_match(&rules,11,Some("aaaaababaa".to_string()),None));
-
 
   }  
 }
@@ -621,5 +611,6 @@ pub fn solve(filename : String) {
   let (rules,messages_lines) = load_rules(filename.to_string());
   println!("Day 19 part 1 is {}", solve_part1(&rules, &messages_lines));
   assert!(226==solve_part1(&rules, &messages_lines));
+  println!("Day 19 part 2 is {}", solve_part2(&rules, &messages_lines));
 
 }

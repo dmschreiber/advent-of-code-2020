@@ -4,7 +4,7 @@ mod tests {
   #[test]
   pub fn dec20_prod() {
     assert!(30425930368573==super::solve_part1("./inputs/dec20.txt".to_string()));
-    super::solve_part2("./inputs/dec20.txt".to_string());
+    assert!(2453==super::solve_part2("./inputs/dec20.txt".to_string()));
 
   }
   #[test]
@@ -45,6 +45,7 @@ impl Tile {
     }
   }
 
+  #[allow(dead_code)]
   fn print_with_border(&self, rotated : bool) {
     for row in 0..10 {
       for col in 0..10 {
@@ -281,10 +282,10 @@ pub fn solve_part1(filename : String) -> u64 {
         }
       }
     }
-    println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
+
     let mut retval : u64 = 1;
     for c in corners.values() {
-      println!("{}", c.id );
+      // println!("{}", c.id );
       retval = retval * c.id as u64;
     }
     println!("{}={} in {:?}", corners.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join("x"), retval, start.elapsed());
@@ -588,9 +589,8 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
       }
     }
   }
-  // println!("{} Border tiles {}", borders.len(), borders.keys().map(|id| format!("{}",id) ).collect::<Vec<String>>().join(","));
-  println!("{} Tiles", things.len());
 
+  
   let size = (things.len() as f64).sqrt() as u32;
   let mut grid = build_border(&corners, &borders, size);
   let mut next_corner_hint = None;
@@ -599,7 +599,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
   // and pass it as my corner hint
   if size > 2 { 
     let mut upper_left_corner = vec![];
-    let mut upper_left_rotation = None;
+    // let mut upper_left_rotation;
     let mut which = 0;
 
     let top = grid.get(&(0,1)).unwrap().clone();
@@ -618,7 +618,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
         }
         if unique_matches == 2 {
             next_corner_hint = Some(t.id);
-            upper_left_rotation = Some(_r_index); // find_rotation(vec![top,None,None,left])
+            // upper_left_rotation = Some(_r_index); // find_rotation(vec![top,None,None,left])
             which = index;
             break;
         }
@@ -652,7 +652,7 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
   return grid;
 }
 
-pub fn solve_part2(filename : String) {
+pub fn solve_part2(filename : String) -> u32 {
   let contents = fs::read_to_string(filename)
   .expect("Something went wrong reading the file");
 
@@ -669,23 +669,23 @@ pub fn solve_part2(filename : String) {
   let mut grid = border(&things,Some(1439));
 
   // display the tile ids in formation
-  for row in 0..size {
-    for col in 0..size {
-      // let (r,c) = rotate_coordinates(row.try_into().unwrap(), col.try_into().unwrap(), 3, 0);
-      let (r,c) = (row,col);
-      if let Some(t) = grid.get(&(r.try_into().unwrap(),c.try_into().unwrap())) {
-        print!(" {:4}", t.id);
-        if t.rotation == None {
-          print!("-None   ")
-        } else {
-          print!("-{:?}", t.rotation);
-        }
-      } else {
-        print!(" ?????? ");
-      }
-    }
-    println!();
-  }
+  // for row in 0..size {
+  //   for col in 0..size {
+  //     // let (r,c) = rotate_coordinates(row.try_into().unwrap(), col.try_into().unwrap(), 3, 0);
+  //     let (r,c) = (row,col);
+  //     if let Some(t) = grid.get(&(r.try_into().unwrap(),c.try_into().unwrap())) {
+  //       print!(" {:4}", t.id);
+  //       if t.rotation == None {
+  //         print!("-None   ")
+  //       } else {
+  //         print!("-{:?}", t.rotation);
+  //       }
+  //     } else {
+  //       print!(" ?????? ");
+  //     }
+  //   }
+  //   println!();
+  // }
 
   for grid_row in 0..size {
     for grid_col in 0..size {
@@ -698,13 +698,6 @@ pub fn solve_part2(filename : String) {
           }
         }
 
-        let mut western_side = 0;
-        if let Some(t) = grid.get_mut(&(grid_row,grid_col-1)) {
-          if let Some(r) = t.rotation {
-            let v = t.all_rotations()[r].clone();
-            western_side = v[1];
-          }
-        }
 
         let mut eastern_side = 0;
         if let Some(t) = grid.get_mut(&(grid_row,grid_col+1)) {
@@ -714,13 +707,6 @@ pub fn solve_part2(filename : String) {
           }
         }
 
-        let mut southern_side = 0;
-        if let Some(t) = grid.get_mut(&(grid_row+1,grid_col)) {
-          if let Some(r) = t.rotation {
-            let v = t.all_rotations()[r].clone();
-            southern_side = v[0];
-          }
-        }
 
         if let Some(t) = grid.get_mut(&(grid_row,grid_col)) {
             for (i,v) in t.all_rotations().iter().enumerate() {
@@ -738,18 +724,6 @@ pub fn solve_part2(filename : String) {
               } else if eastern_side == v[1] {
                 match_count = match_count + 1;
               }
-
-              // if southern_side != 0 && southern_side != v[2] {
-              //   matches = false;
-              // } else if southern_side == v[2] {
-              //   match_count = match_count + 1;
-              // }
-
-              // if western_side != 0 && western_side != v[3] {
-              //   matches = false;
-              // } else if western_side == v[3] {
-              //   match_count = match_count + 1;
-              // }
               
               if let Some(r) = t.rotation {
                 if matches && match_count > 0 && i != r {
@@ -796,20 +770,17 @@ let monster_height = sea_monster.len();
 // searching
 let mut monsters = vec![];
 for rotation in 0..12 {
-  println!("Trying rotation {}", rotation);
-  for grid_row  in 0..size*8 {
-    for grid_col in 0..size*8 {
+
+  for grid_row  in 0..size*8-monster_height as u32 {
+    for grid_col in 0..size*8-monster_width as u32 {
       let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), size as usize*8, rotation);
       // let (r,c) = (grid_row,grid_col);
 
       // search for the monster
       let mut monster_match = 0;
-      println!("Checking {},{}", r, c);
       for (sm_row,sm_line) in sea_monster.iter().enumerate() {
         for (sm_col,sm) in sm_line.iter().enumerate() {
           let (effective_row,effective_col) = rotate_coordinates((grid_row+sm_row as u32).try_into().unwrap(), (grid_col+sm_col as u32).try_into().unwrap(), size as usize*8, rotation);
-          // let effective_row = r.checked_add(sm_row.try_into().unwrap()).unwrap(); //  + sm_row.try_into().unwrap();
-          // let effective_col = c.checked_add(sm_col.try_into().unwrap()).unwrap();
           if effective_row <= (size*8).try_into().unwrap() && effective_col <= (size*8).try_into().unwrap() { // { panic!("effective row is too big {} vs {}", effective_row, size*8)};
             if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
               let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
@@ -845,4 +816,5 @@ for grid_row in 0..size*8 {
   println!("Monsters {:?}", monsters);
 
   println!("Rough water count {}", hash_count - monsters.len()*15);
+  return hash_count as u32 - monsters.len() as u32 *15;
 }

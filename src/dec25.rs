@@ -22,7 +22,6 @@ mod tests {
   }
 }
 
-use std::collections::HashMap;
 const SECRET : u32 = 20201227;
 
 fn mod_inv(a: i64, module: i64) -> i64 {
@@ -39,7 +38,6 @@ fn mod_inv(a: i64, module: i64) -> i64 {
   }
   xy.0
 }
-use std::convert::TryFrom;
 
 fn another_way(key : u32) -> u32 {
   let mi =  mod_inv(7 as i64, SECRET as i64);
@@ -59,7 +57,6 @@ fn another_way(key : u32) -> u32 {
 }
 
 fn find_loop_size_from_key(key : u32) -> u32 {
-  let mut loop_size = 1;
 
   let mut acc = 1;
   let mut loop_count = 1;
@@ -69,14 +66,6 @@ fn find_loop_size_from_key(key : u32) -> u32 {
     loop_count = loop_count + 1;
   }
 
-  // loop {
-  //   println!("{:8}", (0..loop_size).fold(1, |acc,_n| (acc * 7) % SECRET));
-  //   if (0..loop_size).fold(1, |acc,_n| (acc * 7) % SECRET) == key {
-  //     println!("{:8}", (0..loop_size+1).fold(1, |acc,_n| (acc * 7) % SECRET));
-  //     return loop_size;
-  //   }
-  //   loop_size = loop_size + 1;
-  // }
 }
 
 pub fn solve_part1(key1 : u32, key2 : u32) -> u128 {
