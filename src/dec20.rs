@@ -793,22 +793,58 @@ for grid_row in 0..size*10 {
 }
 
 // the following is the actual eventual image
-let v1 = "                  #".as_bytes(); 
-let v2 = "#    ##    ##    ###".as_bytes();
-let v3 = " #  #  #  #  #  #".as_bytes(); 
+let monster_width = 20;
+let monster_height = 3;
+let sea_monster : Vec<Vec<char>> = vec![
+  "                  # ".as_bytes().iter().map(|b| *b as char).collect(),
+  "#    ##    ##    ###".as_bytes().iter().map(|b| *b as char).collect(),
+  " #  #  #  #  #  #   ".as_bytes().iter().map(|b| *b as char).collect() 
+];
 
+// searching
+for rotation in 0..11 {
+  let mut monsters = vec![];
+  for grid_row  in 0..size*8-monster_height {
+    for grid_col in 0..size*8-monster_width {
+      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 1);
+      let (r,c) = (grid_row,grid_col);
+      println!("checking ({},{})", r, c);
+      // search for the monster
+      let mut monster_match = 0;
+      for (sm_row,sm_line) in sea_monster.iter().enumerate() {
+        for (sm_col,sm) in sm_line.iter().enumerate() {
+          let effective_row : u32 = r.checked_add(sm_row.try_into().unwrap()).unwrap(); //  + sm_row.try_into().unwrap();
+          let effective_col : u32 = c.checked_add(sm_col.try_into().unwrap()).unwrap();
+
+          if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
+            let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
+            if *sm == '#' && pixel == '#' {
+              monster_match = monster_match + 1;
+            }
+          }          
+        }
+      }
+      if monster_match == 15 { monsters.push((r,c)); }
+    }
+  }
+}
+println!("Monsters {:?}", monsters);
+
+let mut hash_count = 0;
 for grid_row in 0..size*8 {
     for grid_col in 0..size*8 {
-      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 0);
+      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 1);
       let (r,c) = (grid_row,grid_col);
       if let Some(t) = grid.get(&((r/8).try_into().unwrap(),(c/8).try_into().unwrap())) {
-        print!("{}", t.get_row_col((r % 8).try_into().unwrap(),(c % 8).try_into().unwrap()));
+        let pixel = t.get_row_col((r % 8).try_into().unwrap(),(c % 8).try_into().unwrap());
+        if pixel == '#' { hash_count = hash_count + 1; }
+        print!("{}", pixel);
       } else {
         print!(" ");
       }   
-      if c % 8 == 7 { print!(" ")};
     }
     println!();
-    if grid_row % 8 == 7 {println!(); }
+
   }
+  println!("Rough water count {}", hash_count - monsters.len()*15);
 }
