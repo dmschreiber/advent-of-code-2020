@@ -330,7 +330,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
   // GENERAL CASE for widthxwidth where width>2
   for row in 0..width {
     for col in 0..width {
-      println!("Trying {} {}", row, col);
+      // println!("Trying {} {}", row, col);
 
       if row == 0 && col == 0 {
         let mut t = corners_vec[0].clone();
@@ -344,7 +344,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
 
           if v == vec![0,1,1,0] {
             if t.rotation != None {
-              println!("already set my rotation for {} in size {}", t.id, width);
+              // println!("already set my rotation for {} in size {}", t.id, width);
             } else {
               t.rotation = Some(my_rotation);
             }
@@ -353,10 +353,6 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
         }
           let rotation_sides = &t.all_rotations()[t.rotation.unwrap()];
           let t1 = get_match(&borders_vec, t_id, rotation_sides[1]).unwrap().clone();
-          println!("CORNER");
-          t.print_with_border(true);
-          println!("0,1");
-          t1.print_with_border(false);
           let index = borders_vec.iter().position(|x| *x == t1).unwrap();
           borders_vec.remove(index);
           retval.insert((0,1),t1);
@@ -755,19 +751,15 @@ pub fn solve_part2(filename : String) {
               //   match_count = match_count + 1;
               // }
               
-              if grid_row == 11 && grid_col == 0 {
-                println!("Tile {} at ({},{}) found rotation {} with {} matches", t.id, grid_row, grid_col, i, match_count);
-                println!("new rotation {}", i);
-              }
               if let Some(r) = t.rotation {
                 if matches && match_count > 0 && i != r {
-                  println!("Tile {} at ({},{}) found new rotation {} with {} matches", t.id, grid_row, grid_col, i, match_count);
-                  println!("old rotation {:?}, new rotation {:?}", t.all_rotations()[r], t.all_rotations()[i]);
+                  // println!("Tile {} at ({},{}) found new rotation {} with {} matches", t.id, grid_row, grid_col, i, match_count);
+                  // println!("old rotation {:?}, new rotation {:?}", t.all_rotations()[r], t.all_rotations()[i]);
                   t.rotation = Some(i);
                 }
               } else if match_count > 0 {
-                println!("Tile {} at ({},{}) found rotation {} with {} matches", t.id, grid_row, grid_col, i, match_count);
-                println!("new rotation {}", i);
+                // println!("Tile {} at ({},{}) found rotation {} with {} matches", t.id, grid_row, grid_col, i, match_count);
+                // println!("new rotation {}", i);
                 t.rotation = Some(i);
               }
           }
@@ -793,47 +785,51 @@ for grid_row in 0..size*10 {
 }
 
 // the following is the actual eventual image
-let monster_width = 20;
-let monster_height = 3;
 let sea_monster : Vec<Vec<char>> = vec![
   "                  # ".as_bytes().iter().map(|b| *b as char).collect(),
   "#    ##    ##    ###".as_bytes().iter().map(|b| *b as char).collect(),
   " #  #  #  #  #  #   ".as_bytes().iter().map(|b| *b as char).collect() 
 ];
+let monster_width = sea_monster[0].len();
+let monster_height = sea_monster.len();
 
 // searching
-for rotation in 0..11 {
-  let mut monsters = vec![];
-  for grid_row  in 0..size*8-monster_height {
-    for grid_col in 0..size*8-monster_width {
-      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 1);
-      let (r,c) = (grid_row,grid_col);
-      println!("checking ({},{})", r, c);
+let mut monsters = vec![];
+for rotation in 0..12 {
+  println!("Trying rotation {}", rotation);
+  for grid_row  in 0..size*8 {
+    for grid_col in 0..size*8 {
+      let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), size as usize*8, rotation);
+      // let (r,c) = (grid_row,grid_col);
+
       // search for the monster
       let mut monster_match = 0;
+      println!("Checking {},{}", r, c);
       for (sm_row,sm_line) in sea_monster.iter().enumerate() {
         for (sm_col,sm) in sm_line.iter().enumerate() {
-          let effective_row : u32 = r.checked_add(sm_row.try_into().unwrap()).unwrap(); //  + sm_row.try_into().unwrap();
-          let effective_col : u32 = c.checked_add(sm_col.try_into().unwrap()).unwrap();
-
-          if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
-            let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
-            if *sm == '#' && pixel == '#' {
-              monster_match = monster_match + 1;
-            }
-          }          
+          let (effective_row,effective_col) = rotate_coordinates((grid_row+sm_row as u32).try_into().unwrap(), (grid_col+sm_col as u32).try_into().unwrap(), size as usize*8, rotation);
+          // let effective_row = r.checked_add(sm_row.try_into().unwrap()).unwrap(); //  + sm_row.try_into().unwrap();
+          // let effective_col = c.checked_add(sm_col.try_into().unwrap()).unwrap();
+          if effective_row <= (size*8).try_into().unwrap() && effective_col <= (size*8).try_into().unwrap() { // { panic!("effective row is too big {} vs {}", effective_row, size*8)};
+            if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
+              let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
+              if *sm == '#' && pixel == '#' {
+                monster_match = monster_match + 1;
+              }
+            }        
+          } // check if in bounds  
         }
       }
       if monster_match == 15 { monsters.push((r,c)); }
     }
   }
+  if monsters.len() > 0 { break; }
 }
-println!("Monsters {:?}", monsters);
 
 let mut hash_count = 0;
 for grid_row in 0..size*8 {
     for grid_col in 0..size*8 {
-      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 1);
+      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 2);
       let (r,c) = (grid_row,grid_col);
       if let Some(t) = grid.get(&((r/8).try_into().unwrap(),(c/8).try_into().unwrap())) {
         let pixel = t.get_row_col((r % 8).try_into().unwrap(),(c % 8).try_into().unwrap());
@@ -846,5 +842,7 @@ for grid_row in 0..size*8 {
     println!();
 
   }
+  println!("Monsters {:?}", monsters);
+
   println!("Rough water count {}", hash_count - monsters.len()*15);
 }
