@@ -18,6 +18,7 @@ use std::fs;
 use regex::Regex;
 use std::time::{Instant};
 use std::collections::HashMap;
+use std::convert::TryInto;
 
 lazy_static! {
   static ref TILE_ID_REGEX: Regex = Regex::new(r"^Tile (\d+):$").unwrap();
@@ -131,6 +132,24 @@ impl Tile {
     let retval = self.lines[rotate_row+1].as_bytes()[rotate_col+1] as char;
     return retval;
   }
+  fn find_rotation(&self, sides : Vec<Option<usize>>) -> Option<usize> {
+    
+    for (i,r) in self.all_rotations().iter().enumerate() {
+      let mut side_match = true;
+      for (side_index,s) in sides.iter().enumerate() {
+        if let Some(side_val) = s {
+          if *side_val != r[side_index] as usize {
+            side_match = false;
+          }
+        }
+      }
+      if side_match {
+        return Some(i);
+      }
+    }
+    return None;
+  }
+
 }
 
 fn rotate_coordinates (row : usize, col : usize, size : usize, rotation : usize) -> (usize, usize) {
@@ -324,7 +343,7 @@ pub fn build_border(corners : &Vec<Tile>, borders : &Vec<Tile>, width : u32) -> 
 
           if v == vec![0,1,1,0] {
             if t.rotation != None {
-              // panic!("already set my rotation for {}", t.id);
+              println!("already set my rotation for {} in size {}", t.id, width);
             } else {
               t.rotation = Some(my_rotation);
             }
@@ -577,8 +596,10 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
     let mut upper_left_rotation = None;
     let mut which = 0;
 
-    upper_left_corner.push(grid.get(&(0,1)).unwrap().clone());
-    upper_left_corner.push(grid.get(&(1,0)).unwrap().clone());
+    let top = grid.get(&(0,1)).unwrap().clone();
+    let left = grid.get(&(1,0)).unwrap().clone();
+    upper_left_corner.push(top.clone());
+    upper_left_corner.push(left.clone());
 
     for (index,t) in inner.iter().enumerate() {
       for (_r_index,rotation) in t.all_rotations().iter().enumerate() {
@@ -591,15 +612,17 @@ pub fn border (things : &Vec<Tile>, corner_hint : Option<u32>) -> HashMap<(u32,u
         }
         if unique_matches == 2 {
             next_corner_hint = Some(t.id);
-            upper_left_rotation = Some(_r_index);
+            upper_left_rotation = Some(_r_index); // find_rotation(vec![top,None,None,left])
             which = index;
             break;
         }
       }
     }
-    inner[which].rotation = upper_left_rotation;
+    let a = top.all_rotations()[top.rotation.unwrap()][2];
+    let b = left.all_rotations()[left.rotation.unwrap()][1];
+    inner[which].rotation = inner[which].find_rotation(vec![Some(a.try_into().unwrap()),None,None,Some(b.try_into().unwrap())]); 
   }
-  return grid;
+
   // if I have inner tiles, copy my inner grid into my outer grid before I return it
   if inner.len() > 1 {
     // build the border with my inner tiles (all over again)
@@ -781,7 +804,6 @@ t.print_with_border(false);
 println!("11,0");
 
 // the following doesn't print right
-use std::convert::TryInto;
 
 for grid_row in 0..size*8 {
     for grid_col in 0..size*8 {
