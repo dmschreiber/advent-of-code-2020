@@ -154,11 +154,11 @@ Day 25 complete in 293.678304ms
 ```
 
 ### Day 19 Part 2 Notes:
-My matching algorithm isn't working with the modified rules (it processes, but not correctly according to the test data set)
+My matching algorithm wasn't working with the modified rules (it processes, but not correctly according to the test data set)
 It appears the modified rules loop upon themselves and mean they go forever if they don't satisfy the original rule.
 I find that I run out of string and am still trying to match, unsure whether that's failure or success.
 My matching in the OR case with different arguments on the left & right mean I needed to potentially go back to the beginning of my Basic2 upon failing the second Argument (rather than just fail)
-Coded rule zero manually.
+Coded rule zero manually to get all the matching options with the unchanged rules 42 and 31.
 
 ### Day 20 part 2 notes:
 My algorithm now seems to successfully create a grid of tiles that correctly match one another. It took much longer than I expected to get the matching correct given all the possible orientations. It really bent my mind.

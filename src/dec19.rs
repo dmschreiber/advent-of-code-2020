@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-
+  
   #[test]
   pub fn dec19_prod() {
       let (rules,messages_lines) = super::load_rules("./inputs/dec19.txt".to_string());
@@ -69,17 +69,6 @@ mod tests {
         println!(" [[{} shouldn't match but does]]", &l);
       } else if !matched && matched_lines.contains(&l) {
         println!(" [[{} doesn't match but should]]", &l);
-        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),Some(l.to_string()),None);
-        println!("{:?}",result);
-        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
-        println!("{:?}",result);
-        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
-        println!("{:?}",result);
-        let result = super::does_match(&rules,rules.get(&42).unwrap().clone(),result,None);
-        println!("{:?}",result);
-        let result = super::does_match(&rules,rules.get(&31).unwrap().clone(),result,None);
-        println!("{:?}",result);
-        break;
       }
     }
     let val = super::solve_part2(&rules, &messages_lines);
@@ -88,6 +77,7 @@ mod tests {
     assert!(12==val);
 
   }  
+
 }
 
 use std::fs;
@@ -108,9 +98,7 @@ lazy_static! {
 
 #[derive(Debug,Clone,PartialEq)]
 pub enum Arg {
-  Basic1(u32),
-  Basic2(u32,u32),
-  Basic3(u32,u32,u32),
+  Basic(Vec<u32>),
   Literal(String),  
 }
 
@@ -120,57 +108,25 @@ pub enum Rule {
   Value(Arg),
 }
 
-fn do_basic1(rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  if let Some(r) = rules.get(&rule_number) {
-    if let Some(s1) = does_match(rules, r.clone(), line,level) {
-      Some(s1)
-    } else {
-      None
+fn do_basic(rules : &std::collections::HashMap<u32,Rule>, rule_list : Vec<u32>, line : Option<String>, level : Option<String>) -> Option<String> {
+  let mut result = line;
+  for r_number in rule_list {
+    if let Some(r) = rules.get(&r_number) {
+      result = does_match(rules,r.clone(), result, level.clone());
     }
-  } else {
-    panic!("Can't find rule {}", rule_number);
   }
+  return result;
+}
+
+fn do_basic1(rules : &std::collections::HashMap<u32,Rule>, rule_number : u32, line : Option<String>, level : Option<String>) -> Option<String> {
+  do_basic(rules, vec![rule_number], line, level)
 }
 
 fn do_basic2(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  let r1_o = rules.get(&r1).unwrap();
-  let r2_o = rules.get(&r2).unwrap();
-
-  if let Some(s1) = does_match(rules, r1_o.clone(), line.clone(),level.clone()) 
-  {
-    if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) 
-    {
-        Some(s2)
-    } else if let Rule::Or(a1,a2) = r1_o {
-      if std::mem::discriminant(a1) != std::mem::discriminant(a2)
-      {
-        if let Some(s1) = does_match(rules, Rule::Value(a2.clone()), line, level.clone()) {
-          if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) 
-          {
-              Some(s2)
-          } else {None }
-        } else { None }
-      } else 
-      { None }
-    } else { None } // second rule
-  } else { None } // first rule
+  do_basic(rules, vec![r1,r2], line, level)
 }
 fn do_basic3(rules : &std::collections::HashMap<u32,Rule>, r1 : u32, r2 : u32, r3 : u32, line : Option<String>, level : Option<String>) -> Option<String> {
-  let r1_o = rules.get(&r1).unwrap();
-  let r2_o = rules.get(&r2).unwrap();
-  let r3_o = rules.get(&r3).unwrap();
-
-  if let Some(s1) = does_match(rules, r1_o.clone(), line,level.clone()) {
-    if let Some(s2) = does_match(rules, r2_o.clone(), Some(s1),level.clone()) {
-      if let Some(s3) = does_match(rules, r3_o.clone(), Some(s2),level.clone()) {
-        Some(s3)
-      } else {
-        None
-      }
-    } else {
-      None
-    }
-  } else { None }
+  do_basic(rules, vec![r1,r2,r3],line,level)
 }
 
 fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line : Option<String>, level : Option<String>) -> Option<String> {
@@ -204,61 +160,29 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line :
               None
             }
           }
-          Arg::Basic1(r1) => { do_basic1(rules, r1, Some(my_string),Some(format!("{}>",level_format))) }      
-          Arg::Basic2(r1,r2) => { do_basic2(rules, r1, r2, Some(my_string),Some(format!("{}>",level_format))) }
-          Arg::Basic3(r1,r2,r3) => { do_basic3(rules, r1, r2, r3, Some(my_string),Some(format!("{}>",level_format))) }
+          Arg::Basic(v) => { do_basic(rules, v, Some(my_string),Some(format!("{}>",level_format))) }      
+          // Arg::Basic2(r1,r2) => { do_basic2(rules, r1, r2, Some(my_string),Some(format!("{}>",level_format))) }
+          // Arg::Basic3(r1,r2,r3) => { do_basic3(rules, r1, r2, r3, Some(my_string),Some(format!("{}>",level_format))) }
         }
     }
     Rule::Or(p1,p2) => 
     {
+
       match p1 
       {
-        Arg::Basic1(p1_a1) => {
+        Arg::Basic(v1) => {
           match p2 {
-            Arg::Basic1(p2_a1) => {
-              if let Some(s1) = do_basic1(rules, p1_a1, Some(my_string.clone()), Some(format!("{}>",level_format))) {
+            Arg::Basic(v2) => {
+              if let Some(s1) = do_basic(rules, v1, Some(my_string.clone()), Some(format!("{}>",level_format))) {
                 Some(s1)
               } else {
-                do_basic1(rules, p2_a1, Some(my_string.clone()),Some(format!("{}>",level_format)))
+                do_basic(rules, v2, Some(my_string.clone()),Some(format!("{}>",level_format)))
               }
             }
-            Arg::Basic2(p2_a1,p2_a2) => {
-              if let Some(s1) = do_basic1(rules, p1_a1, Some(my_string.clone()),Some(format!("{}>",level_format))) {
-                Some(s1)
-              } else {
-                do_basic2(rules, p2_a1, p2_a2, Some(my_string.clone()),Some(format!("{}>",level_format)))
-              }
-            }
-            _ => {panic!("Or with 1 and more than one arg")}
-          }
-        }        
-        Arg::Basic2(p1_a1,p1_a2) => 
-        {
-          match p2 
-          {
-            Arg::Basic1(_p2_a1) => { panic!("or with 2 and 1")}
-            Arg::Basic2(p2_a1,p2_a2) => 
-            { 
-              let p1 = do_basic2(rules,p1_a1,p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format))); 
-              if p1 == None {
-                do_basic2(rules,p2_a1,p2_a2,Some(my_string.clone()),Some(format!("{}>",level_format)))
-              } else {
-                p1
-              }
-            }
-            Arg::Basic3(p2_a1,p2_a2,p2_a3) => {
-              let p1 = do_basic2(rules, p1_a1, p1_a2, Some(my_string.clone()),Some(format!("{}>",level_format)));
-              if p1 == None {
-                do_basic3(rules, p2_a1, p2_a2, p2_a3, Some(my_string.clone()),Some(format!("{}>",level_format)))
-              } else {
-                p1
-              }
-            }
-            _ => { panic!("Or with more than two args")}
+            _ => {panic!("or with a non-basic")}
           }
         }
-
-        _ => { panic!("Or with more than two args")}
+        _ => {panic!("or with a non-basic")}
       }
     }
     };
@@ -286,13 +210,13 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
       let p1_a2 = args[3].parse::<u32>().unwrap();
       let p2_a1 = args[4].parse::<u32>().unwrap();
       let p2_a2 = args[5].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(Arg::Basic2(p1_a1,p1_a2),Arg::Basic2(p2_a1,p2_a2)));
+      rules.insert(rule_number,Rule::Or(Arg::Basic(vec![p1_a1,p1_a2]),Arg::Basic(vec![p2_a1,p2_a2])));
     } else if let Some(args) = RULE_SIMPLE_OR_REGEX.captures(line) {
       // println!("SIMPLE OR");
       rule_number = args[1].parse::<u32>().unwrap();
       let p1_a1 = args[2].parse::<u32>().unwrap();
       let p2_a1 = args[3].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(Arg::Basic1(p1_a1),Arg::Basic1(p2_a1)));
+      rules.insert(rule_number,Rule::Or(Arg::Basic(vec![p1_a1]),Arg::Basic(vec![p2_a1])));
       // rules.insert(rule_number,Rule::SimpleOr(p1_a1,p2_a1));
 
     } else if let Some(args) = RULE_OR12_REGEX.captures(line) {
@@ -300,7 +224,7 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
       let p1_a1 = args[2].parse::<u32>().unwrap();
       let p2_a1 = args[3].parse::<u32>().unwrap();
       let p2_a2 = args[4].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(Arg::Basic1(p1_a1),Arg::Basic2(p2_a1,p2_a2)));
+      rules.insert(rule_number,Rule::Or(Arg::Basic(vec![p1_a1]),Arg::Basic(vec![p2_a1,p2_a2])));
     } else if let Some(args) = RULE_OR23_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
       let p1_a1 = args[2].parse::<u32>().unwrap();
@@ -308,7 +232,7 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
       let p2_a1 = args[4].parse::<u32>().unwrap();
       let p2_a2 = args[5].parse::<u32>().unwrap();
       let p2_a3 = args[6].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(Arg::Basic2(p1_a1,p1_a2),Arg::Basic3(p2_a1,p2_a2,p2_a3)));
+      rules.insert(rule_number,Rule::Or(Arg::Basic(vec![p1_a1,p1_a2]),Arg::Basic(vec![p2_a1,p2_a2,p2_a3])));
 
     } else if let Some(args) = RULE_LITERAL_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
@@ -320,18 +244,18 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
       let l1 = args[2].parse::<u32>().unwrap();
       let l2 = args[3].parse::<u32>().unwrap();
       let l3 = args[4].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Value(Arg::Basic3(l1, l2, l3)));
+      rules.insert(rule_number, Rule::Value(Arg::Basic(vec![l1, l2, l3])));
       // println!("BASIC 3 {} {} {} {}", rule_number, &l1, &l2, &l3);
     } else if let Some(args) = RULE_BASIC2_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
       let l1 = args[2].parse::<u32>().unwrap();
       let l2 = args[3].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Value(Arg::Basic2(l1, l2)));
+      rules.insert(rule_number, Rule::Value(Arg::Basic(vec![l1, l2])));
       // println!("BASIC 2 {} {} {}", rule_number, &l1, &l2);
     } else if let Some(args) = RULE_BASIC1_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
       let l1 = args[2].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Value(Arg::Basic1(l1)));
+      rules.insert(rule_number, Rule::Value(Arg::Basic(vec![l1])));
       // println!("BASIC 1 {} {}", rule_number, &l1);
 
     } else {
@@ -361,7 +285,7 @@ fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &St
   let mut result;
 
   // Option 1 is just 42 42 31
-  result = does_match(&rules, Rule::Value(Arg::Basic3(42,42,31)),Some(messages_line.to_string()),None);
+  result = does_match(&rules, Rule::Value(Arg::Basic(vec![42,42,31])),Some(messages_line.to_string()),None);
   if result == Some("".to_string()) {
     return true;
   }
