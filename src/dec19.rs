@@ -92,8 +92,10 @@ use std::fs;
 use regex::Regex;
 
 lazy_static! {
-  static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+)$").unwrap();
+  // static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+)$").unwrap();
+  static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (?P<lhs>(\d+ )+)\| (?P<rhs>(\d+\s*)+)$").unwrap();
   static ref RULE_SIMPLE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) \| (\d+)$").unwrap();
+
   static ref RULE_OR12_REGEX: Regex = Regex::new(r"^(\d+): (\d+) \| (\d+) (\d+)$").unwrap();
   static ref RULE_OR23_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+) (\d+)$").unwrap();
 
@@ -174,33 +176,11 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
     // print!("RULES LINE {}", line);
     if let Some(args) = RULE_OR_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
-      let p1_a1 = args[2].parse::<u32>().unwrap();
-      let p1_a2 = args[3].parse::<u32>().unwrap();
-      let p2_a1 = args[4].parse::<u32>().unwrap();
-      let p2_a2 = args[5].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(vec![p1_a1,p1_a2],vec![p2_a1,p2_a2]));
-    } else if let Some(args) = RULE_SIMPLE_OR_REGEX.captures(line) {
-      // println!("SIMPLE OR");
-      rule_number = args[1].parse::<u32>().unwrap();
-      let p1_a1 = args[2].parse::<u32>().unwrap();
-      let p2_a1 = args[3].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(vec![p1_a1],vec![p2_a1]));
-      // rules.insert(rule_number,Rule::SimpleOr(p1_a1,p2_a1));
-
-    } else if let Some(args) = RULE_OR12_REGEX.captures(line) {
-      rule_number = args[1].parse::<u32>().unwrap();
-      let p1_a1 = args[2].parse::<u32>().unwrap();
-      let p2_a1 = args[3].parse::<u32>().unwrap();
-      let p2_a2 = args[4].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(vec![p1_a1],vec![p2_a1,p2_a2]));
-    } else if let Some(args) = RULE_OR23_REGEX.captures(line) {
-      rule_number = args[1].parse::<u32>().unwrap();
-      let p1_a1 = args[2].parse::<u32>().unwrap();
-      let p1_a2 = args[3].parse::<u32>().unwrap();
-      let p2_a1 = args[4].parse::<u32>().unwrap();
-      let p2_a2 = args[5].parse::<u32>().unwrap();
-      let p2_a3 = args[6].parse::<u32>().unwrap();
-      rules.insert(rule_number,Rule::Or(vec![p1_a1,p1_a2],vec![p2_a1,p2_a2,p2_a3]));
+      let p1 = args.name("lhs").unwrap().as_str().trim();
+      let p2 = args.name("rhs").unwrap().as_str().trim();
+      let v1 : Vec<u32> = p1.split(" ").map(|n| n.parse().unwrap() ).collect();
+      let v2 : Vec<u32> = p2.split(" ").map(|n| n.parse().unwrap() ).collect();
+      rules.insert(rule_number,Rule::Or(v1,v2));
 
     } else if let Some(args) = RULE_LITERAL_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
