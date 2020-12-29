@@ -19,6 +19,7 @@ use regex::Regex;
 use std::time::{Instant};
 use std::collections::HashMap;
 use std::convert::TryInto;
+use colored::*;
 
 lazy_static! {
   static ref TILE_ID_REGEX: Regex = Regex::new(r"^Tile (\d+):$").unwrap();
@@ -70,10 +71,6 @@ impl Tile {
       basic = vec![self.reverse(basic[3]),basic[0],self.reverse(basic[1]), basic[2]];
       v.push(basic.clone());
     }
-    // v.push(vec![self.sides[0],self.sides[1],self.sides[2],self.sides[3]]);
-    // v.push(vec![self.rev_sides[3],self.sides[0],self.rev_sides[1],self.sides[2]]);
-    // v.push(vec![self.sides[2],self.rev_sides[3],self.rev_sides[0], self.rev_sides[1]]);
-    // v.push(vec![self.sides[1],self.sides[2],self.sides[3], self.rev_sides[0]]);
 
     // flip on vertical axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
     basic = vec![self.rev_sides[0],self.sides[3],self.rev_sides[2],self.sides[1]];
@@ -83,11 +80,6 @@ impl Tile {
       v.push(basic.clone());
     }
 
-    // v.push(vec![self.sides[0],self.sides[3],self.sides[2],self.sides[1]]);
-    // v.push(vec![self.rev_sides[1],self.sides[0],self.rev_sides[3],self.sides[2]]);
-    // v.push(vec![self.rev_sides[2],self.rev_sides[1],self.rev_sides[0], self.rev_sides[3]]);
-    // v.push(vec![self.sides[3],self.rev_sides[2],self.sides[1], self.rev_sides[0]]);
-
     // flip on horizontal axis then 0 degree; 90 degree; 180 degree; 270 degree rotation
     basic = vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]];
     v.push(basic.clone());
@@ -95,10 +87,6 @@ impl Tile {
       basic = vec![self.reverse(basic[3]),basic[0],self.reverse(basic[1]), basic[2]];
       v.push(basic.clone());
     }
-    // v.push(vec![self.sides[2],self.rev_sides[1],self.sides[0],self.rev_sides[3]]);
-    // v.push(vec![self.sides[3],self.sides[2],self.sides[1],self.sides[0]]);
-    // v.push(vec![self.rev_sides[0],self.sides[3],self.rev_sides[2], self.sides[1]]);
-    // v.push(vec![self.rev_sides[1],self.rev_sides[0],self.rev_sides[3], self.rev_sides[2]]);
 
     v
   }
@@ -668,25 +656,6 @@ pub fn solve_part2(filename : String) -> u32 {
   // call to make the successive borders
   let mut grid = border(&things,Some(1439));
 
-  // display the tile ids in formation
-  // for row in 0..size {
-  //   for col in 0..size {
-  //     // let (r,c) = rotate_coordinates(row.try_into().unwrap(), col.try_into().unwrap(), 3, 0);
-  //     let (r,c) = (row,col);
-  //     if let Some(t) = grid.get(&(r.try_into().unwrap(),c.try_into().unwrap())) {
-  //       print!(" {:4}", t.id);
-  //       if t.rotation == None {
-  //         print!("-None   ")
-  //       } else {
-  //         print!("-{:?}", t.rotation);
-  //       }
-  //     } else {
-  //       print!(" ?????? ");
-  //     }
-  //   }
-  //   println!();
-  // }
-
   for grid_row in 0..size {
     for grid_col in 0..size {
       if !(grid_row == 0 && grid_col == 0) {
@@ -769,8 +738,11 @@ let monster_height = sea_monster.len();
 
 // searching
 let mut monsters = vec![];
-for rotation in 0..12 {
+let mut monster_map = HashMap::new();
 
+let mut my_rotation = 0;
+for rotation in 0..12 {
+  my_rotation = rotation;
   for grid_row  in 0..size*8-monster_height as u32 {
     for grid_col in 0..size*8-monster_width as u32 {
       let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), size as usize*8, rotation);
@@ -791,21 +763,45 @@ for rotation in 0..12 {
           } // check if in bounds  
         }
       }
-      if monster_match == 15 { monsters.push((r,c)); }
+      if monster_match == 15 { 
+        monsters.push((r,c)); 
+        for (sm_row,sm_line) in sea_monster.iter().enumerate() {
+          for (sm_col,sm) in sm_line.iter().enumerate() {
+            let (effective_row,effective_col) = rotate_coordinates((grid_row+sm_row as u32).try_into().unwrap(), (grid_col+sm_col as u32).try_into().unwrap(), size as usize*8, rotation);
+            if effective_row <= (size*8).try_into().unwrap() && effective_col <= (size*8).try_into().unwrap() { // { panic!("effective row is too big {} vs {}", effective_row, size*8)};
+              if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
+                let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
+                if *sm == '#' && pixel == '#' {
+                  monster_map.insert((effective_row,effective_col),'O');
+                }
+              }        
+            } // check if in bounds  
+          }
+        }
+      }
     }
   }
-  if monsters.len() > 0 { break; }
+  if monsters.len() > 0 { println!("rotation is {}", my_rotation); break; }
 }
 
 let mut hash_count = 0;
 for grid_row in 0..size*8 {
     for grid_col in 0..size*8 {
-      // let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, 2);
-      let (r,c) = (grid_row,grid_col);
+      let (r,c) = rotate_coordinates(grid_row.try_into().unwrap(), grid_col.try_into().unwrap(), 8 as usize * size as usize, my_rotation);
+      // let (r,c) = (grid_row,grid_col);
       if let Some(t) = grid.get(&((r/8).try_into().unwrap(),(c/8).try_into().unwrap())) {
         let pixel = t.get_row_col((r % 8).try_into().unwrap(),(c % 8).try_into().unwrap());
         if pixel == '#' { hash_count = hash_count + 1; }
-        print!("{}", pixel);
+
+        if let Some(m) = monster_map.get(&(r,c)) {
+          if *m == 'O' {
+            print!("{}", "O".red());
+          } else {
+            print!("{}", pixel);
+          }
+        } else {
+          print!("{}", pixel);
+        }
       } else {
         print!(" ");
       }   
