@@ -112,20 +112,16 @@ pub enum Rule {
 }
 
 fn do_basic(rules : &std::collections::HashMap<u32,Rule>, rule_list : Vec<u32>, line : Option<String>, level : Option<String>) -> Vec<Option<String>> {
-  let mut result; //  = line;
   let mut retval = vec![line];
-  // let mut new_list = vec![];
 
   for r_number in rule_list {
     if let Some(r) = rules.get(&r_number) {
-      result = retval.pop();
-      let mut new_list = vec![];
-      while result != None {
-        new_list.append(&mut does_match(rules,r.clone(), result.unwrap(), level.clone())); // I need to handle the option that this could return multiple paths
-        result = retval.pop();
+      let mut new_list = vec![]; // generate a list of possible matches
+
+      while let Some(result) = retval.pop() {
+        new_list.append(&mut does_match(rules,r.clone(), result, level.clone()));
       }
       retval = new_list.iter().filter(|&a| *a != None).map(|a| a.clone()).collect::<Vec<Option<String>>>().clone();
-      // retval = new_list;
 
     }
   }
@@ -147,27 +143,20 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line :
   let retval = 
   match rule 
   {
-    Rule::Literal(l) => 
-          { if my_string.len() == 0 { vec![None] }
-            else if *l == my_string[..1] { 
-              vec![Some(format!("{}",&my_string[1..]).to_string())]
-            } else {
-              vec![None]
-            }
-          }
+    Rule::Literal(_l) if my_string.len() == 0 => { vec![None] }
+    Rule::Literal(l) if *l == my_string[..1] => { vec![Some(format!("{}",&my_string[1..]).to_string())] }
+    Rule::Literal(_l) => { vec![None] }
     Rule::Basic(v) => { do_basic(rules, v, Some(my_string),Some(format!("{}>",level_format))) }      
     Rule::Or(v1,v2) => 
     {
         let mut matches = do_basic(rules, v1, Some(my_string.clone()), Some(format!("{}>",level_format)));
         let mut or_matches = do_basic(rules, v2, Some(my_string.clone()),Some(format!("{}>",level_format))).clone();
-
-        // println!("{} result of Or {:?} and {:?}",level_format,matches, or_matches);
         matches.append(&mut or_matches);
       
         matches
       }
     };
-    // println!("returning {:?}", retval);
+
     retval
 }
 
