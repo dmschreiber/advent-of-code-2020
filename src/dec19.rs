@@ -92,18 +92,16 @@ use std::fs;
 use regex::Regex;
 
 lazy_static! {
-  // static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+)$").unwrap();
   static ref RULE_OR_REGEX: Regex = Regex::new(r"^(\d+): (?P<lhs>(\d+ )+)\| (?P<rhs>(\d+\s*)+)$").unwrap();
   static ref RULE_SIMPLE_OR_REGEX: Regex = Regex::new(r"^(\d+): (\d+) \| (\d+)$").unwrap();
 
-  static ref RULE_OR12_REGEX: Regex = Regex::new(r"^(\d+): (\d+) \| (\d+) (\d+)$").unwrap();
-  static ref RULE_OR23_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) \| (\d+) (\d+) (\d+)$").unwrap();
-
   static ref RULE_LITERAL_REGEX: Regex = Regex::new(r#"^(\d+): .([ab]).$"#).unwrap();
-  static ref RULE_BASIC1_REGEX: Regex = Regex::new(r"^(\d+): (\d+)$").unwrap();
   
-  static ref RULE_BASIC2_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+)$").unwrap();
-  static ref RULE_BASIC3_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) (\d+)$").unwrap();
+  static ref RULE_BASIC_REGEX: Regex = Regex::new(r"^(\d+): (?P<basic>(\d+\s*)+)$").unwrap();
+  // static ref RULE_BASIC1_REGEX: Regex = Regex::new(r"^(\d+): (\d+)$").unwrap();
+  
+  // static ref RULE_BASIC2_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+)$").unwrap();
+  // static ref RULE_BASIC3_REGEX: Regex = Regex::new(r"^(\d+): (\d+) (\d+) (\d+)$").unwrap();
 }
 
 #[derive(Debug,Clone,PartialEq)]
@@ -187,24 +185,11 @@ pub fn load_rules(filename : String) -> (std::collections::HashMap::<u32,Rule>, 
       let literal = args[2].to_string();
       rules.insert(rule_number, Rule::Literal(literal));
       // println!("LITERAL {} {:?}", rule_number, rules.get(&rule_number).unwrap());
-    } else if let Some(args) = RULE_BASIC3_REGEX.captures(line) {
+    } else if let Some(args) = RULE_BASIC_REGEX.captures(line) {
       rule_number = args[1].parse::<u32>().unwrap();
-      let l1 = args[2].parse::<u32>().unwrap();
-      let l2 = args[3].parse::<u32>().unwrap();
-      let l3 = args[4].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Basic(vec![l1, l2, l3]));
-      // println!("BASIC 3 {} {} {} {}", rule_number, &l1, &l2, &l3);
-    } else if let Some(args) = RULE_BASIC2_REGEX.captures(line) {
-      rule_number = args[1].parse::<u32>().unwrap();
-      let l1 = args[2].parse::<u32>().unwrap();
-      let l2 = args[3].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Basic(vec![l1, l2]));
-      // println!("BASIC 2 {} {} {}", rule_number, &l1, &l2);
-    } else if let Some(args) = RULE_BASIC1_REGEX.captures(line) {
-      rule_number = args[1].parse::<u32>().unwrap();
-      let l1 = args[2].parse::<u32>().unwrap();
-      rules.insert(rule_number, Rule::Basic(vec![l1]));
-      // println!("BASIC 1 {} {}", rule_number, &l1);
+      let p1 = args.name("basic").unwrap().as_str().trim();
+      let v1 : Vec<u32> = p1.split(" ").map(|n| n.parse().unwrap() ).collect();
+      rules.insert(rule_number, Rule::Basic(v1));
 
     } else {
       panic!("unexpected rule format! ({})",line);
