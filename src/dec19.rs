@@ -8,8 +8,8 @@ mod tests {
       assert!(226==super::solve_part1(&rules, &messages_lines));
 
       rules.insert(8,super::Rule::Or(vec![42],vec![42,8]));
-      rules.insert(8,super::Rule::Or(vec![42,31],vec![42,11,31]));
-    
+      rules.insert(11,super::Rule::Or(vec![42,31],vec![42,11,31]));
+
       let val = super::solve_part2(&rules, &messages_lines);
       println!("part two prod 2 {}",val);
       assert!(val==355);
@@ -66,6 +66,9 @@ mod tests {
                         "aabbbbbaabbbaaaaaabbbbbababaaaaabbaaabba",
     ];               
     
+    rules.insert(8,super::Rule::Or(vec![42],vec![42,8]));
+    rules.insert(11,super::Rule::Or(vec![42,31],vec![42,11,31]));
+
     for l in all_lines {
       let matched = super::rule_zero(&rules, &l.to_string()); 
       if matched && !matched_lines.contains(&l) {
@@ -74,8 +77,10 @@ mod tests {
         println!(" [[{} doesn't match but should]]", &l);
       }
     }
+ 
+  
     let val = super::solve_part2(&rules, &messages_lines);
-    println!("part two test should wrong (3 not 12) - {}",val);
+    println!("part two test should be 12 - {}",val);
 
     assert!(12==val);
 
@@ -119,7 +124,9 @@ fn do_basic(rules : &std::collections::HashMap<u32,Rule>, rule_list : Vec<u32>, 
         new_list.append(&mut does_match(rules,r.clone(), result.unwrap(), level.clone())); // I need to handle the option that this could return multiple paths
         result = retval.pop();
       }
-      retval = new_list.clone();
+      retval = new_list.iter().filter(|&a| *a != None).map(|a| a.clone()).collect::<Vec<Option<String>>>().clone();
+      // retval = new_list;
+
     }
   }
   return retval;
@@ -160,7 +167,7 @@ fn does_match (rules : &std::collections::HashMap<u32,Rule>, rule : Rule, line :
         matches
       }
     };
-
+    // println!("returning {:?}", retval);
     retval
 }
 
@@ -254,316 +261,323 @@ pub fn solve_part1(rules : &std::collections::HashMap::<u32,Rule>, messages_line
 
 
 fn rule_zero(rules : &std::collections::HashMap::<u32,Rule>, messages_line : &String) -> bool {
-  let mut result;
-
-  // Rule 0 : 8 11
-  // Rule 8 : 42
-  // Rule 11 : 42 31
-
-  // new rules
-  // Rule 8 : 42 | 42 8
-  // Rule 11 : 42 31 | 42 11 31
-
-  // Option 1 is just 42 42 31
-  result = does_match(&rules, Rule::Basic(vec![42,42,31]),Some(messages_line.to_string()),None);
-  if result.contains(&Some("".to_string())) {
-    return true;
-  }
-
-  // Option 2 is 42(n+2) 31
-  // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
-  // 42 42 42 31, 42 42 42 42 31, ... 42 (n+2) times then 31 where n >= 1
-  // IN TEST Rule 42 matches 5 chars; Rule 31 matches 5 chars
-  // IN PROD Rule 42 and Rule 31 match 8 chars
-  // println!("LINE {}", messages_line);
-
-  for n in 1..=9 {
-    // Do Rule 42 n+2 times
-    let mut v = vec![42,42];
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    for _i in 0..n {
-      v.push(42);
-      // result = do_basic1(&rules, 42, result, None);
-    }
-    // Do Rule 31 one times
-    v.push(31);
-    // result = do_basic1(&rules, 31, result, None);
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }
-
-  // remaining option 3
-  // 42 42 11 31 -> 42 42 (42 31 | 42 11 31) 31 -> 42 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31 
-  //                                            -> 42 42 (42 31 | 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31) 31
-  // 42 42 42 31 31, 42 42 42 42 31 31 31, 42 42 42 42 42 31 31 31 31, 
-  //                                       42x(n+2) and 31x(n+1) where n>=1 and n <= 5
-  // 42 42 42 42 42 42 31 31 31 31 31 is the longest that could match
-  // for all n>= 2 match 42 n+1 times and 31 n times (lengths 25, 35, 45, 55, etc chars IN TEST)
-  // Option 3 summary
-  // 42(n+2) 31(n+1) n>=1 n<=5
-
-  for n in 1..=6 {
-    // Do Rule 42 n+2 times
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    let mut v = vec![42,42];
-
-    for _i in 0..n {
-      // result = do_basic1(&rules, 42, result, None);
-      v.push(42);
-    }
-    // Do Rule 31 n+1 times
-    v.push(31);
-    // result = do_basic1(&rules, 31, result, None);
-    for _i in 0..n {
-      v.push(31);
-      // result = do_basic1(&rules, 31, result, None);
-    }
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }
-
-  // remaining option 4
-  // ******* NOTES ********
-  // 42 8 42 11 31 -> 42 (42 | 42 8) 42 (42 31 | 42 11 31) 31
-  //                  42 (42 | 42 (42 | 42 8)) 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31
-
-  // option 4.1         opion 4.2                      option 4.3                            option 4.4
-  // 42 42 42 42 31 31, 42 42 8 42 42 31 31,           42 42 42 42 11 31 31,                
-  //                --> 42 42 (42 | 42 8) 42 42 31 31, 42 42 42 42 (42 31 | 42 11 31) 31 31, 
-  //                    42(n+3) 31 31 n>=1             42(n+4) 31(n+2) n>= 1                 
-  //  
-  // option 4.4
-  // 42 42 8 42 42 11 31 31
-  // 42 42 (42 | 42 8) 42 42 (42 31 | 42 11 31) 31 31
-
-  // option 4.4.1                option 4.4.2                  option 4.4.3                   
-  // 42 42 42 42 42 42 31 31 31, 42 42 42 8 42 42 42 31 31 31, 42 42 42 42 42 42 11 31 31 31, 
-  //                             42(n+6) 31 31 31 n>=1         42(n+6) 31(n+3) n>=1
-
-  // option 4.4.4
-  // 42 42 42 8 42 42 42 11 31 31 31
-  // 42 42 42 (42 | 42 8) 42 42 42 (42 31 | 42 11 31) 31 31 31
-  // 42x8 31x4, 42(n+8) 31x4, 42x8 31(n+4), 42x4 8 42x4 11 31x4 <-- too long
-  // ******* END NOTES ********
-  // Option 4 Summary (9 options)
-  // 
-  // 42x4 31x2
-  result = do_basic(&rules, vec![42, 42, 42, 42,31, 31],Some(messages_line.to_string()), None);
-  // result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
-  // result = do_basic1(&rules, 42, result, None);
-  // result = do_basic2(&rules, 31, 31, result, None);
-
-  if result.contains(&Some("".to_string())) {
-    return true;
-  }
-
-
-  // 42(n+3) 31x2 n>=1
-  for n in 1..=8 {
-    // Do Rule 42 n+3 times
-    let mut v = vec![42,42,42];
-
-    // result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
-    for _i in 0..n {
-    //   result = do_basic1(&rules, 42, result, None);
-      v.push(42);
-    }
-    v.push(31);
-    v.push(31);
-
-    // // Do Rule 31 two times
-    // result = do_basic2(&rules, 31, 31, result, None);
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }
-
-  // 42(n+4) 31(n+2) n>= 1
-  for n in 1..=5 {
-    // Do Rule 42 n+4 times
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    let mut v = vec![42,42,42,42];
-
-    // result = do_basic2(&rules, 42, 42, result, None);
-    for _i in 0..n {
-      v.push(42);
-      // result = do_basic1(&rules, 42, result, None);
-    }
-    // Do Rule 31 n+2 times
-    // result = do_basic2(&rules, 31, 31, result, None);
-    v.push(31);
-    v.push(31);
-
-    for _i in 0..n {
-      // result = do_basic1(&rules, 31, result, None);
-      v.push(31);
-    }
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }
-
-  // 42x6 31x3
-  // Do Rule 42 6 times
-  let v = vec![42,42,42,42,42,42,31,31,31];
-  // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-  // result = do_basic2(&rules, 42, 42, result, None);
-  // result = do_basic2(&rules, 42, 42, result, None);
-
-  // Do Rule 31 3 times
-  // result = do_basic2(&rules, 31, 31, result, None);
-  // result = do_basic1(&rules, 31, result, None);
-
-  result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-  if result.contains(&Some("".to_string())) {
-    return true;
-  }
-
-  // 42(n+6) 31x3 n>=1
-  for n in 1..=5 {
-    let mut v = vec![42,42,42,42,42,42];
-    // Do Rule 42 n+6 times
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    for _i in 0..n {
-      v.push(42);
-      // result = do_basic1(&rules, 42, result, None);
-    }
-    // Do Rule 31 3 times
-  // Do Rule 31 3 times
-    v.push(31);
-    v.push(31);
-    v.push(31);
-    // result = do_basic2(&rules, 31, 31, result, None);
-    // result = do_basic1(&rules, 31, result, None);
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }
-
-  // 42(n+6) 31(n+3) n>=1
-  for n in 1..=5 {
-    let mut v = vec![42,42,42,42,42,42];
-    // Do Rule 42 n+6 times
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    for _i in 0..n {
-      v.push(42);
-      // result = do_basic1(&rules, 42, result, None);
-    }
-
-    // Do Rule 31 n+3 times
-    v.push(31);
-    v.push(31);
-    v.push(31);
-
-    // result = do_basic3(&rules, 31, 31, 31, result, None);
-    for _i in 0..n {
-      v.push(31);
-      // result = do_basic1(&rules, 31, result, None);
-    }
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }  
-  // 42x8 31x4
-  // Do Rule 42 8 times
-  let v = vec![42,42,42,42,42,42,42,42,31,31,31,31];
-  // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-  // result = do_basic2(&rules, 42, 42, result, None);
-  // result = do_basic2(&rules, 42, 42, result, None);
-  // result = do_basic2(&rules, 42, 42, result, None);
-
-  // // Do Rule 31 4 times
-  // result = do_basic2(&rules, 31, 31, result, None);
-  // result = do_basic2(&rules, 31, 31, result, None);
-
-  result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-  if result.contains(&Some("".to_string())) {
-    return true;
-  }
-
-  // 42(n+8) 31x4 n>=1
-  for n in 1..=5 {
-    let mut v = vec![42,42,42,42,42,42,42,42];
-    // Do Rule 42 n+8 times
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    for _i in 0..n {
-      v.push(42);
-      // result = do_basic1(&rules, 42, result, None);
-    }
-
-    // Do Rule 31 4 times
-    v.push(31);
-    v.push(31);
-    v.push(31);
-    v.push(31);
-    // result = do_basic2(&rules, 31, 31, result, None);
-    // result = do_basic2(&rules, 31, 31, result, None);
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }  
-
-  // 42x8 31(n+4) n>=1
-  for n in 1..=5 {
-    // Do Rule 42 n+8 times
-    let mut v = vec![42,42,42,42,42,42,42,42];
-
-    // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-    // result = do_basic2(&rules, 42, 42, result, None);
-
-    // Do Rule 31 n+4 times
-    v.push(31);
-    v.push(31);
-    v.push(31);
-    v.push(31);
-    // result = do_basic2(&rules, 31, 31, result, None);
-    // result = do_basic2(&rules, 31, 31, result, None);
-    for _i in 0..n {
-      v.push(31);
-      // result = do_basic1(&rules, 31, result, None);
-    }
-
-    result = do_basic(&rules, v, Some(messages_line.to_string()), None);
-    if result.contains(&Some("".to_string())) {
-      return true;
-    }
-  }  
-
-  return false;
+  let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(messages_line.to_string()),None);
+  return m.contains(&Some("".to_string()));
 }
+
+// let mut result;
+//   // Rule 0 : 8 11
+//   // Rule 8 : 42
+//   // Rule 11 : 42 31
+
+//   // new rules
+//   // Rule 8 : 42 | 42 8
+//   // Rule 11 : 42 31 | 42 11 31
+
+//   result = does_match(&rules, rules.get(&0).unwrap().clone(),Some(messages_line.to_string()),None);
+//   if result.contains(&Some("".to_string())) {
+//     return true;
+//   }
+
+//   // Option 1 is just 42 42 31
+//   result = does_match(&rules, Rule::Basic(vec![42,42,31]),Some(messages_line.to_string()),None);
+//   if result.contains(&Some("".to_string())) {
+//     return true;
+//   }
+
+//   // Option 2 is 42(n+2) 31
+//   // 42 8 42 31 -> 42 (42 | 42 8) 42 31 -> 42 (42 | 42 (42 | 42 8)) 42 31
+//   // 42 42 42 31, 42 42 42 42 31, ... 42 (n+2) times then 31 where n >= 1
+//   // IN TEST Rule 42 matches 5 chars; Rule 31 matches 5 chars
+//   // IN PROD Rule 42 and Rule 31 match 8 chars
+//   // println!("LINE {}", messages_line);
+
+//   for n in 1..=9 {
+//     // Do Rule 42 n+2 times
+//     let mut v = vec![42,42];
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     for _i in 0..n {
+//       v.push(42);
+//       // result = do_basic1(&rules, 42, result, None);
+//     }
+//     // Do Rule 31 one times
+//     v.push(31);
+//     // result = do_basic1(&rules, 31, result, None);
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }
+
+//   // remaining option 3
+//   // 42 42 11 31 -> 42 42 (42 31 | 42 11 31) 31 -> 42 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31 
+//   //                                            -> 42 42 (42 31 | 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31) 31
+//   // 42 42 42 31 31, 42 42 42 42 31 31 31, 42 42 42 42 42 31 31 31 31, 
+//   //                                       42x(n+2) and 31x(n+1) where n>=1 and n <= 5
+//   // 42 42 42 42 42 42 31 31 31 31 31 is the longest that could match
+//   // for all n>= 2 match 42 n+1 times and 31 n times (lengths 25, 35, 45, 55, etc chars IN TEST)
+//   // Option 3 summary
+//   // 42(n+2) 31(n+1) n>=1 n<=5
+
+//   for n in 1..=6 {
+//     // Do Rule 42 n+2 times
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     let mut v = vec![42,42];
+
+//     for _i in 0..n {
+//       // result = do_basic1(&rules, 42, result, None);
+//       v.push(42);
+//     }
+//     // Do Rule 31 n+1 times
+//     v.push(31);
+//     // result = do_basic1(&rules, 31, result, None);
+//     for _i in 0..n {
+//       v.push(31);
+//       // result = do_basic1(&rules, 31, result, None);
+//     }
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }
+
+//   // remaining option 4
+//   // ******* NOTES ********
+//   // 42 8 42 11 31 -> 42 (42 | 42 8) 42 (42 31 | 42 11 31) 31
+//   //                  42 (42 | 42 (42 | 42 8)) 42 (42 31 | 42 (42 31 | 42 11 31) 31) 31
+
+//   // option 4.1         opion 4.2                      option 4.3                            option 4.4
+//   // 42 42 42 42 31 31, 42 42 8 42 42 31 31,           42 42 42 42 11 31 31,                
+//   //                --> 42 42 (42 | 42 8) 42 42 31 31, 42 42 42 42 (42 31 | 42 11 31) 31 31, 
+//   //                    42(n+3) 31 31 n>=1             42(n+4) 31(n+2) n>= 1                 
+//   //  
+//   // option 4.4
+//   // 42 42 8 42 42 11 31 31
+//   // 42 42 (42 | 42 8) 42 42 (42 31 | 42 11 31) 31 31
+
+//   // option 4.4.1                option 4.4.2                  option 4.4.3                   
+//   // 42 42 42 42 42 42 31 31 31, 42 42 42 8 42 42 42 31 31 31, 42 42 42 42 42 42 11 31 31 31, 
+//   //                             42(n+6) 31 31 31 n>=1         42(n+6) 31(n+3) n>=1
+
+//   // option 4.4.4
+//   // 42 42 42 8 42 42 42 11 31 31 31
+//   // 42 42 42 (42 | 42 8) 42 42 42 (42 31 | 42 11 31) 31 31 31
+//   // 42x8 31x4, 42(n+8) 31x4, 42x8 31(n+4), 42x4 8 42x4 11 31x4 <-- too long
+//   // ******* END NOTES ********
+//   // Option 4 Summary (9 options)
+//   // 
+//   // 42x4 31x2
+//   result = do_basic(&rules, vec![42, 42, 42, 42,31, 31],Some(messages_line.to_string()), None);
+//   // result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
+//   // result = do_basic1(&rules, 42, result, None);
+//   // result = do_basic2(&rules, 31, 31, result, None);
+
+//   if result.contains(&Some("".to_string())) {
+//     return true;
+//   }
+
+
+//   // 42(n+3) 31x2 n>=1
+//   for n in 1..=8 {
+//     // Do Rule 42 n+3 times
+//     let mut v = vec![42,42,42];
+
+//     // result = do_basic3(&rules, 42, 42, 42, Some(messages_line.to_string()), None);
+//     for _i in 0..n {
+//     //   result = do_basic1(&rules, 42, result, None);
+//       v.push(42);
+//     }
+//     v.push(31);
+//     v.push(31);
+
+//     // // Do Rule 31 two times
+//     // result = do_basic2(&rules, 31, 31, result, None);
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }
+
+//   // 42(n+4) 31(n+2) n>= 1
+//   for n in 1..=5 {
+//     // Do Rule 42 n+4 times
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     let mut v = vec![42,42,42,42];
+
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     for _i in 0..n {
+//       v.push(42);
+//       // result = do_basic1(&rules, 42, result, None);
+//     }
+//     // Do Rule 31 n+2 times
+//     // result = do_basic2(&rules, 31, 31, result, None);
+//     v.push(31);
+//     v.push(31);
+
+//     for _i in 0..n {
+//       // result = do_basic1(&rules, 31, result, None);
+//       v.push(31);
+//     }
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }
+
+//   // 42x6 31x3
+//   // Do Rule 42 6 times
+//   let v = vec![42,42,42,42,42,42,31,31,31];
+//   // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//   // result = do_basic2(&rules, 42, 42, result, None);
+//   // result = do_basic2(&rules, 42, 42, result, None);
+
+//   // Do Rule 31 3 times
+//   // result = do_basic2(&rules, 31, 31, result, None);
+//   // result = do_basic1(&rules, 31, result, None);
+
+//   result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//   if result.contains(&Some("".to_string())) {
+//     return true;
+//   }
+
+//   // 42(n+6) 31x3 n>=1
+//   for n in 1..=5 {
+//     let mut v = vec![42,42,42,42,42,42];
+//     // Do Rule 42 n+6 times
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     for _i in 0..n {
+//       v.push(42);
+//       // result = do_basic1(&rules, 42, result, None);
+//     }
+//     // Do Rule 31 3 times
+//   // Do Rule 31 3 times
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+//     // result = do_basic2(&rules, 31, 31, result, None);
+//     // result = do_basic1(&rules, 31, result, None);
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }
+
+//   // 42(n+6) 31(n+3) n>=1
+//   for n in 1..=5 {
+//     let mut v = vec![42,42,42,42,42,42];
+//     // Do Rule 42 n+6 times
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     for _i in 0..n {
+//       v.push(42);
+//       // result = do_basic1(&rules, 42, result, None);
+//     }
+
+//     // Do Rule 31 n+3 times
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+
+//     // result = do_basic3(&rules, 31, 31, 31, result, None);
+//     for _i in 0..n {
+//       v.push(31);
+//       // result = do_basic1(&rules, 31, result, None);
+//     }
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }  
+//   // 42x8 31x4
+//   // Do Rule 42 8 times
+//   let v = vec![42,42,42,42,42,42,42,42,31,31,31,31];
+//   // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//   // result = do_basic2(&rules, 42, 42, result, None);
+//   // result = do_basic2(&rules, 42, 42, result, None);
+//   // result = do_basic2(&rules, 42, 42, result, None);
+
+//   // // Do Rule 31 4 times
+//   // result = do_basic2(&rules, 31, 31, result, None);
+//   // result = do_basic2(&rules, 31, 31, result, None);
+
+//   result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//   if result.contains(&Some("".to_string())) {
+//     return true;
+//   }
+
+//   // 42(n+8) 31x4 n>=1
+//   for n in 1..=5 {
+//     let mut v = vec![42,42,42,42,42,42,42,42];
+//     // Do Rule 42 n+8 times
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     for _i in 0..n {
+//       v.push(42);
+//       // result = do_basic1(&rules, 42, result, None);
+//     }
+
+//     // Do Rule 31 4 times
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+//     // result = do_basic2(&rules, 31, 31, result, None);
+//     // result = do_basic2(&rules, 31, 31, result, None);
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }  
+
+//   // 42x8 31(n+4) n>=1
+//   for n in 1..=5 {
+//     // Do Rule 42 n+8 times
+//     let mut v = vec![42,42,42,42,42,42,42,42];
+
+//     // result = do_basic2(&rules, 42, 42, Some(messages_line.to_string()), None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+//     // result = do_basic2(&rules, 42, 42, result, None);
+
+//     // Do Rule 31 n+4 times
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+//     v.push(31);
+//     // result = do_basic2(&rules, 31, 31, result, None);
+//     // result = do_basic2(&rules, 31, 31, result, None);
+//     for _i in 0..n {
+//       v.push(31);
+//       // result = do_basic1(&rules, 31, result, None);
+//     }
+
+//     result = do_basic(&rules, v, Some(messages_line.to_string()), None);
+//     if result.contains(&Some("".to_string())) {
+//       return true;
+//     }
+//   }  
+
+//   return false;
+// }
 
 pub fn solve_part2(rules : &std::collections::HashMap::<u32,Rule>, messages_lines : &Vec<String>) -> u64 {
 
   let mut retval = 0;
-
   for line in messages_lines {
-    if rule_zero(&rules, &line) {
-      
+    let m = does_match(&rules, rules.get(&0).unwrap().clone(),Some(line.to_string()),None);
+    if m.contains(&Some("".to_string())) {
       retval += 1;
     }
   }
