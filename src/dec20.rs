@@ -729,9 +729,9 @@ for grid_row in 0..size*10 {
 
 // the following is the actual eventual image
 let sea_monster : Vec<Vec<char>> = vec![
-  "                  # ".as_bytes().iter().map(|b| *b as char).collect(),
-  "#    ##    ##    ###".as_bytes().iter().map(|b| *b as char).collect(),
-  " #  #  #  #  #  #   ".as_bytes().iter().map(|b| *b as char).collect() 
+  "                  O ".as_bytes().iter().map(|b| *b as char).collect(),
+  "\\    /\\    /\\    OO>".as_bytes().iter().map(|b| *b as char).collect(),
+  " \\  /  \\  /  \\  /   ".as_bytes().iter().map(|b| *b as char).collect() 
 ];
 let monster_width = sea_monster[0].len();
 let monster_height = sea_monster.len();
@@ -756,7 +756,7 @@ for rotation in 0..12 {
           if effective_row <= (size*8).try_into().unwrap() && effective_col <= (size*8).try_into().unwrap() { // { panic!("effective row is too big {} vs {}", effective_row, size*8)};
             if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
               let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
-              if *sm == '#' && pixel == '#' {
+              if *sm != ' ' && pixel == '#' {
                 monster_match = monster_match + 1;
               }
             }        
@@ -771,8 +771,8 @@ for rotation in 0..12 {
             if effective_row <= (size*8).try_into().unwrap() && effective_col <= (size*8).try_into().unwrap() { // { panic!("effective row is too big {} vs {}", effective_row, size*8)};
               if let Some(t) = grid.get(&((effective_row/8).try_into().unwrap(),(effective_col/8).try_into().unwrap())) {
                 let pixel = t.get_row_col((effective_row % 8).try_into().unwrap(),(effective_col % 8).try_into().unwrap());
-                if *sm == '#' && pixel == '#' {
-                  monster_map.insert((effective_row,effective_col),'O');
+                if *sm != ' ' && pixel == '#' {
+                  monster_map.insert((effective_row,effective_col),sea_monster[sm_row][sm_col]);
                 }
               }        
             } // check if in bounds  
@@ -794,11 +794,7 @@ for grid_row in 0..size*8 {
         if pixel == '#' { hash_count = hash_count + 1; }
 
         if let Some(m) = monster_map.get(&(r,c)) {
-          if *m == 'O' {
-            print!("{}", "O".red());
-          } else {
-            print!("{}", pixel);
-          }
+            print!("{}", m.to_string().purple());
         } else {
           print!("{}", pixel);
         }
