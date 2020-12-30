@@ -118,6 +118,7 @@ Day 19 complete in 592.192538ms
 Day 20 complete in 1.621750835s
 Rough water count 2453
 Day 20  complete in 7.106600784s
+![sea-monsters](sea-monsters.png)
 ```
 
 ```
